@@ -1,7 +1,7 @@
 [project]
-name = "video-analyzer"
+name = "philm"
 version = "2.0.0"
-description = "Philosophical video analysis using Gemini 2.5 Flash - Python rewrite"
+description = "Philosophical video analysis using Gemini 2.5 Flash"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -19,11 +19,15 @@ dev = [
 ]
 
 [project.scripts]
+philm = "video_analyzer.cli:app"
 vanalyze = "video_analyzer.cli:app"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/video_analyzer"]
 
 [tool.ruff]
 line-length = 100
