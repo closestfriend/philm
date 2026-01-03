@@ -191,6 +191,53 @@ class Archive:
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- Žižek moments (parallax/ideology)
+    CREATE TABLE IF NOT EXISTS zizek_moments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        video_id INTEGER NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
+        timecode TEXT NOT NULL,
+        parallax_type TEXT NOT NULL,
+        lacanian_register TEXT NOT NULL,
+        ideology_at_work TEXT,
+        obscene_supplement TEXT,
+        gap_between TEXT,
+        real_intrusion TEXT,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Barthes moments (punctum/mythology)
+    CREATE TABLE IF NOT EXISTS barthes_moments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        video_id INTEGER NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
+        timecode TEXT NOT NULL,
+        register TEXT NOT NULL,
+        punctum_detail TEXT,
+        myth_operation TEXT,
+        denotation TEXT,
+        connotation TEXT,
+        grain TEXT,
+        death_present BOOLEAN,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Benjamin moments (aura/dialectical image)
+    CREATE TABLE IF NOT EXISTS benjamin_moments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        video_id INTEGER NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
+        timecode TEXT NOT NULL,
+        aura_status TEXT NOT NULL,
+        aura_source TEXT,
+        dialectical_image TEXT,
+        optical_unconscious TEXT,
+        cult_vs_exhibition TEXT,
+        reproducibility TEXT,
+        now_time TEXT,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- Generic moments table for all other modes (Levinas, rhythm, etc.)
     -- Uses JSON blob for flexibility
     CREATE TABLE IF NOT EXISTS generic_moments (
@@ -256,6 +303,12 @@ class Archive:
     CREATE INDEX IF NOT EXISTS idx_foucault_surveillance ON foucault_moments(surveillance);
     CREATE INDEX IF NOT EXISTS idx_virilio_speed ON virilio_moments(speed_regime);
     CREATE INDEX IF NOT EXISTS idx_virilio_accident ON virilio_moments(accident);
+    CREATE INDEX IF NOT EXISTS idx_zizek_parallax ON zizek_moments(parallax_type);
+    CREATE INDEX IF NOT EXISTS idx_zizek_register ON zizek_moments(lacanian_register);
+    CREATE INDEX IF NOT EXISTS idx_barthes_register ON barthes_moments(register);
+    CREATE INDEX IF NOT EXISTS idx_barthes_myth ON barthes_moments(myth_operation);
+    CREATE INDEX IF NOT EXISTS idx_benjamin_aura ON benjamin_moments(aura_status);
+    CREATE INDEX IF NOT EXISTS idx_benjamin_dialectical ON benjamin_moments(dialectical_image);
 
     -- Full-text search on descriptions
     CREATE VIRTUAL TABLE IF NOT EXISTS video_fts USING fts5(
@@ -667,6 +720,89 @@ class Archive:
             )
         conn.commit()
 
+    def store_zizek_analysis(self, video_id: int, timecodes: list[dict]):
+        """Store Žižek parallax/ideology analysis."""
+        conn = self.connect()
+        conn.execute("DELETE FROM zizek_moments WHERE video_id = ?", (video_id,))
+
+        for t in timecodes:
+            conn.execute(
+                """
+                INSERT INTO zizek_moments
+                (video_id, timecode, parallax_type, lacanian_register, ideology_at_work,
+                 obscene_supplement, gap_between, real_intrusion, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    video_id,
+                    t.get("time", ""),
+                    t.get("parallax", ""),
+                    t.get("register", ""),
+                    t.get("ideology_at_work", ""),
+                    t.get("obscene_supplement", ""),
+                    t.get("gap_between", ""),
+                    t.get("real_intrusion", ""),
+                    t.get("description", ""),
+                )
+            )
+        conn.commit()
+
+    def store_barthes_analysis(self, video_id: int, timecodes: list[dict]):
+        """Store Barthes punctum/mythology analysis."""
+        conn = self.connect()
+        conn.execute("DELETE FROM barthes_moments WHERE video_id = ?", (video_id,))
+
+        for t in timecodes:
+            conn.execute(
+                """
+                INSERT INTO barthes_moments
+                (video_id, timecode, register, punctum_detail, myth_operation,
+                 denotation, connotation, grain, death_present, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    video_id,
+                    t.get("time", ""),
+                    t.get("register", ""),
+                    t.get("punctum_detail", ""),
+                    t.get("myth_operation", ""),
+                    t.get("denotation", ""),
+                    t.get("connotation", ""),
+                    t.get("grain", ""),
+                    t.get("death_present"),
+                    t.get("description", ""),
+                )
+            )
+        conn.commit()
+
+    def store_benjamin_analysis(self, video_id: int, timecodes: list[dict]):
+        """Store Benjamin aura/dialectical image analysis."""
+        conn = self.connect()
+        conn.execute("DELETE FROM benjamin_moments WHERE video_id = ?", (video_id,))
+
+        for t in timecodes:
+            conn.execute(
+                """
+                INSERT INTO benjamin_moments
+                (video_id, timecode, aura_status, aura_source, dialectical_image,
+                 optical_unconscious, cult_vs_exhibition, reproducibility, now_time, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    video_id,
+                    t.get("time", ""),
+                    t.get("aura_status", ""),
+                    t.get("aura_source", ""),
+                    t.get("dialectical_image", ""),
+                    t.get("optical_unconscious", ""),
+                    t.get("cult_vs_exhibition", ""),
+                    t.get("reproducibility", ""),
+                    t.get("now_time", ""),
+                    t.get("description", ""),
+                )
+            )
+        conn.commit()
+
     def store_analysis(self, video_id: int, mode: str, result: dict):
         """
         Store analysis result, routing to appropriate table.
@@ -696,6 +832,12 @@ class Archive:
             self.store_foucault_analysis(video_id, timecodes)
         elif mode == "virilio":
             self.store_virilio_analysis(video_id, timecodes)
+        elif mode == "zizek":
+            self.store_zizek_analysis(video_id, timecodes)
+        elif mode == "barthes":
+            self.store_barthes_analysis(video_id, timecodes)
+        elif mode == "benjamin":
+            self.store_benjamin_analysis(video_id, timecodes)
         else:
             self.store_generic_analysis(video_id, mode, timecodes)
 

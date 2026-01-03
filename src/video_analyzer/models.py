@@ -265,6 +265,108 @@ class VirilioMoment(BaseModel):
 
 
 # ============================================================================
+# ŽIŽEK - PARALLAX AND THE REAL
+# ============================================================================
+
+class ParallaxType(str, Enum):
+    """Types of parallax gap."""
+    ONTOLOGICAL = "ontological"  # Gap in being itself
+    EPISTEMOLOGICAL = "epistemological"  # Gap between knowing positions
+    POLITICAL = "political"  # Gap between political positions that cannot be synthesized
+    AESTHETIC = "aesthetic"  # Gap between form and content, surface and depth
+
+
+class LacanianRegister(str, Enum):
+    """Lacan's three registers."""
+    IMAGINARY = "imaginary"  # Mirror stage, ego, identification, gestalt
+    SYMBOLIC = "symbolic"  # Language, law, the big Other, signifiers
+    REAL = "real"  # That which resists symbolization, trauma, impossibility
+
+
+class ZizekMoment(BaseModel):
+    """Analysis through Žižek's parallax view and Lacanian framework."""
+    time: str
+    parallax: ParallaxType = Field(..., description="Type of parallax gap visible")
+    register: LacanianRegister = Field(..., description="Which Lacanian register dominates")
+    ideology_at_work: str = Field(..., description="What ideological operation is visible")
+    obscene_supplement: Optional[str] = Field(None, description="The hidden underside that sustains the official narrative")
+    gap_between: str = Field(..., description="What two perspectives create the irreducible gap")
+    real_intrusion: Optional[str] = Field(None, description="Where does the Real break through?")
+    description: str
+
+
+# ============================================================================
+# BARTHES - PUNCTUM AND MYTHOLOGY
+# ============================================================================
+
+class BarthesRegister(str, Enum):
+    """Barthes' modes of meaning."""
+    STUDIUM = "studium"  # Cultural, coded, readable meaning
+    PUNCTUM = "punctum"  # The wound, the accident that pricks
+    OBTUSE = "obtuse"  # Third meaning, excess beyond signification
+
+
+class MythOperation(str, Enum):
+    """Operations of Barthesian mythology."""
+    NATURALIZATION = "naturalization"  # Making historical appear natural
+    INOCULATION = "inoculation"  # Admitting small evil to hide systemic one
+    PRIVATION = "privation"  # Removing history from the image
+    IDENTIFICATION = "identification"  # Reducing Other to Same
+    TAUTOLOGY = "tautology"  # "It is because it is"
+    NEITHER_NOR = "neither_nor"  # False balance, refusing to choose
+    QUANTIFICATION = "quantification"  # Reducing quality to quantity
+    STATEMENT_OF_FACT = "statement_of_fact"  # Presenting opinion as natural fact
+
+
+class BarthesMoment(BaseModel):
+    """Analysis through Barthes' semiotics and punctum theory."""
+    time: str
+    register: BarthesRegister = Field(..., description="Studium, punctum, or obtuse meaning")
+    punctum_detail: Optional[str] = Field(None, description="If punctum: what wounds, what pricks?")
+    myth_operation: Optional[MythOperation] = Field(None, description="If myth operates: which operation?")
+    denotation: str = Field(..., description="What does the image literally show")
+    connotation: str = Field(..., description="What cultural meanings attach")
+    grain: Optional[str] = Field(None, description="The 'grain' - the body in the voice/image")
+    death_present: bool = Field(..., description="Is the 'that-has-been' (mortality) visible?")
+    description: str
+
+
+# ============================================================================
+# BENJAMIN - AURA AND DIALECTICAL IMAGE
+# ============================================================================
+
+class AuraStatus(str, Enum):
+    """Status of the aura in mechanical reproduction."""
+    AURATIC = "auratic"  # Unique presence, here-and-now, cult value
+    DECAYED = "decayed"  # Aura in process of withering
+    ABSENT = "absent"  # Post-auratic, exhibition value dominates
+    SIMULATED = "simulated"  # Fake aura, nostalgia, aura-effect
+    REVOLUTIONARY = "revolutionary"  # Absence of aura as liberation
+
+
+class DialecticalImageType(str, Enum):
+    """Types of dialectical image."""
+    CONSTELLATION = "constellation"  # Past and present in sudden alignment
+    RUIN = "ruin"  # History visible as decay, allegory
+    WISH_IMAGE = "wish_image"  # Utopian content in commodity form
+    FOSSIL = "fossil"  # Petrified life, frozen history
+    TIGER_LEAP = "tiger_leap"  # Revolutionary citation of the past
+
+
+class BenjaminMoment(BaseModel):
+    """Analysis through Benjamin's theory of aura and mechanical reproduction."""
+    time: str
+    aura_status: AuraStatus = Field(..., description="Status of the aura")
+    aura_source: Optional[str] = Field(None, description="If auratic: what generates the aura?")
+    dialectical_image: Optional[DialecticalImageType] = Field(None, description="Type of dialectical image")
+    optical_unconscious: Optional[str] = Field(None, description="What does the camera reveal that the eye cannot?")
+    cult_vs_exhibition: str = Field(..., description="Does cult value or exhibition value dominate?")
+    reproducibility: str = Field(..., description="How does mechanical reproduction operate here?")
+    now_time: Optional[str] = Field(None, description="The Jetztzeit - explosive present that blasts open the continuum")
+    description: str
+
+
+# ============================================================================
 # CAMERA ANALYSIS - KINETIC ENERGY
 # ============================================================================
 
@@ -381,6 +483,21 @@ class FoucaultResult(BaseAnalysisResult):
 class VirilioResult(BaseAnalysisResult):
     """Virilio speed and accident analysis."""
     timecodes: list[VirilioMoment]
+
+
+class ZizekResult(BaseAnalysisResult):
+    """Žižek parallax and ideology analysis."""
+    timecodes: list[ZizekMoment]
+
+
+class BarthesResult(BaseAnalysisResult):
+    """Barthes punctum/studium and mythology analysis."""
+    timecodes: list[BarthesMoment]
+
+
+class BenjaminResult(BaseAnalysisResult):
+    """Benjamin aura and dialectical image analysis."""
+    timecodes: list[BenjaminMoment]
 
 
 # ============================================================================
