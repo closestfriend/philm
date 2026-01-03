@@ -47,3 +47,14 @@ htmlcov/
 
 # Output files
 *_analysis.json
+
+# Video files
+*.mp4
+*.mpg
+*.mpeg
+*.mov
+*.avi
+*.mkv
+*.m4v
+*.webm
+documentary/output/
