@@ -18,6 +18,9 @@ from .models import (
     SublimeResult,
     CameraResult,
     BaudrillardResult,
+    EpistemicResult,
+    FoucaultResult,
+    VirilioResult,
 )
 
 
@@ -251,6 +254,133 @@ This is especially relevant for social media content, news footage, conspiracy
 content, and anything that makes truth claims."""
 )
 
+EPISTEMIC = AnalysisMode(
+    name="epistemic",
+    description="Truth claims, evidence, and certainty analysis",
+    result_model=EpistemicResult,
+    prompt="""Analyze this video's relationship to truth and knowledge.
+
+For each significant moment, identify:
+
+EPISTEMIC MODE - how does the video claim truth?
+- "documentary": Claims direct, unmediated access to truth
+- "testimonial": Truth through witness, speaker, personal experience
+- "evidential": Presents evidence, data, proof for claims
+- "speculative": Hypothetical, conditional, uncertain
+- "performative": Creates truth through enactment (e.g., ritual, declaration)
+- "denialist": Actively rejects established knowledge/consensus
+
+CERTAINTY LEVEL (using Kantian categories):
+- "apodictic": Presented as necessarily true, self-evident, beyond question
+- "assertoric": Claimed as fact but could be otherwise
+- "problematic": Possible, uncertain, hedged
+- "skeptical": Doubting, questioning, deconstructive
+
+For each moment also identify:
+- CLAIM: What truth claim is being made (explicit or implicit)?
+- EVIDENCE TYPE: What counts as evidence here? (visual proof, testimony,
+  scientific data, emotional authenticity, common sense, etc.)
+- VERIFIABLE: Can this claim be independently verified?
+- APPEALS TO: What authority is invoked? (science, tradition, lived experience,
+  religious text, expert opinion, "just asking questions")
+
+Pay special attention to:
+- Moments where the video claims to "reveal" hidden truths
+- The relationship between seeing and believing
+- How certainty is performed vs. earned
+- Conspiracy logic and unfalsifiable claims
+- The difference between knowledge and belief
+
+This is especially useful for documentary, news, propaganda, conspiracy content,
+and anything making claims about reality."""
+)
+
+FOUCAULT = AnalysisMode(
+    name="foucault",
+    description="Power, surveillance, and discipline analysis",
+    result_model=FoucaultResult,
+    prompt="""Analyze this video through Foucault's frameworks of power, discipline,
+and surveillance.
+
+For each significant moment, identify:
+
+POWER MODE - which modality of power operates?
+- "sovereign": Top-down, spectacular, punitive (the king's power to kill)
+- "disciplinary": Normalizing, training, examining, correcting (the prison, school)
+- "biopolitical": Managing populations, life itself (statistics, public health)
+- "pastoral": Caring, confessional, individualizing (the shepherd's power)
+- "governmentality": Conduct of conduct, self-regulation, internalized control
+
+SURVEILLANCE TYPE:
+- "panoptic": Visible, centralized surveillance that induces self-discipline
+- "synoptic": Many watch few (celebrity, spectacle, the few perform for many)
+- "lateral": Peer-to-peer, social surveillance (neighbors watching neighbors)
+- "algorithmic": Automated, data-driven, predictive monitoring
+- "absent": Surveillance apparatus not visible but may be implied
+
+For each moment also identify:
+- SUBJECT PRODUCED: What kind of subject is being created/normalized?
+  (the docile body, the entrepreneur of the self, the surveilled citizen)
+- NORM ENFORCED: What norm is being enforced or implied?
+- RESISTANCE: Any counter-conduct, resistance, or refusal visible?
+- APPARATUS: What dispositif/apparatus is at work? (camera, institution,
+  platform, examination, confession)
+
+Pay special attention to:
+- The gaze as mechanism of power (who watches whom)
+- Moments of examination, confession, normalization
+- How subjects participate in their own surveillance
+- Spaces of discipline vs. spaces of control
+- The camera itself as an apparatus of power
+
+This is especially relevant for footage of institutions, surveillance systems,
+social media performance, and any situation where bodies are managed."""
+)
+
+VIRILIO = AnalysisMode(
+    name="virilio",
+    description="Speed, technology, and the accident",
+    result_model=VirilioResult,
+    prompt="""Analyze this video through Paul Virilio's theory of speed (dromology),
+technology, and the accident.
+
+For each significant moment, identify:
+
+SPEED REGIME - what speed governs this moment?
+- "metabolic": Body speed, walking, natural biological rhythm
+- "mechanical": Vehicle speed, industrial acceleration, the train/car/plane
+- "electronic": Speed of light, instantaneous transmission, real-time
+- "static": Polar inertia, paralysis through speed, the body that no longer moves
+
+DROMOLOGY: Describe the logic of speed operating. Speed is not just fast movement
+but the logic of progress, war, and technological society. What is being
+accelerated? What is left behind?
+
+ACCIDENT TYPE - Virilio: "The invention of the ship is also the invention
+of the shipwreck"
+- "integral": The accident inherent to the technology (the crash inherent to the car)
+- "catastrophic": System-wide, cascading failure
+- "aesthetic": The accident as visual/sensory event (glitch, rupture)
+- "temporal": Disruption of time perception, jet lag, desynchronization
+- "none": No accident visible (but note: the accident is always potential)
+
+For each moment also identify:
+- TERRITORY COLLAPSE: Does speed collapse geographic distance? (Telepresence,
+  global simultaneity, the shrinking earth)
+- REAL TIME: Is this operating in "real time" (instantaneous, live)?
+- WAR MACHINE: Any military/strategic logic visible? (Virilio: "Speed is violence")
+
+Pay special attention to:
+- Vehicles, screens, transmission technologies
+- The relationship between speed and vision (cinema as war technology)
+- Glitches, crashes, technical failures as revelatory moments
+- The paradox of real-time (instantaneity produces paralysis)
+- Pure war: the logistics of perception
+
+This is especially useful for footage involving vehicles, screens, transmission,
+glitches, or any content that makes speed/technology visible."""
+)
+
 
 # ============================================================================
 # CHART MODES
@@ -299,6 +429,9 @@ ALL_MODES = {
     "sublime": SUBLIME,
     "camera": CAMERA,
     "baudrillard": BAUDRILLARD,
+    "epistemic": EPISTEMIC,
+    "foucault": FOUCAULT,
+    "virilio": VIRILIO,
 }
 
 

@@ -132,7 +132,66 @@ class Archive:
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
-    -- Generic moments table for all other modes (Benjamin, Foucault, etc.)
+    -- Baudrillard moments (simulacra/hyperreality)
+    CREATE TABLE IF NOT EXISTS baudrillard_moments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        video_id INTEGER NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
+        timecode TEXT NOT NULL,
+        simulacra_order TEXT NOT NULL,
+        hyperreality_mode TEXT NOT NULL,
+        sign_value TEXT,
+        implosion TEXT,
+        precession BOOLEAN,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Epistemic moments (truth claims)
+    CREATE TABLE IF NOT EXISTS epistemic_moments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        video_id INTEGER NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
+        timecode TEXT NOT NULL,
+        epistemic_mode TEXT NOT NULL,
+        certainty TEXT NOT NULL,
+        claim TEXT,
+        evidence_type TEXT,
+        verifiable BOOLEAN,
+        appeals_to TEXT,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Foucault moments (power/surveillance)
+    CREATE TABLE IF NOT EXISTS foucault_moments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        video_id INTEGER NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
+        timecode TEXT NOT NULL,
+        power_mode TEXT NOT NULL,
+        surveillance TEXT NOT NULL,
+        subject_produced TEXT,
+        norm_enforced TEXT,
+        resistance TEXT,
+        apparatus TEXT,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Virilio moments (speed/accident)
+    CREATE TABLE IF NOT EXISTS virilio_moments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        video_id INTEGER NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
+        timecode TEXT NOT NULL,
+        speed_regime TEXT NOT NULL,
+        dromology TEXT,
+        accident TEXT NOT NULL,
+        territory_collapse BOOLEAN,
+        real_time BOOLEAN,
+        war_machine TEXT,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Generic moments table for all other modes (Levinas, rhythm, etc.)
     -- Uses JSON blob for flexibility
     CREATE TABLE IF NOT EXISTS generic_moments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -189,6 +248,14 @@ class Archive:
     CREATE INDEX IF NOT EXISTS idx_affect_intensity ON affect_moments(intensity);
     CREATE INDEX IF NOT EXISTS idx_camera_frenetic ON camera_moments(frenetic);
     CREATE INDEX IF NOT EXISTS idx_generic_mode ON generic_moments(mode);
+    CREATE INDEX IF NOT EXISTS idx_baudrillard_order ON baudrillard_moments(simulacra_order);
+    CREATE INDEX IF NOT EXISTS idx_baudrillard_precession ON baudrillard_moments(precession);
+    CREATE INDEX IF NOT EXISTS idx_epistemic_mode ON epistemic_moments(epistemic_mode);
+    CREATE INDEX IF NOT EXISTS idx_epistemic_verifiable ON epistemic_moments(verifiable);
+    CREATE INDEX IF NOT EXISTS idx_foucault_power ON foucault_moments(power_mode);
+    CREATE INDEX IF NOT EXISTS idx_foucault_surveillance ON foucault_moments(surveillance);
+    CREATE INDEX IF NOT EXISTS idx_virilio_speed ON virilio_moments(speed_regime);
+    CREATE INDEX IF NOT EXISTS idx_virilio_accident ON virilio_moments(accident);
 
     -- Full-text search on descriptions
     CREATE VIRTUAL TABLE IF NOT EXISTS video_fts USING fts5(
@@ -493,6 +560,113 @@ class Archive:
             )
         conn.commit()
 
+    def store_baudrillard_analysis(self, video_id: int, timecodes: list[dict]):
+        """Store Baudrillard simulacra/hyperreality analysis."""
+        conn = self.connect()
+        conn.execute("DELETE FROM baudrillard_moments WHERE video_id = ?", (video_id,))
+
+        for t in timecodes:
+            conn.execute(
+                """
+                INSERT INTO baudrillard_moments
+                (video_id, timecode, simulacra_order, hyperreality_mode, sign_value,
+                 implosion, precession, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    video_id,
+                    t.get("time", ""),
+                    t.get("order", ""),
+                    t.get("hyperreality_mode", ""),
+                    t.get("sign_value", ""),
+                    t.get("implosion", ""),
+                    t.get("precession"),
+                    t.get("description", ""),
+                )
+            )
+        conn.commit()
+
+    def store_epistemic_analysis(self, video_id: int, timecodes: list[dict]):
+        """Store epistemic truth claims analysis."""
+        conn = self.connect()
+        conn.execute("DELETE FROM epistemic_moments WHERE video_id = ?", (video_id,))
+
+        for t in timecodes:
+            conn.execute(
+                """
+                INSERT INTO epistemic_moments
+                (video_id, timecode, epistemic_mode, certainty, claim, evidence_type,
+                 verifiable, appeals_to, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    video_id,
+                    t.get("time", ""),
+                    t.get("mode", ""),
+                    t.get("certainty", ""),
+                    t.get("claim", ""),
+                    t.get("evidence_type", ""),
+                    t.get("verifiable"),
+                    t.get("appeals_to", ""),
+                    t.get("description", ""),
+                )
+            )
+        conn.commit()
+
+    def store_foucault_analysis(self, video_id: int, timecodes: list[dict]):
+        """Store Foucault power/surveillance analysis."""
+        conn = self.connect()
+        conn.execute("DELETE FROM foucault_moments WHERE video_id = ?", (video_id,))
+
+        for t in timecodes:
+            conn.execute(
+                """
+                INSERT INTO foucault_moments
+                (video_id, timecode, power_mode, surveillance, subject_produced,
+                 norm_enforced, resistance, apparatus, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    video_id,
+                    t.get("time", ""),
+                    t.get("power_mode", ""),
+                    t.get("surveillance", ""),
+                    t.get("subject_produced", ""),
+                    t.get("norm_enforced", ""),
+                    t.get("resistance", ""),
+                    t.get("apparatus", ""),
+                    t.get("description", ""),
+                )
+            )
+        conn.commit()
+
+    def store_virilio_analysis(self, video_id: int, timecodes: list[dict]):
+        """Store Virilio speed/accident analysis."""
+        conn = self.connect()
+        conn.execute("DELETE FROM virilio_moments WHERE video_id = ?", (video_id,))
+
+        for t in timecodes:
+            conn.execute(
+                """
+                INSERT INTO virilio_moments
+                (video_id, timecode, speed_regime, dromology, accident,
+                 territory_collapse, real_time, war_machine, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    video_id,
+                    t.get("time", ""),
+                    t.get("speed_regime", ""),
+                    t.get("dromology", ""),
+                    t.get("accident", ""),
+                    t.get("territory_collapse"),
+                    t.get("real_time"),
+                    t.get("war_machine", ""),
+                    t.get("description", ""),
+                )
+            )
+        conn.commit()
+
     def store_analysis(self, video_id: int, mode: str, result: dict):
         """
         Store analysis result, routing to appropriate table.
@@ -514,6 +688,14 @@ class Archive:
             self.store_affect_analysis(video_id, timecodes)
         elif mode == "camera":
             self.store_camera_analysis(video_id, timecodes)
+        elif mode == "baudrillard":
+            self.store_baudrillard_analysis(video_id, timecodes)
+        elif mode == "epistemic":
+            self.store_epistemic_analysis(video_id, timecodes)
+        elif mode == "foucault":
+            self.store_foucault_analysis(video_id, timecodes)
+        elif mode == "virilio":
+            self.store_virilio_analysis(video_id, timecodes)
         else:
             self.store_generic_analysis(video_id, mode, timecodes)
 
