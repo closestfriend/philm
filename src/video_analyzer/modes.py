@@ -21,6 +21,9 @@ from .models import (
     EpistemicResult,
     FoucaultResult,
     VirilioResult,
+    ZizekResult,
+    BarthesResult,
+    BenjaminResult,
 )
 
 
@@ -381,6 +384,149 @@ This is especially useful for footage involving vehicles, screens, transmission,
 glitches, or any content that makes speed/technology visible."""
 )
 
+ZIZEK = AnalysisMode(
+    name="zizek",
+    description="Parallax gap, ideology, and the Real",
+    result_model=ZizekResult,
+    prompt="""Analyze this video through Žižek's concept of the parallax view and
+Lacanian psychoanalysis.
+
+The PARALLAX is not a shift between two views of the same object, but the recognition
+that the gap between perspectives is itself constitutive—there is no "neutral"
+position from which to synthesize them.
+
+For each significant moment, identify:
+
+PARALLAX TYPE:
+- "ontological": The gap is in being itself (not just our knowledge)
+- "epistemological": Irreducible gap between knowing positions
+- "political": Gap between positions that cannot be dialectically synthesized
+- "aesthetic": Gap between form and content, surface and depth
+
+LACANIAN REGISTER - which register dominates?
+- "imaginary": Mirror stage, ego, identification, wholeness, gestalt
+- "symbolic": Language, law, the big Other, signifying chain
+- "real": That which resists symbolization, trauma, the impossible
+
+For each moment also identify:
+- IDEOLOGY AT WORK: What ideological operation is visible? (interpellation,
+  fantasy frame, fetishistic disavowal "I know, but nevertheless...")
+- OBSCENE SUPPLEMENT: The hidden underside that sustains the official narrative
+  (the dirty secret everyone knows but doesn't say)
+- GAP BETWEEN: What two perspectives create the irreducible parallax?
+- REAL INTRUSION: Where does the Real break through the symbolic order?
+  (glitches, trauma, that which cannot be represented)
+
+Pay special attention to:
+- "I know very well, but nevertheless..." (fetishistic disavowal)
+- The gap between what is said and what is shown
+- Moments where the frame itself becomes visible
+- The obscene enjoyment hidden behind official discourse
+- Points where meaning fails, breaks down, traumatizes
+
+Žižek's key insight: ideology is not "false consciousness" but the very
+structuring of our reality. Look for where the video constructs reality
+through its gaps and exclusions."""
+)
+
+BARTHES = AnalysisMode(
+    name="barthes",
+    description="Punctum/studium, third meaning, and mythology",
+    result_model=BarthesResult,
+    prompt="""Analyze this video through Roland Barthes' semiotic and photographic theory,
+particularly from Camera Lucida and "The Third Meaning."
+
+The STUDIUM is the cultural, linguistic, political interpretation—what we
+"understand" about an image through our cultural training.
+
+The PUNCTUM is what pierces through the studium—the accidental detail that
+wounds, that establishes a direct relationship between the image and the viewer,
+bypassing cultural codes. It cannot be coded, cannot be intentional.
+
+The OBTUSE MEANING (third meaning) is that which exceeds signification entirely—
+neither denotation nor connotation, but a supplement that cannot be absorbed.
+
+For each significant moment, identify:
+
+REGISTER:
+- "studium": Cultural, coded, readable meaning (what the image "is about")
+- "punctum": The wound, the accident, the detail that pricks without being sought
+- "obtuse": Third meaning, excess beyond signification, the "filmic"
+
+For moments of PUNCTUM:
+- What detail wounds? (Often: a gesture, a texture, a collar, dirty fingernails)
+- The punctum is never intentional—it's what the photographer didn't mean to capture
+
+For moments where MYTH operates (from Mythologies):
+- "naturalization": Making the historical appear natural, eternal
+- "inoculation": Admitting a small evil to hide a systemic one
+- "privation": History removed from the image
+- "identification": Reducing the Other to the Same
+- "tautology": "Because it is" (refusing explanation)
+- "neither_nor": False balance that refuses to choose
+- "quantification": Reducing quality to quantity
+- "statement_of_fact": Opinion presented as natural fact
+
+Also identify:
+- DENOTATION: What the image literally shows
+- CONNOTATION: What cultural meanings attach (through pose, objects, setting)
+- GRAIN: "The body in the voice"—materiality that exceeds meaning
+- DEATH PRESENT: The "that-has-been" (ça-a-été)—mortality visible in the image
+
+The punctum often relates to time and death: "this will be and this has been."
+Look for where the image touches mortality."""
+)
+
+BENJAMIN = AnalysisMode(
+    name="benjamin",
+    description="Aura, dialectical image, and optical unconscious",
+    result_model=BenjaminResult,
+    prompt="""Analyze this video through Walter Benjamin's theory of mechanical
+reproduction, aura, and the dialectical image.
+
+The AURA is "the unique apparition of a distance, however near it may be"—
+the sense of authenticity, presence, and unapproachability that traditional
+art possessed and that mechanical reproduction destroys.
+
+For each significant moment, identify:
+
+AURA STATUS:
+- "auratic": Unique presence, here-and-now, cult value, unapproachable
+- "decayed": Aura in process of withering (nostalgia, distance collapsing)
+- "absent": Post-auratic, exhibition value dominates, democratic access
+- "simulated": Fake aura, manufactured authenticity, nostalgic aura-effect
+- "revolutionary": Absence of aura as political liberation
+
+If AURATIC: What generates the aura? (ritual context, uniqueness, distance)
+
+DIALECTICAL IMAGE TYPE (Jetztzeit—the "now-time"):
+- "constellation": Past and present flash together in sudden legibility
+- "ruin": History visible as decay, allegory of transience
+- "wish_image": Utopian content embedded in commodity form
+- "fossil": Petrified life, frozen history waiting to be awakened
+- "tiger_leap": Revolutionary citation of the past (fashion, revolution)
+
+Also identify:
+- OPTICAL UNCONSCIOUS: What does the camera reveal that the naked eye cannot?
+  (slow motion reveals hidden gestures, close-up reveals hidden textures)
+- CULT VS EXHIBITION: Does cult value (ritualistic) or exhibition value
+  (display, accessibility) dominate?
+- REPRODUCIBILITY: How does mechanical reproduction operate? What is gained
+  and what is lost?
+- NOW-TIME: The Jetztzeit—the explosive present that blasts open the
+  continuum of history (revolutionary moments of recognition)
+
+Pay special attention to:
+- Moments where the "here and now" feels irreplaceable vs. infinitely copyable
+- The camera as surgeon vs. the painter as magician
+- Where reproduction enables or destroys meaning
+- The political stakes of destroying or preserving aura
+- Flashes of recognition between past and present
+
+Benjamin's key insight: the decay of aura is not simply loss but contains
+revolutionary potential. The question is who controls reproduction."""
+)
+
 
 # ============================================================================
 # CHART MODES
@@ -432,6 +578,9 @@ ALL_MODES = {
     "epistemic": EPISTEMIC,
     "foucault": FOUCAULT,
     "virilio": VIRILIO,
+    "zizek": ZIZEK,
+    "barthes": BARTHES,
+    "benjamin": BENJAMIN,
 }
 
 

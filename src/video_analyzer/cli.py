@@ -61,6 +61,9 @@ def main(
     epistemic: bool = typer.Option(False, "--epistemic", help="Truth claims/evidence analysis"),
     foucault: bool = typer.Option(False, "--foucault", help="Power/surveillance analysis"),
     virilio: bool = typer.Option(False, "--virilio", help="Speed/accident analysis"),
+    zizek: bool = typer.Option(False, "--zizek", help="Parallax/ideology analysis"),
+    barthes: bool = typer.Option(False, "--barthes", help="Punctum/studium/mythology analysis"),
+    benjamin: bool = typer.Option(False, "--benjamin", help="Aura/dialectical image analysis"),
 
     # Chart mode
     chart: Optional[str] = typer.Option(
@@ -123,6 +126,9 @@ def main(
         "epistemic": epistemic,
         "foucault": foucault,
         "virilio": virilio,
+        "zizek": zizek,
+        "barthes": barthes,
+        "benjamin": benjamin,
     }
 
     active_modes = [name for name, active in mode_flags.items() if active]
