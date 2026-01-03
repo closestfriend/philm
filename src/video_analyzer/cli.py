@@ -58,6 +58,9 @@ def main(
     sublime: bool = typer.Option(False, "--sublime", help="Sublime classification"),
     rhythm: bool = typer.Option(False, "--rhythm", help="Deleuzian rhythm analysis"),
     baudrillard: bool = typer.Option(False, "--baudrillard", help="Simulacra/hyperreality analysis"),
+    epistemic: bool = typer.Option(False, "--epistemic", help="Truth claims/evidence analysis"),
+    foucault: bool = typer.Option(False, "--foucault", help="Power/surveillance analysis"),
+    virilio: bool = typer.Option(False, "--virilio", help="Speed/accident analysis"),
 
     # Chart mode
     chart: Optional[str] = typer.Option(
@@ -117,6 +120,9 @@ def main(
         "sublime": sublime,
         "rhythm": rhythm,
         "baudrillard": baudrillard,
+        "epistemic": epistemic,
+        "foucault": foucault,
+        "virilio": virilio,
     }
 
     active_modes = [name for name, active in mode_flags.items() if active]

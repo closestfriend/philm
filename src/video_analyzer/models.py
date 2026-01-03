@@ -164,6 +164,107 @@ class BaudrillardMoment(BaseModel):
 
 
 # ============================================================================
+# EPISTEMIC - TRUTH AND EVIDENCE
+# ============================================================================
+
+class EpistemicMode(str, Enum):
+    """How the video relates to truth claims."""
+    DOCUMENTARY = "documentary"  # Claims direct access to truth
+    TESTIMONIAL = "testimonial"  # Truth through witness/speaker
+    EVIDENTIAL = "evidential"  # Presents evidence for claims
+    SPECULATIVE = "speculative"  # Hypothetical, uncertain
+    PERFORMATIVE = "performative"  # Creates truth through enactment
+    DENIALIST = "denialist"  # Rejects established knowledge
+
+
+class CertaintyLevel(str, Enum):
+    """Epistemological certainty."""
+    APODICTIC = "apodictic"  # Necessarily true, self-evident
+    ASSERTORIC = "assertoric"  # Claimed as fact, could be otherwise
+    PROBLEMATIC = "problematic"  # Possible, uncertain
+    SKEPTICAL = "skeptical"  # Doubting, questioning
+
+
+class EpistemicMoment(BaseModel):
+    """Analysis of truth claims and knowledge production."""
+    time: str
+    mode: EpistemicMode = Field(..., description="How truth is claimed")
+    certainty: CertaintyLevel = Field(..., description="Degree of epistemological certainty")
+    claim: str = Field(..., description="What truth claim is made")
+    evidence_type: Optional[str] = Field(None, description="What counts as evidence here")
+    verifiable: bool = Field(..., description="Can this claim be independently verified?")
+    appeals_to: Optional[str] = Field(None, description="Authority/source invoked (science, tradition, etc.)")
+    description: str
+
+
+# ============================================================================
+# FOUCAULT - POWER AND SURVEILLANCE
+# ============================================================================
+
+class PowerMode(str, Enum):
+    """Foucauldian modes of power."""
+    SOVEREIGN = "sovereign"  # Top-down, spectacular, punitive
+    DISCIPLINARY = "disciplinary"  # Normalizing, training, examining
+    BIOPOLITICAL = "biopolitical"  # Managing populations, life itself
+    PASTORAL = "pastoral"  # Caring, confessional, individualizing
+    GOVERNMENTALITY = "governmentality"  # Conduct of conduct, self-regulation
+
+
+class SurveillanceType(str, Enum):
+    """Types of watching/monitoring."""
+    PANOPTIC = "panoptic"  # Visible, centralized, induces self-discipline
+    SYNOPTIC = "synoptic"  # Many watch few (celebrity, spectacle)
+    LATERAL = "lateral"  # Peer-to-peer, social surveillance
+    ALGORITHMIC = "algorithmic"  # Automated, data-driven
+    ABSENT = "absent"  # Surveillance apparatus not visible
+
+
+class FoucaultMoment(BaseModel):
+    """Analysis of power, discipline, and surveillance."""
+    time: str
+    power_mode: PowerMode = Field(..., description="Which modality of power operates")
+    surveillance: SurveillanceType = Field(..., description="Type of watching/monitoring")
+    subject_produced: str = Field(..., description="What kind of subject is being produced")
+    norm_enforced: Optional[str] = Field(None, description="What norm is being enforced/implied")
+    resistance: Optional[str] = Field(None, description="Any resistance or counter-conduct visible")
+    apparatus: str = Field(..., description="The dispositif/apparatus at work")
+    description: str
+
+
+# ============================================================================
+# VIRILIO - SPEED AND ACCIDENT
+# ============================================================================
+
+class SpeedRegime(str, Enum):
+    """Virilio's speed classifications."""
+    METABOLIC = "metabolic"  # Body speed, walking, natural rhythm
+    MECHANICAL = "mechanical"  # Vehicle speed, industrial acceleration
+    ELECTRONIC = "electronic"  # Speed of light, instantaneous transmission
+    STATIC = "static"  # Inertia, paralysis through speed
+
+
+class AccidentType(str, Enum):
+    """Types of technological accident."""
+    INTEGRAL = "integral"  # The accident inherent to the technology
+    CATASTROPHIC = "catastrophic"  # System-wide failure
+    AESTHETIC = "aesthetic"  # Accident as visual/sensory event
+    TEMPORAL = "temporal"  # Disruption of time perception
+    NONE = "none"  # No accident visible
+
+
+class VirilioMoment(BaseModel):
+    """Analysis of speed, technology, and the accident."""
+    time: str
+    speed_regime: SpeedRegime = Field(..., description="What speed governs this moment")
+    dromology: str = Field(..., description="The logic of speed operating")
+    accident: AccidentType = Field(..., description="Type of accident visible/implied")
+    territory_collapse: bool = Field(..., description="Does speed collapse geographic distance?")
+    real_time: bool = Field(..., description="Is this operating in 'real time' (instantaneous)?")
+    war_machine: Optional[str] = Field(None, description="Military/strategic logic visible")
+    description: str
+
+
+# ============================================================================
 # CAMERA ANALYSIS - KINETIC ENERGY
 # ============================================================================
 
@@ -265,6 +366,21 @@ class CameraResult(BaseAnalysisResult):
 class BaudrillardResult(BaseAnalysisResult):
     """Baudrillard simulacra and hyperreality analysis."""
     timecodes: list[BaudrillardMoment]
+
+
+class EpistemicResult(BaseAnalysisResult):
+    """Epistemic analysis of truth claims."""
+    timecodes: list[EpistemicMoment]
+
+
+class FoucaultResult(BaseAnalysisResult):
+    """Foucault power and surveillance analysis."""
+    timecodes: list[FoucaultMoment]
+
+
+class VirilioResult(BaseAnalysisResult):
+    """Virilio speed and accident analysis."""
+    timecodes: list[VirilioMoment]
 
 
 # ============================================================================
