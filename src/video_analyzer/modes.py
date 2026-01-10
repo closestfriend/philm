@@ -24,6 +24,7 @@ from .models import (
     ZizekResult,
     BarthesResult,
     BenjaminResult,
+    HauntologyResult,
 )
 
 
@@ -527,6 +528,72 @@ Benjamin's key insight: the decay of aura is not simply loss but contains
 revolutionary potential. The question is who controls reproduction."""
 )
 
+HAUNTOLOGY = AnalysisMode(
+    name="hauntology",
+    description="Capitalist realism, burnout society, and hypernormalisation",
+    result_model=HauntologyResult,
+    prompt="""Analyze this video through the combined lens of Mark Fisher's capitalist
+realism and hauntology, Byung-Chul Han's burnout society, and Adam Curtis's
+hypernormalisation.
+
+These three thinkers diagnose the same pathology: late capitalism has colonized
+not just labor but the psyche, time itself, and the capacity to imagine alternatives.
+
+For each significant moment, identify:
+
+TEMPORAL PATHOLOGY - how is time deformed?
+- "hauntological": Ghosts of lost futures, retrofuturism, "the future that didn't arrive"
+  (Fisher: we're haunted by futures that were promised but cancelled)
+- "eternal_present": No history, no future, just managed now (Curtis's hypernormalisation)
+- "burnout_time": Exhausted temporality, no pause possible, always-on (Han)
+- "nostalgic": Simulated past, weaponized nostalgia, fake memory
+- "cancelled_future": The slow cancellation of the future made visible
+
+CAPITALIST REALISM MARKERS (Fisher):
+- "no_alternative": "This is just how things are" - TINA (There Is No Alternative)
+- "self_exploitation": The achievement-subject optimizing themselves to death (Han)
+- "commodified_resistance": Rebellion as product, dissent as brand identity
+- "depressive_hedonia": Unable to do anything BUT pursue pleasure, joyless compulsion
+- "interpassivity": The device enjoys/believes/experiences for us
+- "precarity_normalized": Instability presented as freedom, gig economy as liberation
+
+SMOOTHNESS (Han's key distinction):
+- "smooth": Frictionless, positive, like-able, optimized, no negativity allowed
+- "negative": Productive friction, genuine otherness, transformative encounter
+- "smooth_evil": The violence OF smoothness - elimination of all that resists
+- "toxic_positivity": Mandatory happiness, sadness as personal failure
+
+HYPERNORMALISATION (Curtis):
+- "managed_reality": Fake but functional reality that everyone accepts
+- "perception_management": Reality as PR operation, manufactured consent
+- "non_linear_war": Surkov-style confusion where contradiction IS the strategy
+- "conspiracy_without_conspirators": Systemic effects with no cabal, no one in charge
+- "reflexive_impotence": "We know it's bad but we can't do anything" (Fisher)
+
+Also identify:
+- LOST FUTURE: What specific future has been cancelled? What haunts this image?
+- SUFFERING INDIVIDUALIZED: Is systemic suffering presented as personal failure?
+  (Depression as chemical imbalance, not political symptom)
+- ACHIEVEMENT SUBJECT: Is someone performing self-optimization? (Han's key figure)
+- LIBIDINAL CAPTURE: How has desire been captured/redirected by capital?
+
+Key concepts to watch for:
+- "It's easier to imagine the end of the world than the end of capitalism" (Fisher)
+- The achievement-subject who is "both victim and perpetrator" (Han)
+- "We know, but nevertheless..." - cynical reason that changes nothing
+- The weird and the eerie (Fisher) - wrongness in presence or absence
+- Transparency as violence (Han) - the demand to make everything visible
+- The mental health crisis as political crisis (Fisher)
+
+This mode is devastating for:
+- Social media content (self-optimization, smoothness, toxic positivity)
+- News/documentary (hypernormalisation, managed reality)
+- Conspiracy content (no_alternative logic, reflexive impotence)
+- Lifestyle/wellness content (achievement-subject, self-exploitation)
+- Nostalgia/retrofuturism (hauntology, cancelled futures)
+- Anything that feels "off" in a way that's hard to name"""
+)
+
 
 # ============================================================================
 # CHART MODES
@@ -581,6 +648,7 @@ ALL_MODES = {
     "zizek": ZIZEK,
     "barthes": BARTHES,
     "benjamin": BENJAMIN,
+    "hauntology": HAUNTOLOGY,
 }
 
 

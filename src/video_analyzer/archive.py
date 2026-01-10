@@ -238,6 +238,23 @@ class Archive:
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- Hauntology moments (Fisher/Han/Curtis)
+    CREATE TABLE IF NOT EXISTS hauntology_moments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        video_id INTEGER NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
+        timecode TEXT NOT NULL,
+        temporal_pathology TEXT NOT NULL,
+        capitalist_realism TEXT,
+        smoothness TEXT NOT NULL,
+        hypernormal TEXT,
+        lost_future TEXT,
+        suffering_individualized BOOLEAN,
+        achievement_subject BOOLEAN,
+        libidinal_capture TEXT,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- Generic moments table for all other modes (Levinas, rhythm, etc.)
     -- Uses JSON blob for flexibility
     CREATE TABLE IF NOT EXISTS generic_moments (
@@ -309,6 +326,10 @@ class Archive:
     CREATE INDEX IF NOT EXISTS idx_barthes_myth ON barthes_moments(myth_operation);
     CREATE INDEX IF NOT EXISTS idx_benjamin_aura ON benjamin_moments(aura_status);
     CREATE INDEX IF NOT EXISTS idx_benjamin_dialectical ON benjamin_moments(dialectical_image);
+    CREATE INDEX IF NOT EXISTS idx_hauntology_temporal ON hauntology_moments(temporal_pathology);
+    CREATE INDEX IF NOT EXISTS idx_hauntology_realism ON hauntology_moments(capitalist_realism);
+    CREATE INDEX IF NOT EXISTS idx_hauntology_smooth ON hauntology_moments(smoothness);
+    CREATE INDEX IF NOT EXISTS idx_hauntology_hypernormal ON hauntology_moments(hypernormal);
 
     -- Full-text search on descriptions
     CREATE VIRTUAL TABLE IF NOT EXISTS video_fts USING fts5(
@@ -803,6 +824,36 @@ class Archive:
             )
         conn.commit()
 
+    def store_hauntology_analysis(self, video_id: int, timecodes: list[dict]):
+        """Store Fisher/Han/Curtis hauntology analysis."""
+        conn = self.connect()
+        conn.execute("DELETE FROM hauntology_moments WHERE video_id = ?", (video_id,))
+
+        for t in timecodes:
+            conn.execute(
+                """
+                INSERT INTO hauntology_moments
+                (video_id, timecode, temporal_pathology, capitalist_realism, smoothness,
+                 hypernormal, lost_future, suffering_individualized, achievement_subject,
+                 libidinal_capture, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    video_id,
+                    t.get("time", ""),
+                    t.get("temporal_pathology", ""),
+                    t.get("capitalist_realism", ""),
+                    t.get("smoothness", ""),
+                    t.get("hypernormal", ""),
+                    t.get("lost_future", ""),
+                    t.get("suffering_individualized"),
+                    t.get("achievement_subject"),
+                    t.get("libidinal_capture", ""),
+                    t.get("description", ""),
+                )
+            )
+        conn.commit()
+
     def store_analysis(self, video_id: int, mode: str, result: dict):
         """
         Store analysis result, routing to appropriate table.
@@ -838,6 +889,8 @@ class Archive:
             self.store_barthes_analysis(video_id, timecodes)
         elif mode == "benjamin":
             self.store_benjamin_analysis(video_id, timecodes)
+        elif mode == "hauntology":
+            self.store_hauntology_analysis(video_id, timecodes)
         else:
             self.store_generic_analysis(video_id, mode, timecodes)
 
