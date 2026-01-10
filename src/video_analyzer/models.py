@@ -367,6 +367,60 @@ class BenjaminMoment(BaseModel):
 
 
 # ============================================================================
+# FISHER/HAN/CURTIS - HAUNTOLOGY AND CAPITALIST REALISM
+# ============================================================================
+
+class TemporalPathology(str, Enum):
+    """How late capitalism deforms time (Fisher/Han)."""
+    HAUNTOLOGICAL = "hauntological"  # Ghosts of lost futures, retrofuturism, the future that didn't arrive
+    ETERNAL_PRESENT = "eternal_present"  # No history, no future, managed now (Curtis)
+    BURNOUT_TIME = "burnout_time"  # Exhausted temporality, no pause possible (Han)
+    NOSTALGIC = "nostalgic"  # Simulated past, fake memory, weaponized nostalgia
+    CANCELLED_FUTURE = "cancelled_future"  # The slow cancellation of the future
+
+
+class CapitalistRealismMarker(str, Enum):
+    """Symptoms of capitalist realism (Fisher)."""
+    NO_ALTERNATIVE = "no_alternative"  # "This is just how things are" - TINA
+    SELF_EXPLOITATION = "self_exploitation"  # Achievement-subject optimizing themselves (Han)
+    COMMODIFIED_RESISTANCE = "commodified_resistance"  # Rebellion as product, dissent as brand
+    DEPRESSIVE_HEDONIA = "depressive_hedonia"  # Unable to do anything BUT pursue pleasure
+    INTERPASSIVITY = "interpassivity"  # The device enjoys for us (Žižek via Fisher)
+    PRECARITY_NORMALIZED = "precarity_normalized"  # Instability as permanent condition
+
+
+class SmoothnessMode(str, Enum):
+    """Han's smooth vs. negative distinction."""
+    SMOOTH = "smooth"  # Frictionless, positive, like-able, no negativity allowed
+    NEGATIVE = "negative"  # Friction, otherness, genuine encounter, productive pain
+    SMOOTH_EVIL = "smooth_evil"  # The violence OF smoothness (elimination of other)
+    TOXIC_POSITIVITY = "toxic_positivity"  # Mandatory happiness, prohibited sadness
+
+
+class HypernormalType(str, Enum):
+    """Curtis's hypernormalisation categories."""
+    MANAGED_REALITY = "managed_reality"  # Fake but functional reality everyone accepts
+    PERCEPTION_MANAGEMENT = "perception_management"  # Reality as PR operation
+    NON_LINEAR_WAR = "non_linear_war"  # Surkov-style confusion as control
+    CONSPIRACY_WITHOUT_CONSPIRATORS = "conspiracy_without_conspirators"  # System effects, no cabal
+    REFLEXIVE_IMPOTENCE = "reflexive_impotence"  # "We know, but we can't do anything"
+
+
+class HauntologyMoment(BaseModel):
+    """Analysis through Fisher's hauntology, Han's burnout society, and Curtis's hypernormalisation."""
+    time: str
+    temporal_pathology: TemporalPathology = Field(..., description="How is time deformed here?")
+    capitalist_realism: Optional[CapitalistRealismMarker] = Field(None, description="Which symptom of capitalist realism?")
+    smoothness: SmoothnessMode = Field(..., description="Smooth positivity or productive negativity?")
+    hypernormal: Optional[HypernormalType] = Field(None, description="If hypernormalisation operates: which type?")
+    lost_future: Optional[str] = Field(None, description="What future has been cancelled/is haunting?")
+    suffering_individualized: bool = Field(..., description="Is systemic suffering presented as personal failure?")
+    achievement_subject: bool = Field(..., description="Is someone performing self-optimization? (Han)")
+    libidinal_capture: Optional[str] = Field(None, description="How has desire been captured/redirected?")
+    description: str
+
+
+# ============================================================================
 # CAMERA ANALYSIS - KINETIC ENERGY
 # ============================================================================
 
@@ -498,6 +552,11 @@ class BarthesResult(BaseAnalysisResult):
 class BenjaminResult(BaseAnalysisResult):
     """Benjamin aura and dialectical image analysis."""
     timecodes: list[BenjaminMoment]
+
+
+class HauntologyResult(BaseAnalysisResult):
+    """Fisher/Han/Curtis capitalist realism and hauntology analysis."""
+    timecodes: list[HauntologyMoment]
 
 
 # ============================================================================
