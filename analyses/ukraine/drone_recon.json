@@ -1,0 +1,192 @@
+{
+  "video": "Ukrainian Drone Buzzes Low Over Proxy Trenches, Records Russian Mine Launchers.mp4",
+  "path": "footage/ukraine/Ukrainian Drone Buzzes Low Over Proxy Trenches, Records Russian Mine Launchers.mp4",
+  "modes": [
+    "baudrillard",
+    "epistemic",
+    "virilio"
+  ],
+  "analyses": {
+    "baudrillard": {
+      "video_description": "Drone footage surveys extensive trenches and ruined structures in a desolate landscape, interspersed with Picture-in-Picture (PIP) overlays of a green military device, often presented as evidence.",
+      "timecodes": [
+        {
+          "time": "0:00-0:02",
+          "order": "third",
+          "hyperreality_mode": "generates",
+          "sign_value": "evidence of military activity; proof of enemy equipment",
+          "implosion": "The distinction between objective landscape survey and curated narrative evidence collapses. The PIP dictates the interpretation of the wider scene.",
+          "precession": true,
+          "description": "An aerial shot of trenches and a ruined building includes a Picture-in-Picture (PIP) showing a close-up of a green device. This immediate juxtaposition constructs a narrative of discovery and significance, generating a specific interpretation of the scene rather than merely representing it."
+        },
+        {
+          "time": "0:06-0:07",
+          "order": "second",
+          "hyperreality_mode": "represents",
+          "sign_value": "human presence in conflict; authenticity of military operations",
+          "implosion": null,
+          "precession": false,
+          "description": "A close-up shot of a person, likely a soldier, in a trench with equipment. This moment aims to represent a 'real' human element within the conflict, offering a sense of direct observation, though still mediated by the camera."
+        },
+        {
+          "time": "0:20-0:21",
+          "order": "third",
+          "hyperreality_mode": "generates",
+          "sign_value": "irrefutable proof; military intelligence; enemy capabilities",
+          "implosion": "The distinction between 'object found' and 'object presented as evidence' collapses. The staged presentation of the device in a gloved hand *is* the reality of its discovery and significance for the viewer.",
+          "precession": true,
+          "description": "Another drone shot of trenches features a PIP, this time showing the green device explicitly held by a gloved hand. This highly curated image is designed to create the reality of 'evidence' and 'discovery,' where the simulation of proof precedes and defines the object's meaning."
+        },
+        {
+          "time": "0:22-0:50",
+          "order": "second",
+          "hyperreality_mode": "represents",
+          "sign_value": "scale of conflict; military infrastructure; strategic overview",
+          "implosion": null,
+          "precession": false,
+          "description": "The drone continues its flight, showcasing the extensive network of trenches and various ruined structures across the landscape. These shots primarily function to represent the physical reality and scope of the observed territory."
+        }
+      ]
+    },
+    "epistemic": {
+      "video_description": "Aerial drone footage surveys an extensive network of trenches, dugouts, and damaged structures in a rural, green landscape, with close-ups highlighting a person and specific equipment.",
+      "timecodes": [
+        {
+          "time": "00:00",
+          "mode": "evidential",
+          "certainty": "assertoric",
+          "claim": "The video presents visual evidence of damaged structures and military-style equipment in a specific location.",
+          "evidence_type": "visual proof (aerial footage, magnified inset)",
+          "verifiable": true,
+          "appeals_to": "direct observation",
+          "description": "The video opens with an aerial view of a partially destroyed building and trenches, featuring a circular inset that magnifies a green object, implying it is a piece of military equipment."
+        },
+        {
+          "time": "00:02",
+          "mode": "documentary",
+          "certainty": "assertoric",
+          "claim": "The surveyed area contains extensive defensive positions and damaged infrastructure.",
+          "evidence_type": "visual proof (aerial overview)",
+          "verifiable": true,
+          "appeals_to": "direct observation",
+          "description": "The drone ascends to provide a broader aerial perspective, revealing the significant scale of the trench system, damaged buildings, and the surrounding rural landscape."
+        },
+        {
+          "time": "00:06",
+          "mode": "documentary",
+          "certainty": "assertoric",
+          "claim": "A person, likely a soldier, is present in one of the dugouts, accompanied by military gear.",
+          "evidence_type": "visual proof (close-up footage)",
+          "verifiable": true,
+          "appeals_to": "direct observation",
+          "description": "A close-up shot focuses on an individual in military attire sitting within a dugout, next to a ladder and what appears to be military equipment, confirming human presence."
+        },
+        {
+          "time": "00:08",
+          "mode": "evidential",
+          "certainty": "assertoric",
+          "claim": "The trench system is extensive, winding, and appears to be a prepared defensive line.",
+          "evidence_type": "visual proof (aerial tracking)",
+          "verifiable": true,
+          "appeals_to": "direct observation",
+          "description": "The drone flies along a long, winding trench line, demonstrating its continuity and depth across the terrain, indicating a significant defensive installation."
+        },
+        {
+          "time": "00:20",
+          "mode": "evidential",
+          "certainty": "assertoric",
+          "claim": "The green object highlighted earlier is a tangible piece of equipment, being handled by someone on the ground.",
+          "evidence_type": "visual proof (magnified close-up)",
+          "verifiable": true,
+          "appeals_to": "direct observation",
+          "description": "Another magnified inset shows a gloved hand holding the green object, providing a clearer view and confirming its physical presence and handling within the observed area."
+        },
+        {
+          "time": "00:22",
+          "mode": "documentary",
+          "certainty": "assertoric",
+          "claim": "The entire surveyed area comprises an interconnected network of trenches and damaged buildings, indicative of a military or fortified position.",
+          "evidence_type": "visual proof (comprehensive aerial survey)",
+          "verifiable": true,
+          "appeals_to": "direct observation",
+          "description": "The drone completes a comprehensive aerial survey, showcasing the full extent of the interconnected trench system and surrounding damaged structures, emphasizing the overall military character of the site."
+        }
+      ]
+    },
+    "virilio": {
+      "video_description": "FPV drone footage provides an aerial survey of extensive trench systems and destroyed buildings in a rural, open landscape, including close-ups on personnel and equipment.",
+      "timecodes": [
+        {
+          "time": "0:00",
+          "speed_regime": "electronic",
+          "dromology": "The drone's real-time visual feed, augmented by a magnified inset, demonstrates the acceleration of remote perception and information density. The inset functions as a 'telescopic' vision, collapsing the visual scale to highlight a specific detail for intelligence gathering.",
+          "accident": "aesthetic",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "The magnified inset serves a reconnaissance function, identifying a specific piece of equipment or detail relevant for military intelligence, thus accelerating the logistics of perception.",
+          "description": "Initial drone view of a destroyed building and trench, with a magnified inset showing a green, technological object on the ground."
+        },
+        {
+          "time": "0:02",
+          "speed_regime": "mechanical",
+          "dromology": "The rapid flight of the drone over the landscape accelerates the visual survey of the terrain, transforming geographic space into a legible, strategic map. It allows for quick assessment of fortifications and destruction.",
+          "accident": "none",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "The drone acts as a surveillance vehicle, providing an aerial perspective crucial for military reconnaissance and mapping the layout of defensive positions and damaged infrastructure.",
+          "description": "The drone flies over a destroyed building and an adjacent trench system, revealing the immediate surroundings."
+        },
+        {
+          "time": "0:06",
+          "speed_regime": "electronic",
+          "dromology": "The zoom function of the drone's camera, transmitting in real-time, exemplifies the acceleration of visual penetration, allowing for the remote identification of individuals or specific elements within a fortified position, collapsing the distance to human scale.",
+          "accident": "none",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "This close-up functions as direct, remote surveillance, identifying a potential combatant and their equipment, crucial for targeting or intelligence gathering in 'pure war'.",
+          "description": "A close-up shot of a person sitting in a trench/bunker, with military equipment visible nearby."
+        },
+        {
+          "time": "0:08",
+          "speed_regime": "mechanical",
+          "dromology": "The drone's sustained flight along the trench line accelerates the understanding of the extent and complexity of the defensive network. It transforms the linear fortification into a continuous visual stream, emphasizing the 'line of sight' logic of modern warfare.",
+          "accident": "none",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "The drone is actively mapping and surveying the enemy's defensive lines, providing logistical and tactical information on the 'war machine's' infrastructure.",
+          "description": "The drone continues to fly rapidly along a winding trench system, revealing its length and structure across the landscape."
+        },
+        {
+          "time": "0:20",
+          "speed_regime": "electronic",
+          "dromology": "The sudden appearance of the magnified inset, showing a hand holding a piece of equipment, represents a further acceleration of information. It creates a disjunction in the visual field, prioritizing specific data over continuous spatial representation, characteristic of 'logistics of perception'.",
+          "accident": "aesthetic",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "The inset provides immediate, focused intelligence on specific objects or actions, vital for rapid assessment and decision-making in a military context.",
+          "description": "A magnified inset appears, showing a gloved hand holding a green, technological object."
+        },
+        {
+          "time": "0:22",
+          "speed_regime": "mechanical",
+          "dromology": "The drone's agile and tilting flight path, typical of FPV, accelerates the visual experience to the point of potential disorientation. This dromology emphasizes the speed and maneuverability of the viewing platform, creating a dynamic, almost violent, interaction with the landscape.",
+          "accident": "aesthetic",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "The highly dynamic camera movement and speed reflect the aggressive and agile nature of modern aerial reconnaissance, designed to evade detection and quickly acquire visual intelligence in a combat zone.",
+          "description": "The drone flies at high speed over the trench network, with significant camera tilting, offering a dynamic and sweeping view."
+        },
+        {
+          "time": "0:31",
+          "speed_regime": "mechanical",
+          "dromology": "The extended aerial survey of the entire trench network and destroyed structures demonstrates the acceleration of comprehensive spatial understanding. The drone's speed collapses the vastness of the territory into an immediately graspable, strategic overview, revealing the full 'war landscape'.",
+          "accident": "none",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "This segment showcases the drone's capacity for strategic reconnaissance, providing a complete picture of fortifications and battle damage across a wide area, essential for operational planning and 'pure war' logistics.",
+          "description": "The drone continues its flight, surveying a more extensive network of trenches and destroyed buildings, revealing the full scale of the fortified area."
+        }
+      ]
+    }
+  }
+}

@@ -1,98 +1,187 @@
-# video-analyzer v2
+# Philm
 
-Philosophical video analysis using Gemini 2.5 Flash. Python rewrite with `uv` for speed and elegance.
+Philosophical video analysis. A CLI tool that reads video through critical theory.
 
-## Philosophy
+## Thesis
 
-> "The orthogonality is the magic: hard structural constraints + rich interpretive prompts = usable philosophical analysis."
+Every recording technology contains its own ideology. Philm makes that ideology legible.
 
-This tool provides **schemas** (Pydantic models enforcing structure) and **modes** (theoretical frameworks guiding interpretation) for analyzing video through various philosophical lenses:
+The tool pairs **hard structural constraints** (Pydantic schemas) with **rich interpretive prompts** (theoretical frameworks) to produce structured readings of video content. The orthogonality is the point: the same schema can be filled by Baudrillard or Virilio, the same footage can be read through Mulvey or Benjamin. The apparatus doesn't privilege one framework over another—it treats theory as a parameter.
 
-- **Levinas**: Ethical encounters and the face of the Other
-- **Massumi**: Affective intensities and atmospheric analysis  
-- **Deleuze**: Rhythms, deterritorialization, and lines of flight
-- **Mulvey**: Gaze structures and visual pleasure
-- **Kant/Burke**: The sublime and aesthetic overwhelm
-- **Camera Analysis**: Kinetic energy from Tarkovsky to Safdie/Death Grips
+```
+vanalyze main video.mp4 --virilio --baudrillard --hauntology
+```
+
+## What It Does
+
+Philm uploads video to Gemini 2.5 Flash and returns structured philosophical analysis. Each mode applies a specific theoretical framework:
+
+| Mode | Framework | Asks |
+|------|-----------|------|
+| `--affect` | Massumi | What pre-cognitive intensities move through this? |
+| `--camera` | Tarkovsky→Safdie | Where does this sit on the contemplative↔frenetic spectrum? |
+| `--gaze` | Mulvey | Who looks at whom, and with what power? |
+| `--sublime` | Kant/Burke | What overwhelms representation here? |
+| `--levinas` | Levinas | Where does the face of the Other emerge? |
+| `--rhythm` | Deleuze | What territorializes, what escapes? |
+| `--baudrillard` | Baudrillard | Which order of simulacra? Does the model precede the real? |
+| `--virilio` | Virilio | What speed regime governs? Where is the accident? |
+| `--foucault` | Foucault | What power operates? What subject is produced? |
+| `--epistemic` | — | What truth claims are made? What counts as evidence? |
+| `--zizek` | Žižek/Lacan | Where is the parallax gap? What ideology operates? |
+| `--barthes` | Barthes | What wounds (punctum)? What myths naturalize? |
+| `--benjamin` | Benjamin | What is the aura status? Where is the dialectical image? |
+| `--hauntology` | Fisher/Han/Curtis | What futures were cancelled? What smoothness conceals? |
+
+Plus basic extraction modes: `--captions`, `--paragraph`, `--key-moments`, `--table`, `--chart`
 
 ## Installation
 
 ```bash
-# Install with uv
+# Clone and install with uv
+git clone https://github.com/closestfriend/philm.git
+cd philm
 uv sync
 
-# Or install globally with uv tool
+# Set your Gemini API key
+echo "GEMINI_API_KEY=your_key_here" > .env
+
+# Run
+uv run vanalyze main video.mp4 --affect
+```
+
+Or install globally:
+
+```bash
 uv tool install .
+vanalyze main video.mp4 --virilio
 ```
 
 ## Usage
 
 ```bash
-# Basic analysis modes
-vanalyze video.mp4 --captions
-vanalyze video.mp4 --affect
-vanalyze video.mp4 --camera
+# Single mode
+vanalyze main video.mp4 --baudrillard
 
-# Deep mode (includes FFmpeg technical analysis)
-vanalyze video.mp4 --affect --deep
+# Multiple modes (one upload, parallel analysis)
+vanalyze main video.mp4 --virilio --baudrillard --hauntology
+
+# JSON output
+vanalyze main video.mp4 --affect --json --output results.json
 
 # Batch processing
-vanalyze --folder /path/to/videos --affect --recursive
+vanalyze main --folder ./videos --gaze --recursive
 
-# Custom prompts
-vanalyze video.mp4 --custom "analyze moments of stillness"
+# Strip audio (reduces upload size ~25%)
+vanalyze main video.mp4 --affect --no-audio
 
-# Output options
-vanalyze video.mp4 --affect --json
-vanalyze video.mp4 --affect --output results.json
+# Include FFmpeg technical analysis
+vanalyze main video.mp4 --camera --deep
+
+# Custom prompt
+vanalyze main video.mp4 --custom "find moments where time dilates"
 ```
 
-## Available Modes
+## Example Output
 
-- `--captions`: A/V captions with spoken text
-- `--paragraph`: 3-5 sentence summary
-- `--key-moments`: Bullet point extraction
-- `--affect`: Massumi affect theory analysis
-- `--camera`: Camera kinetics (Tarkovsky → Safdie scale)
-- `--levinas`: Ethical encounters and the face
-- `--gaze`: Mulvey gaze analysis
-- `--sublime`: Kant/Burke sublime classification
-- `--rhythm`: Deleuzian tempo/deterritorialization
-- `--custom "prompt"`: Custom analysis
-
-## Development
-
-```bash
-# Install with dev dependencies
-uv sync --extra dev
-
-# Run tests
-uv run pytest
-
-# Run the CLI during development
-uv run vanalyze --help
-
-# Format code
-uv run ruff format .
-```
-
-## Environment
-
-Create a `.env` file:
+From FPV drone strike footage, `--baudrillard`:
 
 ```
-GEMINI_API_KEY=your_key_here
+1:15 | [fourth] | pure_simulacrum | PRECESSION
+     sign: Content virality, channel growth, impact
+     implosion: Event/media, content/platform, war/entertainment
+
+     Drone footage shows strikes on buildings with a prominent
+     YouTube 'SUBSCRIBE' button overlay, indicating the video's
+     status as media content.
+```
+
+From personal footage in an empty commercial plaza, `--hauntology`:
+
+```
+0:49 | [hauntological] | smooth: negative | SUFFERING INDIVIDUALIZED
+     capitalist realism: precarity_normalized
+     lost future: Successful small businesses, community leisure
+
+     The camera pans to reveal neon signs for 'Relax Spa' and
+     'Tropical Fiyah Jamaican Restaurant.' These names evoke
+     promises of leisure and vibrancy that are conspicuously
+     absent from the desolate scene, highlighting failed
+     capitalist aspirations.
+```
+
+From car accident footage, `--virilio`:
+
+```
+3:30-4:00 | [mechanical] | accident: integral | REAL-TIME
+     dromology: The flashing lights of emergency vehicles signify
+     a disruption of the normal flow of mechanical speed, revealing
+     the 'integral accident' inherent in high-speed mobility.
+     war machine: Emergency response as 'pure war' in managing
+     the accident of speed.
 ```
 
 ## Architecture
 
-- **models.py**: Pydantic schemas for all philosophical frameworks
-- **analyzer.py**: Gemini API integration with structured outputs
-- **technical.py**: FFmpeg scene detection and chaos metrics
-- **modes.py**: Theoretical prompt definitions
-- **cli.py**: Typer-based CLI with rich output
-- **output.py**: Formatting (human-readable, JSON, etc.)
+```
+src/video_analyzer/
+├── models.py      # Pydantic schemas (structure)
+├── modes.py       # Theoretical prompts (interpretation)
+├── analyzer.py    # Gemini API integration
+├── cli.py         # Typer CLI
+├── output.py      # Rich terminal formatting
+├── technical.py   # FFmpeg scene detection
+└── batch.py       # Folder processing
+```
+
+The separation matters: `models.py` defines **what** (the shape of a Baudrillardian reading), `modes.py` defines **how** (the prompt that produces it). Adding a new theoretical framework is ~30 lines of Python.
+
+## Theory
+
+Philm operationalizes the insight that all media analysis is already theoretical—the question is whether the theory is explicit or implicit. By parameterizing the theoretical framework, the tool makes visible what usually remains hidden: the lens through which we read images.
+
+The frameworks included span:
+- **Affect theory** (Massumi's pre-cognitive intensity)
+- **Apparatus theory** (Mulvey's gaze, Benjamin's aura)
+- **Simulation theory** (Baudrillard's hyperreal)
+- **Dromology** (Virilio's speed and accident)
+- **Power analytics** (Foucault's dispositif)
+- **Hauntology** (Fisher's cancelled futures, Han's burnout society)
+
+Running multiple modes on the same footage reveals how different frameworks illuminate different aspects—and how some frameworks find resonance where others find nothing.
+
+## Use Cases
+
+- **Video artists**: Generate structured readings of your own work
+- **Researchers**: Produce systematic analyses across corpora
+- **Critics**: Supplement close reading with algorithmic analysis
+- **Archivists**: Generate rich metadata beyond technical specs
+- **Curious**: See what Baudrillard would say about your vacation footage
+
+## Scripts
+
+```bash
+# Compress video for Gemini upload (720p, optional audio strip)
+python scripts/compress_for_gemini.py input.mp4 -o output/ --no-audio
+```
+
+## Limitations
+
+- Gemini's visual understanding, not yours—the tool surfaces *its* readings
+- Structured output occasionally hallucinates timecodes
+- Large files (>500MB) may timeout; use compression script
+- Theory is not neutral; each framework has its blindspots
+
+## License
+
+MIT
+
+## Acknowledgments
+
+Built with [uv](https://github.com/astral-sh/uv), [Typer](https://typer.tiangolo.com/), [Rich](https://github.com/Textualize/rich), and [Pydantic](https://docs.pydantic.dev/).
+
+Theoretical frameworks drawn from: Brian Massumi, Laura Mulvey, Gilles Deleuze, Emmanuel Levinas, Immanuel Kant, Edmund Burke, Jean Baudrillard, Paul Virilio, Michel Foucault, Slavoj Žižek, Roland Barthes, Walter Benjamin, Mark Fisher, Byung-Chul Han, and Adam Curtis.
 
 ---
 
-Built with `uv` for speed. Theory-first, implementation-clean.
+*"The orthogonality is the magic."*

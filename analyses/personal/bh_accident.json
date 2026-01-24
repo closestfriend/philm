@@ -1,0 +1,387 @@
+{
+  "video": "Sony Export BH Accident_compressed.mp4",
+  "path": "footage/personal/Sony Export BH Accident_compressed.mp4",
+  "modes": [
+    "baudrillard",
+    "virilio",
+    "hauntology"
+  ],
+  "analyses": {
+    "baudrillard": {
+      "video_description": "A raw, low-fidelity video capturing a young woman's performative interaction in a car, abruptly transitioning to the documentation of a street emergency scene, including a car crash and discarded alcohol bottles, with the same individuals observing the event.",
+      "timecodes": [
+        {
+          "time": "0:00-2:30",
+          "order": "third",
+          "hyperreality_mode": "generates",
+          "sign_value": "Simulated intimacy, manufactured authenticity, the illusion of direct access to a personal moment, mimicking celebrity culture. Consuming this signifies being 'in' on a private moment, part of an exclusive circle.",
+          "implosion": "The distinction between spontaneous, genuine interaction and staged, mediated performance for an audience collapses.",
+          "precession": true,
+          "description": "The video opens with a young woman performing various gestures and expressions for the camera inside a car. The low-fidelity, handheld aesthetic attempts to convey authenticity, but the conscious performance creates a simulated candidness for an implied audience."
+        },
+        {
+          "time": "2:30-3:30",
+          "order": "fourth",
+          "hyperreality_mode": "pure_simulacrum",
+          "sign_value": "Disorientation, tension, a deliberate aesthetic choice to disrupt narrative flow, or a representation of chaos/movement itself.",
+          "implosion": "The distinction between image and referent, and ultimately, meaning and meaninglessness, collapses.",
+          "precession": true,
+          "description": "A period of extremely blurry, shaky, and chaotic footage with abstract lights and indistinct shapes. This segment loses all discernible referentiality, becoming pure visual noise or a sign referring only to the act of recording itself."
+        },
+        {
+          "time": "3:30-5:30",
+          "order": "third",
+          "hyperreality_mode": "masks_absence",
+          "sign_value": "Drama, public interest, voyeurism, the thrill of 'being there' at a newsworthy event, even if mediated. Consuming this signifies being a witness to a dramatic event.",
+          "implosion": "The distinction between a genuine, unmediated event and its consumption as a media spectacle collapses.",
+          "precession": true,
+          "description": "The video transitions to an emergency scene with flashing lights from police cars and fire trucks. While a real event, the filming style, coupled with the prior segment's performative nature, frames the incident as a spectacle to be consumed, rather than an unmediated reality."
+        },
+        {
+          "time": "12:20-12:50",
+          "order": "third",
+          "hyperreality_mode": "generates",
+          "sign_value": "Moral judgment, narrative closure, confirmation of assumptions, implied 'truth' or explanation for the event. Consuming this signifies gaining insight into the underlying cause.",
+          "implosion": "The distinction between objective fact/evidence and a constructed narrative or interpretation collapses.",
+          "precession": true,
+          "description": "The camera deliberately focuses on discarded alcohol bottles near the accident scene. This specific framing constructs a narrative of causation, presenting the bottles as definitive evidence and generating a specific interpretation of the event (e.g., drunk driving) that precedes a full, complex understanding."
+        },
+        {
+          "time": "14:20-14:40",
+          "order": "third",
+          "hyperreality_mode": "masks_absence",
+          "sign_value": "Suspense, implied connection, narrative development, continuation of the 'personal story' of the woman within the larger event.",
+          "implosion": "The distinction between a random event and a narrative-driven sequence, and between objective observation and subjective implication, collapses.",
+          "precession": true,
+          "description": "A white SUV drives away from the scene, with the woman from the opening segment observing. This moment, through its framing and the woman's presence, implies a narrative connection or significance that may not be explicitly stated, thereby masking the absence of a direct link and creating a simulated narrative."
+        }
+      ]
+    },
+    "virilio": {
+      "video_description": "The video captures a night scene transitioning from a woman in a moving car with visual glitches to an unfolding accident scene with emergency services, and then back to individuals navigating the aftermath, often absorbed in their phones.",
+      "timecodes": [
+        {
+          "time": "0:00",
+          "speed_regime": "mechanical",
+          "dromology": "The car facilitates mechanical speed, placing the individual in a state of passive reception. The focus on the woman highlights a human presence within this technological acceleration.",
+          "accident": "none",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": null,
+          "description": "A young woman sits in a moving car at night, illuminated by interior lights, with visible horizontal scan lines from the recording."
+        },
+        {
+          "time": "0:18",
+          "speed_regime": "mechanical",
+          "dromology": "The hand is a static point within the moving vehicle, emphasizing the passenger's detachment from the mechanical speed, yet still subject to its ambient effects.",
+          "accident": "none",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": null,
+          "description": "Close-up of the woman's hand resting on the car's armrest, reinforcing the passive state within mechanical motion."
+        },
+        {
+          "time": "0:30",
+          "speed_regime": "electronic",
+          "dromology": "The sudden black screen represents a failure of visual transmission, an interruption of the flow of information. The acceleration of electronic capture leads to its own accident.",
+          "accident": "aesthetic",
+          "territory_collapse": false,
+          "real_time": false,
+          "war_machine": null,
+          "description": "An extreme close-up of the woman's eyes is abruptly cut by a black screen, indicating a momentary failure of the recording or transmission."
+        },
+        {
+          "time": "1:00",
+          "speed_regime": "electronic",
+          "dromology": "Another instance of the recording technology failing or being manipulated, disrupting the continuity of perception. The eyes, as windows to perception, are momentarily lost.",
+          "accident": "aesthetic",
+          "territory_collapse": false,
+          "real_time": false,
+          "war_machine": null,
+          "description": "A second abrupt cut to black after an intense close-up on her eyes, reinforcing the fragility of the visual stream."
+        },
+        {
+          "time": "1:35",
+          "speed_regime": "electronic",
+          "dromology": "The repetitive failure of the recording (black screen) suggests an inherent flaw in the technology, a constant threat to the continuity of perception and a rhythmic interruption.",
+          "accident": "aesthetic",
+          "territory_collapse": false,
+          "real_time": false,
+          "war_machine": null,
+          "description": "Another instance of the recording cutting to black, emphasizing the intermittent nature of the visual feed and the inherent fragility of the electronic medium."
+        },
+        {
+          "time": "2:00",
+          "speed_regime": "electronic",
+          "dromology": "The recurring black screen becomes a pattern, a rhythmic interruption that highlights the limits of continuous capture and the presence of the recording apparatus itself.",
+          "accident": "aesthetic",
+          "territory_collapse": false,
+          "real_time": false,
+          "war_machine": null,
+          "description": "A further repetition of the black screen, solidifying the impression of a compromised or manipulated recording."
+        },
+        {
+          "time": "2:10",
+          "speed_regime": "electronic",
+          "dromology": "The black screen serves as a dromological punctuation, marking the inherent fragility and potential for failure in electronic transmission, creating a rhythm of presence and absence.",
+          "accident": "aesthetic",
+          "territory_collapse": false,
+          "real_time": false,
+          "war_machine": null,
+          "description": "Another cut to black, emphasizing the recurring interruptions in the visual feed."
+        },
+        {
+          "time": "2:20",
+          "speed_regime": "electronic",
+          "dromology": "The rapid succession of brief glimpses and black screens creates a sense of frantic, fragmented perception, where the integrity of the image is constantly threatened by the speed of its capture and transmission.",
+          "accident": "aesthetic",
+          "territory_collapse": false,
+          "real_time": false,
+          "war_machine": null,
+          "description": "A very short glimpse of the woman's eyes followed immediately by a black screen, highlighting the extreme fragmentation."
+        },
+        {
+          "time": "2:30",
+          "speed_regime": "electronic",
+          "dromology": "The camera's frantic movement, combined with severe digital artifacts, simulates a state of hyper-speed or extreme acceleration that overwhelms coherent perception, leading to a form of visual blindness.",
+          "accident": "aesthetic",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "The disorienting effect is akin to a visual weapon, a failure of the 'logistics of perception' in a state of 'pure war' on the visual field.",
+          "description": "A prolonged sequence of rapid, disorienting camera movements, severe motion blur, and extreme scan line artifacts, creating a chaotic and fragmented visual experience."
+        },
+        {
+          "time": "3:15",
+          "speed_regime": "mechanical",
+          "dromology": "The mechanical speed of the cars is externally observed, but the electronic artifacts continue to mediate and distort the perception of this speed, elevating mundane motion to a dromological event.",
+          "accident": "aesthetic",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": null,
+          "description": "Outside view of cars passing at night, with their headlights and taillights creating streaks due to the camera's motion and scan line effect."
+        },
+        {
+          "time": "3:30",
+          "speed_regime": "mechanical",
+          "dromology": "The flashing emergency lights signal a disruption, an accident, and the rapid response of official services. The speed of intervention is crucial. The visual artifacts intensify the sense of urgency and chaos.",
+          "accident": "integral",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "The organization of emergency response can be seen as a form of logistical 'war machine' against disorder or accident.",
+          "description": "Flashing red and blue emergency lights are visible in the distance, heavily distorted by scan lines and lens flares, suggesting an unfolding incident."
+        },
+        {
+          "time": "4:00",
+          "speed_regime": "mechanical",
+          "dromology": "The tow truck signifies the process of clearing the 'accident' and restoring the flow of traffic. It's a logistical component of managing the speed of the city, counteracting the disruption of the crash.",
+          "accident": "integral",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "Logistics of post-accident recovery and infrastructure maintenance.",
+          "description": "A tow truck is briefly visible, indicating the process of clearing the scene, while the overall image remains distorted by the camera's limitations."
+        },
+        {
+          "time": "5:00",
+          "speed_regime": "static",
+          "dromology": "The focus is on the organized, albeit slow, response to the accident. The speed of the initial incident has frozen into a tableau of official response, managed by human metabolic speed.",
+          "accident": "integral",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "Coordinated emergency response, a 'pure war' against disorder.",
+          "description": "A relatively clearer shot of emergency vehicles with flashing lights and personnel attending to the scene, though still with some visual artifacts."
+        },
+        {
+          "time": "6:20",
+          "speed_regime": "electronic",
+          "dromology": "The lights themselves become the subject, their intensity overwhelming the camera's ability to process. This highlights Virilio's idea of light as a weapon or a form of dromological power that can blind.",
+          "accident": "aesthetic",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "Light as a blinding force, logistics of perception overwhelmed.",
+          "description": "An intense close-up on the flashing emergency lights, which are severely overexposed and distorted by the camera's scan lines, creating an abstract, blinding effect."
+        },
+        {
+          "time": "7:10",
+          "speed_regime": "metabolic",
+          "dromology": "The individual, previously a passive recipient of mechanical speed, is now actively navigating the aftermath of an accident at a human, metabolic pace, contrasting with the frozen speed of the crash.",
+          "accident": "integral",
+          "territory_collapse": false,
+          "real_time": true,
+          "war_machine": null,
+          "description": "The woman from the car is now outside, walking on the sidewalk near the accident scene, observing her surroundings."
+        },
+        {
+          "time": "9:10",
+          "speed_regime": "mechanical",
+          "dromology": "The slow, deliberate pan of the camera captures the methodical arrival of the tow truck, representing the speed of logistical intervention to clear the scene.",
+          "accident": "integral",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "Logistics of recovery.",
+          "description": "The camera pans from the ground to reveal the street and the arrival of a tow truck, signaling the next phase of the accident cleanup."
+        },
+        {
+          "time": "10:00",
+          "speed_regime": "electronic",
+          "dromology": "The abstract light patterns give way to the recognizable form of a police car, representing the re-assertion of order and control after the chaotic speed of the accident.",
+          "accident": "aesthetic",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "State control and order maintenance.",
+          "description": "A sequence of abstract, blurry lights transitions to a clearer view of a police car with its lights flashing, signifying official presence."
+        },
+        {
+          "time": "10:20",
+          "speed_regime": "static",
+          "dromology": "The full deployment of emergency services, a concerted effort to manage the accident's aftermath. Various speeds converge on this point of disruption, indicating a 'pure war' against disorder.",
+          "accident": "integral",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "Coordinated emergency response, a 'pure war' against disorder.",
+          "description": "Multiple emergency vehicles, including a fire truck and police cars, are visible at the scene, with personnel and bystanders moving around under the flashing lights."
+        },
+        {
+          "time": "12:20",
+          "speed_regime": "static",
+          "dromology": "These objects are the detritus of human activity, perhaps related to the cause of the accident, or simply discarded by bystanders. They represent the 'left behind' in the wake of accelerated modern life.",
+          "accident": "integral",
+          "territory_collapse": false,
+          "real_time": true,
+          "war_machine": null,
+          "description": "A close-up on a discarded bottle and can on the grass, possibly remnants of the incident or related human activity."
+        },
+        {
+          "time": "12:50",
+          "speed_regime": "static",
+          "dromology": "The damaged car is the material evidence of the accident, a frozen moment of violent speed. It embodies the 'shipwreck' of the mechanical age, a direct consequence of dromological excess.",
+          "accident": "integral",
+          "territory_collapse": false,
+          "real_time": true,
+          "war_machine": "The car as a weapon or a vulnerable machine in the 'pure war' of speed.",
+          "description": "A close-up on the severely damaged car, a stark visual representation of the integral accident."
+        },
+        {
+          "time": "14:20",
+          "speed_regime": "static",
+          "dromology": "The SUV, a symbol of mechanical speed and luxury, is now static, caught in the aftermath. The woman's interaction with her phone introduces electronic speed, a distraction from the immediate physical reality, collapsing her attention into a virtual territory.",
+          "accident": "integral",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": null,
+          "description": "The white SUV is now parked at the scene, and the woman from the beginning is seen standing near it, engrossed in her phone, creating a juxtaposition of physical and electronic presence."
+        },
+        {
+          "time": "15:20",
+          "speed_regime": "metabolic",
+          "dromology": "The flashlight beam is a localized manifestation of 'light-speed' information gathering, a focused search for details or evidence that might explain the accident. It's a deliberate, investigative speed.",
+          "accident": "integral",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "Surveillance and information gathering as part of state control.",
+          "description": "A police officer uses a flashlight to meticulously search the ground, illuminating small areas, signifying the detailed investigation of the accident."
+        }
+      ]
+    },
+    "hauntology": {
+      "video_description": "A raw, handheld video capturing a young woman's night, starting with her detached presence in a car, transitioning to her and others observing a car accident scene with emergency services, and concluding with a focus on the aftermath and the individuals present.",
+      "timecodes": [
+        {
+          "time": "0:00-0:18",
+          "temporal_pathology": "eternal_present",
+          "capitalist_realism": "depressive_hedonia",
+          "smoothness": "smooth",
+          "hypernormal": null,
+          "lost_future": null,
+          "suffering_individualized": false,
+          "achievement_subject": false,
+          "libidinal_capture": null,
+          "description": "A young woman sits in a car at night, looking around with a detached, almost bored expression, occasionally making small gestures. The ambiance is dark with car interior lights."
+        },
+        {
+          "time": "0:35-0:40",
+          "temporal_pathology": "eternal_present",
+          "capitalist_realism": "depressive_hedonia",
+          "smoothness": "smooth",
+          "hypernormal": null,
+          "lost_future": null,
+          "suffering_individualized": false,
+          "achievement_subject": false,
+          "libidinal_capture": "commodified_resistance",
+          "description": "The woman briefly forms a heart shape with her hands, a gesture that feels more like a performance for the camera than a spontaneous expression of emotion."
+        },
+        {
+          "time": "1:20-1:29",
+          "temporal_pathology": "eternal_present",
+          "capitalist_realism": "depressive_hedonia",
+          "smoothness": "smooth",
+          "hypernormal": null,
+          "lost_future": null,
+          "suffering_individualized": false,
+          "achievement_subject": false,
+          "libidinal_capture": "commodified_resistance",
+          "description": "The woman makes an \"OK\" sign with her fingers and offers a polite smile, reinforcing a sense of agreeable, unproblematic presence."
+        },
+        {
+          "time": "2:51-3:14",
+          "temporal_pathology": "cancelled_future",
+          "capitalist_realism": "no_alternative",
+          "smoothness": "negative",
+          "hypernormal": null,
+          "lost_future": "A vibrant, communal public sphere or a future where urban spaces are not just conduits for private vehicles but sites of genuine interaction.",
+          "suffering_individualized": false,
+          "achievement_subject": false,
+          "libidinal_capture": null,
+          "description": "The camera transitions from the car interior to a dark, quiet street at night, briefly showing an absence of activity before any incident occurs."
+        },
+        {
+          "time": "3:31-3:45",
+          "temporal_pathology": "eternal_present",
+          "capitalist_realism": "precarity_normalized",
+          "smoothness": "smooth_evil",
+          "hypernormal": "managed_reality",
+          "lost_future": "A society where such incidents are rare due to better infrastructure, social care, or less alienated forms of transportation/living.",
+          "suffering_individualized": true,
+          "achievement_subject": false,
+          "libidinal_capture": null,
+          "description": "Flashing red and blue lights of emergency vehicles become visible in the distance, signaling an incident and drawing attention to a disruption in the otherwise quiet night."
+        },
+        {
+          "time": "4:16-4:49",
+          "temporal_pathology": "eternal_present",
+          "capitalist_realism": "precarity_normalized",
+          "smoothness": "smooth_evil",
+          "hypernormal": "managed_reality",
+          "lost_future": "A society with robust public safety nets and infrastructure that prevents such common tragedies, or one where community response is more organic and less institutionalized.",
+          "suffering_individualized": true,
+          "achievement_subject": false,
+          "libidinal_capture": null,
+          "description": "The camera shows the scene of the accident more clearly, with emergency personnel in high-visibility vests working around damaged vehicles, illuminated by flashing lights."
+        },
+        {
+          "time": "12:21-12:30",
+          "temporal_pathology": "cancelled_future",
+          "capitalist_realism": "depressive_hedonia",
+          "smoothness": "smooth",
+          "hypernormal": null,
+          "lost_future": "A future where consumption is sustainable, intentional, and does not leave behind such casual waste, or where social interaction isn't centered around transient, commodified substances.",
+          "suffering_individualized": true,
+          "achievement_subject": false,
+          "libidinal_capture": "depressive_hedonia",
+          "description": "An empty alcohol bottle and a crushed soda can lie on the ground, illuminated by a flashlight, serving as a silent testament to casual consumption and discard."
+        },
+        {
+          "time": "14:11-14:20",
+          "temporal_pathology": "eternal_present",
+          "capitalist_realism": "no_alternative",
+          "smoothness": "smooth",
+          "hypernormal": "managed_reality",
+          "lost_future": "A future where community-based, non-carceral forms of safety and justice are imagined or enacted, rather than relying solely on state enforcement.",
+          "suffering_individualized": true,
+          "achievement_subject": false,
+          "libidinal_capture": null,
+          "description": "Two police officers stand on the sidewalk, engaged in conversation, their presence signifying the institutional response to the incident and the maintenance of order."
+        }
+      ]
+    }
+  }
+}
