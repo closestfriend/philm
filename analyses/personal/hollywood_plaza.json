@@ -1,0 +1,201 @@
+{
+  "video": "M2U00087_compressed.mp4",
+  "path": "footage/hollywood/M2U00087_compressed.mp4",
+  "modes": [
+    "baudrillard",
+    "virilio",
+    "hauntology"
+  ],
+  "analyses": {
+    "baudrillard": {
+      "video_description": "A low-fidelity video featuring a woman in a hoodie performing for the camera in an empty, desolate urban space at night, interspersed with shots of commercial signs and abstract lights.",
+      "timecodes": [
+        {
+          "time": "0:00-0:04",
+          "order": "third",
+          "hyperreality_mode": "masks_absence",
+          "sign_value": "Authenticity, rawness, surveillance aesthetic, 'found footage' vibe. Consuming this signifies engaging with a simulated 'real' experience.",
+          "implosion": "Real/fake, mediated/unmediated. The visual noise and low quality blur the line between a genuine recording and a deliberate artistic choice.",
+          "precession": true,
+          "description": "The initial shaky, low-resolution footage, despite appearing 'raw,' is likely a deliberate aesthetic choice, simulating an unmediated reality rather than simply capturing it. This masks the absence of any truly unmediated reality in a hyperreal media landscape."
+        },
+        {
+          "time": "0:04-0:10",
+          "order": "third",
+          "hyperreality_mode": "generates",
+          "sign_value": "Performance, self-presentation, enigmatic presence, object of gaze. Consuming this signifies participation in a staged interaction.",
+          "implosion": "Subject/object, performer/audience. The woman's direct gaze and posing collapse the distinction between passive observation and active engagement.",
+          "precession": true,
+          "description": "The woman clearly acknowledges and performs for the camera, indicating a staged interaction where the act of being filmed (the model) dictates her actions and generates a specific reality for the viewer."
+        },
+        {
+          "time": "0:29-0:34",
+          "order": "third",
+          "hyperreality_mode": "masks_absence",
+          "sign_value": "Mystery, revelation, playful engagement, manufactured intimacy. Consuming this signifies a momentary connection with a constructed persona.",
+          "implosion": "Public/private, hidden/revealed. The performance collapses these boundaries, as the private act of hiding is immediately made public and performative.",
+          "precession": true,
+          "description": "The woman's performative act of covering her face and then revealing a smile plays with identity and anonymity. This gesture, while seemingly a 'reveal,' ultimately masks the absence of any profound identity, offering only the spectacle of the act itself."
+        },
+        {
+          "time": "0:49-0:51",
+          "order": "third",
+          "hyperreality_mode": "pure_simulacrum",
+          "sign_value": "Commercial promise, cultural signifier (Jamaican), consumer choice, urban landscape. Consuming this signifies navigating a landscape of commercial codes.",
+          "implosion": "Use value/sign value. The actual function of the restaurant (use value) is completely subsumed by its image and brand (sign value).",
+          "precession": true,
+          "description": "The commercial sign for 'Tropical Fiyah Jamaican Restaurant' is a simulacrum. It represents an idealized concept of a restaurant and its associated experience, functioning as a code that precedes and shapes the perception of any underlying reality."
+        },
+        {
+          "time": "1:09-1:12",
+          "order": "fourth",
+          "hyperreality_mode": "pure_simulacrum",
+          "sign_value": "Aesthetic experience, visual noise, digital artifact, pure spectacle. Consuming this signifies engagement with pure, unmoored visual data.",
+          "implosion": "Meaning/non-meaning, representation/abstraction. The lights collapse any distinction between a sign that points to something and a sign that only points to itself or other signs.",
+          "precession": true,
+          "description": "The video concludes with abstract, colored lights. These are pure visual signs, disconnected from any discernible referent or narrative. They exist as self-referential spectacle, a fractal of visual information that generates its own reality without a prior territory."
+        }
+      ]
+    },
+    "virilio": {
+      "video_description": "A video featuring a person walking and posing in an urban environment at night, interspersed with camera movements that create visual distortions and reveal commercial signs. The footage exhibits characteristics of early digital video recording.",
+      "timecodes": [
+        {
+          "time": "0:00-0:04",
+          "speed_regime": "mechanical",
+          "dromology": "The camera's rapid movement, likely from a vehicle or fast pan, accelerates the visual field, blurring the environment into streaks. This signifies a dromology of vehicular speed and the accelerated gaze of the recording apparatus.",
+          "accident": "aesthetic",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "null",
+          "description": "Initial blurry, fast-moving shot, likely from a moving vehicle, showing horizontal scan lines and motion blur as the camera rapidly traverses space."
+        },
+        {
+          "time": "0:04-0:09",
+          "speed_regime": "static",
+          "dromology": "The camera halts, and the subject stands still. This moment of stasis emphasizes the preceding speed, creating a 'polar inertia' where the subject is framed and observed, contrasting with the earlier blur of motion.",
+          "accident": "none",
+          "territory_collapse": false,
+          "real_time": true,
+          "war_machine": "null",
+          "description": "The camera stops moving, revealing a person standing still in an outdoor, semi-enclosed area at night. The environment becomes stable."
+        },
+        {
+          "time": "0:09-0:14",
+          "speed_regime": "metabolic",
+          "dromology": "The person walks slowly and deliberately, their metabolic speed foregrounded against the now static camera. The dromology here is the slow, observable movement of the human body, a counterpoint to technological acceleration.",
+          "accident": "none",
+          "territory_collapse": false,
+          "real_time": true,
+          "war_machine": "null",
+          "description": "The person begins to walk slowly, turning their body to face different directions while remaining in the same general area."
+        },
+        {
+          "time": "0:25-0:30",
+          "speed_regime": "static",
+          "dromology": "The subject briefly covers their face, a momentary refusal of the camera's accelerated gaze. This act disrupts the flow of visual information, highlighting the power dynamic inherent in visual capture.",
+          "accident": "aesthetic",
+          "territory_collapse": false,
+          "real_time": true,
+          "war_machine": "The act of covering the face can be interpreted as a minor tactical resistance against the surveillance-like gaze of the camera, a refusal to be fully captured by the 'war machine' of perception.",
+          "description": "The camera zooms in slightly as the person covers their face with their hands, then lowers them."
+        },
+        {
+          "time": "0:31-0:34",
+          "speed_regime": "metabolic",
+          "dromology": "The subject lowers their hands and smiles, directly engaging with the camera. This engagement acknowledges the accelerated perception of the recording device, transforming the observed into a conscious participant in the dromology of the image.",
+          "accident": "none",
+          "territory_collapse": false,
+          "real_time": true,
+          "war_machine": "null",
+          "description": "The person reveals their face and smiles at the camera, then begins to walk again."
+        },
+        {
+          "time": "0:48-0:53",
+          "speed_regime": "mechanical",
+          "dromology": "The camera resumes rapid movement, panning across the environment and passing commercial signs like 'Tropical Fiyah' and 'Relax Spa'. This reintroduces the dromology of accelerated perception, where the urban landscape becomes a blur of fleeting information and consumerist signals.",
+          "accident": "aesthetic",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "The rapid scanning of the environment, picking out commercial targets, resembles a form of visual reconnaissance, where the camera acts as a 'war machine' for mapping and consuming space.",
+          "description": "The camera moves quickly again, panning past illuminated commercial signs, creating motion blur and horizontal scan lines."
+        },
+        {
+          "time": "1:09-1:12",
+          "speed_regime": "electronic",
+          "dromology": "The final shot presents abstract, multicolored lights, almost disembodied from their source. The persistent horizontal lines and digital artifacts emphasize the electronic speed of the image's creation and transmission, where pure light and information dominate the visual field.",
+          "accident": "aesthetic",
+          "territory_collapse": true,
+          "real_time": true,
+          "war_machine": "The spectacle of pure light and abstract patterns, delivered through electronic speed, can be seen as a 'logistics of perception,' an overwhelming of the senses that Virilio links to the 'pure war' of information and image.",
+          "description": "A static shot of abstract, multicolored lights, with prominent horizontal scan lines and digital noise."
+        }
+      ]
+    },
+    "hauntology": {
+      "video_description": "A low-fidelity video featuring a person walking and interacting with the camera in a desolate, dimly lit commercial area at night, punctuated by glimpses of commercial signs and abstract lights.",
+      "timecodes": [
+        {
+          "time": "0:04",
+          "temporal_pathology": "cancelled_future",
+          "capitalist_realism": "no_alternative",
+          "smoothness": "negative",
+          "hypernormal": "managed_reality",
+          "lost_future": "A thriving, vibrant commercial district or community space.",
+          "suffering_individualized": false,
+          "achievement_subject": false,
+          "libidinal_capture": null,
+          "description": "The video opens with a person walking through an empty, poorly lit outdoor corridor of a building. Windows are covered, and the space appears desolate, suggesting a failure of commercial activity. The low-quality video adds to a sense of unreality and decay."
+        },
+        {
+          "time": "0:28",
+          "temporal_pathology": "eternal_present",
+          "capitalist_realism": "depressive_hedonia",
+          "smoothness": "toxic_positivity",
+          "hypernormal": "perception_management",
+          "lost_future": "Authentic, unmediated human connection or genuine joy.",
+          "suffering_individualized": true,
+          "achievement_subject": true,
+          "libidinal_capture": "The desire for connection and validation is channeled into a performative, camera-facing interaction.",
+          "description": "The person covers their face with their hands, then slowly uncovers it to reveal a smile. This act of performative positivity in a bleak setting highlights the pressure to project happiness, even when context suggests otherwise."
+        },
+        {
+          "time": "0:49",
+          "temporal_pathology": "hauntological",
+          "capitalist_realism": "depressive_hedonia",
+          "smoothness": "smooth_evil",
+          "hypernormal": "managed_reality",
+          "lost_future": "The promise of exotic leisure, relaxation, and thriving local businesses.",
+          "suffering_individualized": true,
+          "achievement_subject": false,
+          "libidinal_capture": "Desire for escape, pleasure, and self-care is commodified and offered as a solution to systemic stress.",
+          "description": "The camera pans across neon signs for 'Tropical Fiyah Jamaican Restaurant' and 'Relax Spa'. These bright, alluring signs stand in stark contrast to the surrounding desolation, representing the commodification of pleasure and escape within a decaying urban landscape."
+        },
+        {
+          "time": "0:53",
+          "temporal_pathology": "cancelled_future",
+          "capitalist_realism": "no_alternative",
+          "smoothness": "negative",
+          "hypernormal": "managed_reality",
+          "lost_future": "A future of open possibilities, agency, and freedom from systemic limitations.",
+          "suffering_individualized": false,
+          "achievement_subject": false,
+          "libidinal_capture": "The desire for freedom or aspiration is met with a blunt, ambiguous negation.",
+          "description": "The person walks past a stark, partially obscured 'NO' sign. This sign, in its directness and ambiguity, reinforces a sense of systemic limitation and the foreclosure of alternatives, embedded within the everyday environment."
+        },
+        {
+          "time": "1:09",
+          "temporal_pathology": "eternal_present",
+          "capitalist_realism": "interpassivity",
+          "smoothness": "smooth_evil",
+          "hypernormal": "perception_management",
+          "lost_future": "Authentic communal celebration and meaningful aesthetic experiences.",
+          "suffering_individualized": false,
+          "achievement_subject": false,
+          "libidinal_capture": "The desire for beauty, wonder, or escape is captured by generic, decontextualized light displays.",
+          "description": "The video concludes with abstract, blurry shots of colorful lights. These decontextualized lights offer a superficial aesthetic distraction, a smooth, unchallenging visual experience that papers over the preceding bleakness, embodying a form of joyous compulsion without true joy."
+        }
+      ]
+    }
+  }
+}

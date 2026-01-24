@@ -19,6 +19,14 @@ from .models import (
     GazeMoment,
     SublimeMoment,
     RhythmMoment,
+    BaudrillardMoment,
+    EpistemicMoment,
+    FoucaultMoment,
+    VirilioMoment,
+    ZizekMoment,
+    BarthesMoment,
+    BenjaminMoment,
+    HauntologyMoment,
 )
 
 
@@ -104,7 +112,110 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
                 console.print(f"         refrain: {item.refrain}")
             console.print(f"         {item.description}")
             console.print()
-            
+
+        elif isinstance(item, BaudrillardMoment):
+            # Baudrillard analysis
+            precession_marker = " [red]⟲ PRECESSION[/red]" if item.precession else ""
+            console.print(f"{time_str} [{item.order.value}] | {item.hyperreality_mode.value}{precession_marker}")
+            console.print(f"         sign: {item.sign_value}")
+            if item.implosion:
+                console.print(f"         [dim]implosion: {item.implosion}[/dim]")
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, EpistemicMoment):
+            # Epistemic analysis
+            verifiable = "[green]✓[/green]" if item.verifiable else "[red]✗[/red]"
+            console.print(f"{time_str} [{item.mode.value}] | certainty: {item.certainty.value} {verifiable}")
+            console.print(f"         claim: {item.claim}")
+            if item.evidence_type:
+                console.print(f"         evidence: {item.evidence_type}")
+            if item.appeals_to:
+                console.print(f"         appeals to: {item.appeals_to}")
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, FoucaultMoment):
+            # Foucault analysis
+            console.print(f"{time_str} [{item.power_mode.value}] | surveillance: {item.surveillance.value}")
+            console.print(f"         subject produced: {item.subject_produced}")
+            if item.norm_enforced:
+                console.print(f"         norm: {item.norm_enforced}")
+            if item.resistance:
+                console.print(f"         [green]resistance: {item.resistance}[/green]")
+            console.print(f"         apparatus: {item.apparatus}")
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, VirilioMoment):
+            # Virilio analysis
+            collapse = " [red]↯ COLLAPSE[/red]" if item.territory_collapse else ""
+            real_time = " [cyan]⚡RT[/cyan]" if item.real_time else ""
+            console.print(f"{time_str} [{item.speed_regime.value}] | accident: {item.accident.value}{collapse}{real_time}")
+            console.print(f"         dromology: {item.dromology}")
+            if item.war_machine:
+                console.print(f"         [red]war machine: {item.war_machine}[/red]")
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, ZizekMoment):
+            # Zizek analysis
+            console.print(f"{time_str} [{item.parallax.value}] | register: {item.register.value}")
+            console.print(f"         ideology: {item.ideology_at_work}")
+            console.print(f"         gap between: {item.gap_between}")
+            if item.obscene_supplement:
+                console.print(f"         [dim]obscene supplement: {item.obscene_supplement}[/dim]")
+            if item.real_intrusion:
+                console.print(f"         [red]Real intrusion: {item.real_intrusion}[/red]")
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, BarthesMoment):
+            # Barthes analysis
+            death = " [dim]† DEATH PRESENT[/dim]" if item.death_present else ""
+            console.print(f"{time_str} [{item.register.value}]{death}")
+            if item.punctum_detail:
+                console.print(f"         [bold]punctum: {item.punctum_detail}[/bold]")
+            console.print(f"         denotation: {item.denotation}")
+            console.print(f"         connotation: {item.connotation}")
+            if item.myth_operation:
+                console.print(f"         myth: {item.myth_operation.value}")
+            if item.grain:
+                console.print(f"         grain: {item.grain}")
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, BenjaminMoment):
+            # Benjamin analysis
+            console.print(f"{time_str} [{item.aura_status.value}] | {item.cult_vs_exhibition}")
+            if item.aura_source:
+                console.print(f"         aura source: {item.aura_source}")
+            if item.dialectical_image:
+                console.print(f"         dialectical image: {item.dialectical_image.value}")
+            if item.optical_unconscious:
+                console.print(f"         optical unconscious: {item.optical_unconscious}")
+            console.print(f"         reproducibility: {item.reproducibility}")
+            if item.now_time:
+                console.print(f"         [bold]Jetztzeit: {item.now_time}[/bold]")
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, HauntologyMoment):
+            # Hauntology analysis (Fisher/Han/Curtis)
+            individual = " [red]↓ INDIVIDUALIZED[/red]" if item.suffering_individualized else ""
+            achievement = " [yellow]⚙ ACHIEVEMENT-SUBJECT[/yellow]" if item.achievement_subject else ""
+            console.print(f"{time_str} [{item.temporal_pathology.value}] | {item.smoothness.value}{individual}{achievement}")
+            if item.capitalist_realism:
+                console.print(f"         [dim]capitalist realism: {item.capitalist_realism.value}[/dim]")
+            if item.hypernormal:
+                console.print(f"         hypernormal: {item.hypernormal.value}")
+            if item.lost_future:
+                console.print(f"         lost future: {item.lost_future}")
+            if item.libidinal_capture:
+                console.print(f"         libidinal capture: {item.libidinal_capture}")
+            console.print(f"         {item.description}")
+            console.print()
+
         elif hasattr(item, 'objects'):
             # Table format with objects
             console.print(f"{time_str} {item.text}")
