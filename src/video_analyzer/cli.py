@@ -19,6 +19,7 @@ from .models import SimpleResult, NumericResult
 from .output import format_for_display, format_as_json, save_json, format_technical_summary
 from .batch import run_batch, find_videos
 from .archive_cli import register_archive_commands
+from .local import LocalConfig, analyze_video_local, check_ollama_available
 
 
 # Load environment variables
@@ -86,6 +87,11 @@ def main(
     folder: Optional[str] = typer.Option(None, "--folder", "-f", help="Process all videos in folder"),
     recursive: bool = typer.Option(False, "--recursive", "-r", help="Recursive folder processing"),
     output_dir: Optional[Path] = typer.Option(None, "--output-dir", help="Output directory for batch results"),
+
+    # Local mode (Ollama)
+    local: bool = typer.Option(False, "--local", help="Use local Ollama model instead of Gemini"),
+    model: str = typer.Option("qwen3-vl:4b", "--model", help="Ollama model for local analysis"),
+    frames: int = typer.Option(4, "--frames", help="Number of frames to extract (local mode)"),
 
     # Version
     version: bool = typer.Option(
@@ -180,7 +186,98 @@ def main(
         return
 
     # =========================================================================
-    # SINGLE VIDEO MODE
+    # LOCAL MODE (Ollama)
+    # =========================================================================
+    if local:
+        # Validate video path
+        if folder:
+            # Local batch mode
+            folder_path = Path(folder)
+            if not folder_path.exists():
+                console.print(f"[red]Error:[/red] Folder not found: {folder}")
+                raise typer.Exit(1)
+
+            videos = find_videos(folder_path, recursive)
+            if not videos:
+                console.print(f"[red]Error:[/red] No videos found in {folder}")
+                raise typer.Exit(1)
+        elif video:
+            if not video.exists():
+                console.print(f"[red]Error:[/red] Video not found: {video}")
+                raise typer.Exit(1)
+            videos = [video]
+        else:
+            console.print("[red]Error:[/red] No video file or --folder specified")
+            raise typer.Exit(1)
+
+        # Check Ollama availability
+        config = LocalConfig(model=model, num_frames=frames)
+        available, msg = check_ollama_available(config)
+        if not available:
+            console.print(f"[red]Error:[/red] {msg}")
+            raise typer.Exit(1)
+        console.print(f"[green]✓[/green] {msg}")
+
+        # Process videos
+        from rich.progress import Progress, SpinnerColumn, TextColumn
+        import json
+
+        results = []
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            for i, vid in enumerate(videos):
+                task = progress.add_task(f"[{i+1}/{len(videos)}] {vid.name}", total=None)
+
+                def progress_cb(stage, msg):
+                    progress.update(task, description=f"[{i+1}/{len(videos)}] {vid.name}: {msg}")
+
+                try:
+                    result = analyze_video_local(vid, config, progress_callback=progress_cb)
+                    result["video"] = vid.name
+                    result["path"] = str(vid)
+                    results.append(result)
+                    progress.update(task, description=f"[{i+1}/{len(videos)}] {vid.name}: ✓ Done")
+                except Exception as e:
+                    console.print(f"[red]Error processing {vid.name}:[/red] {e}")
+                    results.append({"video": vid.name, "path": str(vid), "error": str(e)})
+
+                progress.remove_task(task)
+
+        # Output
+        if len(videos) == 1 and not folder:
+            # Single video output
+            result = results[0]
+            if output:
+                with open(output, 'w') as f:
+                    json.dump(result, f, indent=2)
+                console.print(f"[green]Saved:[/green] {output}")
+            elif json_output:
+                print(json.dumps(result, indent=2))
+            else:
+                console.print(f"\n[bold]{video.name}[/bold]")
+                console.print(f"[cyan]Description:[/cyan] {result['video_description']}")
+                console.print(f"\n[dim]Frames analyzed: {result['num_frames']} | Model: {result['model']}[/dim]")
+        else:
+            # Batch output
+            out_dir = output_dir or Path("./local_results")
+            out_dir.mkdir(parents=True, exist_ok=True)
+
+            for result in results:
+                if "error" not in result:
+                    out_file = out_dir / f"{Path(result['video']).stem}_local.json"
+                    with open(out_file, 'w') as f:
+                        json.dump(result, f, indent=2)
+
+            console.print(f"\n[green]✓[/green] Processed {len(results)} videos")
+            console.print(f"[dim]Results saved to: {out_dir}[/dim]")
+
+        return
+
+    # =========================================================================
+    # SINGLE VIDEO MODE (Gemini)
     # =========================================================================
 
     # Validate video path
