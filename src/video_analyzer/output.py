@@ -27,6 +27,8 @@ from .models import (
     BarthesMoment,
     BenjaminMoment,
     HauntologyMoment,
+    SizzleMoment,
+    SizzleResult,
 )
 
 
@@ -41,10 +43,10 @@ def format_as_json(result: BaseAnalysisResult, indent: int = 2) -> str:
 def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
     """
     Format and print result in human-readable form using rich.
-    
+
     Adapts formatting based on the type of analysis.
     """
-    
+
     # Header
     console.print()
     console.print(Panel(
@@ -53,6 +55,19 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
         expand=False
     ))
     console.print()
+
+    # Sizzle summary (if SizzleResult)
+    if isinstance(result, SizzleResult):
+        best_for = ", ".join([p.value for p in result.best_for])
+        console.print(f"[bold]SUMMARY[/bold]")
+        console.print(f"  Overall energy: [yellow]{result.overall_energy}/10[/yellow]")
+        console.print(f"  Dominant tone: [cyan]{result.dominant_tone.value}[/cyan]")
+        console.print(f"  Best for: [green]{best_for}[/green]")
+        if result.warnings:
+            console.print(f"  [red]Warnings: {', '.join(result.warnings)}[/red]")
+        console.print()
+        console.print("[bold]MOMENTS[/bold]")
+        console.print()
     
     # Timecodes - format based on type
     for item in result.timecodes:
@@ -214,6 +229,18 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
             if item.libidinal_capture:
                 console.print(f"         libidinal capture: {item.libidinal_capture}")
             console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, SizzleMoment):
+            # Sizzle reel production analysis
+            energy_color = "red" if item.energy >= 8 else "yellow" if item.energy >= 5 else "dim"
+            positions = ", ".join([p.value for p in item.sizzle_position])
+            shot_type_upper = item.shot_type.value.upper()
+            console.print(f"{time_str} [magenta]{shot_type_upper}[/magenta] | [{energy_color}]energy: {item.energy}/10[/{energy_color}] | {item.tone.value}")
+            console.print(f"         subjects: {', '.join(item.subjects)}")
+            console.print(f"         motion: {item.motion} | usable: {item.usable_seconds}")
+            console.print(f"         [cyan]fits: {positions}[/cyan]")
+            console.print(f"         [dim]{item.notes}[/dim]")
             console.print()
 
         elif hasattr(item, 'objects'):

@@ -25,6 +25,7 @@ from .models import (
     BarthesResult,
     BenjaminResult,
     HauntologyResult,
+    SizzleResult,
 )
 
 
@@ -596,6 +597,71 @@ This mode is devastating for:
 
 
 # ============================================================================
+# PRODUCTION MODES
+# ============================================================================
+
+SIZZLE = AnalysisMode(
+    name="sizzle",
+    description="Sizzle reel production analysis",
+    result_model=SizzleResult,
+    prompt="""You are a senior video editor analyzing footage for a sizzle reel / promo video.
+Your job is to identify USABLE MOMENTS and characterize them for an editor.
+
+For each distinct moment or shot, analyze:
+
+SHOT TYPE - What kind of production value does this offer?
+- "hero": Clean, polished, can hold attention for 2+ seconds alone
+- "action": Dynamic movement, sports, activity, energy
+- "product": Object/interface showcase, demo-worthy
+- "portrait": Person-focused, testimonial-ready, emotional
+- "establishing": Wide shot, scene-setter, context
+- "montage": Quick-cut texture, 0.5-1.5 seconds of energy
+- "transition": Movement, blur, useful for scene changes
+- "data": Screens, charts, UI, stats, numbers in motion
+
+ENERGY (1-10):
+- 1-2: Calm, still, contemplative (rarely useful for sizzle)
+- 3-4: Low energy, conversational pace
+- 5-6: Medium energy, standard promo pace
+- 7-8: High energy, dynamic, engaging
+- 9-10: Explosive, maximum impact, hook-worthy
+
+TONE - What emotional register?
+- "confident": Assured, punchy, professional
+- "exciting": High energy, thrilling, dynamic
+- "dramatic": Stakes, tension, intensity
+- "aspirational": Premium, desirable, lifestyle
+- "triumphant": Victory, celebration, achievement
+- "technical": Professional, data-driven, smart
+- "warm": Friendly, approachable, human
+- "urgent": Fast-paced, FOMO-inducing
+
+SIZZLE POSITION - Where in a sizzle structure could this work?
+- "hook": Opening punch, first 5 seconds - needs maximum impact
+- "establish": "What is this?" section - explains the product/concept
+- "demo": Feature showcase, how it works
+- "proof": Social proof, results, testimonials, credibility
+- "montage": Fast-cut energy section, texture and rhythm
+- "climax": Emotional peak, the payoff moment
+- "cta": Call to action, closer, clean ending
+
+MOTION: Describe camera and subject movement (static, pan, track, handheld, dolly, drone, etc.)
+
+USABLE SECONDS: How long is this moment actually usable? Be specific (e.g., "0.5s", "2-3s", "full clip")
+
+NOTES: Editor notes - what makes this work or not work? Any warnings (shaky, bad lighting, visible logos, needs color grade, audio issues)?
+
+Also provide:
+- OVERALL_ENERGY: Average energy across all moments (1-10)
+- DOMINANT_TONE: Most prevalent emotional register
+- BEST_FOR: What sizzle positions this footage is best suited for
+- WARNINGS: Any global issues with the footage (optional)
+
+Think like an editor on deadline. Be specific. Be honest about what's usable and what's not."""
+)
+
+
+# ============================================================================
 # CHART MODES
 # ============================================================================
 
@@ -649,6 +715,7 @@ ALL_MODES = {
     "barthes": BARTHES,
     "benjamin": BENJAMIN,
     "hauntology": HAUNTOLOGY,
+    "sizzle": SIZZLE,
 }
 
 
