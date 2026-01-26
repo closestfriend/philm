@@ -66,6 +66,7 @@ def main(
     barthes: bool = typer.Option(False, "--barthes", help="Punctum/studium/mythology analysis"),
     benjamin: bool = typer.Option(False, "--benjamin", help="Aura/dialectical image analysis"),
     hauntology: bool = typer.Option(False, "--hauntology", help="Fisher/Han/Curtis capitalist realism"),
+    sizzle: bool = typer.Option(False, "--sizzle", help="Sizzle reel production analysis"),
 
     # Chart mode
     chart: Optional[str] = typer.Option(
@@ -137,6 +138,7 @@ def main(
         "barthes": barthes,
         "benjamin": benjamin,
         "hauntology": hauntology,
+        "sizzle": sizzle,
     }
 
     active_modes = [name for name, active in mode_flags.items() if active]

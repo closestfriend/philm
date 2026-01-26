@@ -6,6 +6,7 @@ Uses the new google.genai SDK.
 """
 
 import os
+import sys
 import time
 import tempfile
 import subprocess
@@ -68,7 +69,7 @@ def strip_audio(video_path: Path) -> Path:
     os.close(temp_fd)
     temp_path = Path(temp_path)
 
-    print(f"  Stripping audio...", flush=True)
+    print(f"  Stripping audio...", file=sys.stderr, flush=True)
 
     try:
         result = subprocess.run([
@@ -120,7 +121,7 @@ def upload_video(video_path: Path, display_name: Optional[str] = None, no_audio:
             mime_type = VIDEO_MIME_TYPES.get(ext, "video/mp4")
 
         # Upload
-        print(f"Uploading video: {video_path.name}...", flush=True)
+        print(f"Uploading video: {video_path.name}...", file=sys.stderr, flush=True)
         uploaded_file = client.files.upload(
             file=str(upload_path),
             config=types.UploadFileConfig(
@@ -130,16 +131,16 @@ def upload_video(video_path: Path, display_name: Optional[str] = None, no_audio:
         )
 
         # Wait for processing
-        print("Processing video...", flush=True)
+        print("Processing video...", file=sys.stderr, flush=True)
         while uploaded_file.state.name == "PROCESSING":
             time.sleep(2)
             uploaded_file = client.files.get(name=uploaded_file.name)
-            print(f"  Status: {uploaded_file.state.name}", flush=True)
+            print(f"  Status: {uploaded_file.state.name}", file=sys.stderr, flush=True)
 
         if uploaded_file.state.name == "FAILED":
             raise RuntimeError(f"Video processing failed: {uploaded_file.state.name}")
 
-        print("Video ready!", flush=True)
+        print("Video ready!", file=sys.stderr, flush=True)
         return uploaded_file
 
     finally:
@@ -170,7 +171,7 @@ def analyze_video(
     full_prompt = prompt_prefix + mode.prompt
 
     # Generate response with structured output
-    print(f"Analyzing with mode: {mode.name}...", flush=True)
+    print(f"Analyzing with mode: {mode.name}...", file=sys.stderr, flush=True)
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=[full_prompt, video_file],
@@ -214,7 +215,7 @@ Call the analysis function with the following instructions:
 Place each relevant moment into the timecodes array with the timestamp and description.
 """
 
-    print("Analyzing with custom prompt...", flush=True)
+    print("Analyzing with custom prompt...", file=sys.stderr, flush=True)
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=[full_prompt, video_file],

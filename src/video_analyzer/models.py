@@ -563,6 +563,71 @@ class HauntologyResult(BaseAnalysisResult):
 # TECHNICAL ANALYSIS
 # ============================================================================
 
+# ============================================================================
+# SIZZLE - PRODUCTION-FOCUSED ANALYSIS
+# ============================================================================
+
+class ShotType(str, Enum):
+    """Production shot categories for sizzle reels."""
+    HERO = "hero"  # Clean, polished, holds attention - can carry a beat
+    ACTION = "action"  # Dynamic movement, sports, activity
+    PRODUCT = "product"  # Object/interface showcase, demo footage
+    PORTRAIT = "portrait"  # Person-focused, testimonial-ready
+    ESTABLISHING = "establishing"  # Scene-setter, wide, context
+    MONTAGE = "montage"  # Quick-cut worthy, texture
+    TRANSITION = "transition"  # Movement between scenes, motion blur
+    DATA = "data"  # Screens, charts, UI, stats
+
+
+class ToneRegister(str, Enum):
+    """Emotional tone for sizzle reel moments."""
+    CONFIDENT = "confident"  # Assured, punchy, "we've got this"
+    EXCITING = "exciting"  # High energy, thrilling, dynamic
+    DRAMATIC = "dramatic"  # Stakes, tension, intensity
+    ASPIRATIONAL = "aspirational"  # Premium, desirable, lifestyle
+    TRIUMPHANT = "triumphant"  # Victory, celebration, achievement
+    TECHNICAL = "technical"  # Professional, data-driven, smart
+    WARM = "warm"  # Friendly, approachable, human
+    URGENT = "urgent"  # Fast-paced, don't miss out
+
+
+class SizzlePosition(str, Enum):
+    """Where in a sizzle structure this could work."""
+    HOOK = "hook"  # Opening punch, first 5 seconds
+    ESTABLISH = "establish"  # "What is this?" section
+    DEMO = "demo"  # Feature showcase, how it works
+    PROOF = "proof"  # Social proof, results, testimonials
+    MONTAGE = "montage"  # Fast-cut energy section
+    CLIMAX = "climax"  # Emotional peak, payoff
+    CTA = "cta"  # Call to action, closer
+
+
+class SizzleMoment(BaseModel):
+    """Production-focused moment analysis for sizzle reel editing."""
+    time: str
+    shot_type: ShotType = Field(..., description="Production category")
+    energy: int = Field(..., ge=1, le=10, description="Visual punch (1=subtle, 10=explosive)")
+    tone: ToneRegister = Field(..., description="Emotional register")
+    subjects: list[str] = Field(..., description="Key subjects/objects in frame")
+    motion: str = Field(..., description="Camera/subject movement (static, pan, track, handheld, etc.)")
+    sizzle_position: list[SizzlePosition] = Field(..., description="Where in sizzle structure this fits")
+    usable_seconds: str = Field(..., description="How long this moment is usable (e.g., '2-3s', '0.5s', 'full clip')")
+    notes: str = Field(..., description="Editor notes - why this works or specific warnings")
+
+
+class SizzleResult(BaseAnalysisResult):
+    """Production-focused sizzle reel analysis."""
+    timecodes: list[SizzleMoment]
+    overall_energy: int = Field(..., ge=1, le=10, description="Average energy across all moments")
+    dominant_tone: ToneRegister = Field(..., description="Most prevalent tone")
+    best_for: list[SizzlePosition] = Field(..., description="Recommended sizzle positions for this footage")
+    warnings: Optional[list[str]] = Field(None, description="Issues: shaky, bad audio, logos, etc.")
+
+
+# ============================================================================
+# TECHNICAL ANALYSIS
+# ============================================================================
+
 class TechnicalMetrics(BaseModel):
     """FFmpeg-derived technical video metrics."""
     duration: float = Field(..., description="Video duration in seconds")
