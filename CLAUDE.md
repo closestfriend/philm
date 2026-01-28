@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Philm is a philosophical video analysis CLI that reads video through critical theory frameworks. It uploads video to Gemini 2.5 Flash and returns structured analysis using Pydantic schemas.
 
+The tool serves two audiences:
+1. **Researchers/artists**: Philosophical analysis modes for critical reading of video
+2. **Video editors**: Production modes (sizzle) for cataloging footage and matching to storyboards
+
 ## Commands
 
 ```bash
@@ -30,12 +34,48 @@ vanalyze main video.mp4 --virilio --baudrillard --hauntology
 vanalyze main --folder ./videos --gaze --recursive
 vanalyze main --folder ./videos --local  # local batch
 
+# Production workflow: sizzle analysis + storyboard matching
+vanalyze main video.mp4 --sizzle --json > footage.json
+python scripts/match_storyboard.py storyboard.json -r ./sizzle_results/ -o shotlist.json
+
 # Format code
 uv run ruff format .
 
 # Run tests
 uv run pytest
 ```
+
+## Analysis Modes
+
+### Basic Modes
+- `--captions` - A/V captions with spoken text
+- `--paragraph` - 3-5 sentence summary
+- `--key-moments` - Extract key moments as bullet points
+- `--table` - 5 key shots with descriptions and objects
+
+### Philosophical Frameworks
+- `--levinas` - Levinasian ethical encounter (face of the Other)
+- `--affect` - Massumi affect theory (pre-cognitive intensity)
+- `--rhythm` - Deleuze/Guattari deterritorialization
+- `--gaze` - Mulvey gaze analysis (power of looking)
+- `--sublime` - Kant/Burke sublime classification
+- `--camera` - Camera kinetics (Tarkovsky → Safdie/DG spectrum)
+- `--baudrillard` - Simulacra, hyperreality, and implosion
+- `--epistemic` - Truth claims, evidence, and certainty
+- `--foucault` - Power, surveillance, and discipline
+- `--virilio` - Speed, technology, and the accident
+- `--zizek` - Parallax gap, ideology, and the Real (Lacanian)
+- `--barthes` - Punctum/studium, third meaning, mythology
+- `--benjamin` - Aura, dialectical image, optical unconscious
+- `--hauntology` - Fisher/Han/Curtis: capitalist realism, burnout society, hypernormalisation
+
+### Production Modes
+- `--sizzle` - Sizzle reel production analysis:
+  - Shot type classification (hero, action, montage, product, portrait, etc.)
+  - Energy scoring (1-10 punch scale)
+  - Tone detection (confident, exciting, dramatic, aspirational, etc.)
+  - Sizzle position matching (hook, demo, climax, cta)
+  - Editor notes and warnings
 
 ## Architecture
 
@@ -50,10 +90,44 @@ src/video_analyzer/
 ├── batch.py       # Multi-video processing
 ├── archive.py     # SQLite persistence layer
 ├── archive_cli.py # Archive subcommands
-└── technical.py   # FFmpeg scene detection
+├── technical.py   # FFmpeg scene detection
+└── annotate.py    # Video annotation pipeline
+
+scripts/
+├── match_storyboard.py   # Match sizzle results to storyboard scenes
+├── compress_for_gemini.py # Compress video for API upload
+└── harvest_catalog.py     # Harvest metadata from video catalog
+
+documentary/
+└── scripts/              # Documentary production scripts
 ```
 
 The separation between `models.py` (structural constraints) and `modes.py` (interpretive prompts) is fundamental. The same schema can be filled by different theoretical frameworks.
+
+## Production Workflow (Sizzle + Storyboard)
+
+The commercial workflow for video editors:
+
+1. **Analyze footage** with sizzle mode:
+   ```bash
+   vanalyze main footage/*.mp4 --sizzle --json -o ./sizzle_results/
+   ```
+
+2. **Define storyboard** as JSON with scene requirements:
+   ```json
+   {
+     "title": "Product Launch Sizzle",
+     "scenes": [
+       {"id": "hook", "name": "Opening Hook", "duration": "0:00-0:03",
+        "min_energy": 8, "positions": ["hook"], "tones": ["exciting", "confident"]}
+     ]
+   }
+   ```
+
+3. **Match footage to storyboard**:
+   ```bash
+   python scripts/match_storyboard.py storyboard.json -r ./sizzle_results/ --top 3 --format md
+   ```
 
 ## Adding a New Analysis Mode
 
@@ -90,6 +164,7 @@ NEW_MODE = AnalysisMode(
 - **Archive layer**: SQLite database at `~/.vanalyze/archive.db` stores analyses with dedicated tables per theoretical framework
 - **Theoretical orthogonality**: Each mode is independent; same footage can be read through any framework
 - **Dual backend**: Gemini (cloud, fast, full video) vs Ollama (local, free, frame-based)
+- **JSON output for pipelines**: `--json` flag outputs clean JSON to stdout (progress goes to stderr) for piping to other tools
 
 ## Environment
 
