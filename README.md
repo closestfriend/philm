@@ -32,6 +32,7 @@ Philm uploads video to Gemini 2.5 Flash and returns structured philosophical ana
 | `--barthes` | Barthes | What wounds (punctum)? What myths naturalize? |
 | `--benjamin` | Benjamin | What is the aura status? Where is the dialectical image? |
 | `--hauntology` | Fisher/Han/Curtis | What futures were cancelled? What smoothness conceals? |
+| `--sizzle` | Production | Analysis for sizzle reel editing (shots, pacing, emotion). |
 
 Plus basic extraction modes: `--captions`, `--paragraph`, `--key-moments`, `--table`, `--chart`
 
@@ -80,6 +81,18 @@ vanalyze main video.mp4 --camera --deep
 
 # Custom prompt
 vanalyze main video.mp4 --custom "find moments where time dilates"
+```
+
+## Local Analysis (Ollama)
+
+Philm supports local analysis using Ollama (default model: `qwen3-vl:4b`). This runs entirely on your machine, extracting frames from the video and passing them to the local VLM.
+
+```bash
+# Run with local model
+vanalyze main video.mp4 --local
+
+# Specify model and frame count
+vanalyze main video.mp4 --local --model llava:latest --frames 8
 ```
 
 ## Example Output
