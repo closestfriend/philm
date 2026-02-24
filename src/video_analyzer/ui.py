@@ -1,8 +1,8 @@
 """FastAPI application for the Philm web UI."""
 
 from pathlib import Path
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from .archive import Archive, DEFAULT_ARCHIVE_PATH
@@ -54,3 +54,11 @@ async def corpus_partial(request: Request, q: str = ""):
     return templates.TemplateResponse("partials/cards.html", {
         "request": request, "videos": videos
     })
+
+
+@app.get("/thumbnails/{video_id}.jpg")
+async def serve_thumbnail(video_id: int):
+    thumb = Path.home() / ".vanalyze" / "thumbnails" / f"{video_id}.jpg"
+    if not thumb.exists():
+        raise HTTPException(status_code=404)
+    return FileResponse(str(thumb))
