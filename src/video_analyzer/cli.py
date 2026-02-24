@@ -20,6 +20,7 @@ from .output import format_for_display, format_as_json, save_json, format_techni
 from .batch import run_batch, find_videos
 from .archive_cli import register_archive_commands
 from .local import LocalConfig, analyze_video_local, check_ollama_available
+from .ui_cli import app as ui_app
 
 
 # Load environment variables
@@ -415,6 +416,7 @@ def main(
 
 # Register archive subcommands
 register_archive_commands(app)
+app.add_typer(ui_app, name="ui")
 
 
 if __name__ == "__main__":
