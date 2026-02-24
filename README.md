@@ -141,10 +141,13 @@ src/video_analyzer/
 ├── models.py      # Pydantic schemas (structure)
 ├── modes.py       # Theoretical prompts (interpretation)
 ├── analyzer.py    # Gemini API integration
+├── local.py       # Ollama local backend
 ├── cli.py         # Typer CLI
 ├── output.py      # Rich terminal formatting
 ├── technical.py   # FFmpeg scene detection
-└── batch.py       # Folder processing
+├── batch.py       # Folder processing
+├── archive.py     # SQLite corpus database
+└── archive_cli.py # Archive subcommands
 ```
 
 The separation matters: `models.py` defines **what** (the shape of a Baudrillardian reading), `modes.py` defines **how** (the prompt that produces it). Adding a new theoretical framework is ~30 lines of Python.
@@ -170,6 +173,33 @@ Running multiple modes on the same footage reveals how different frameworks illu
 - **Critics**: Supplement close reading with algorithmic analysis
 - **Archivists**: Generate rich metadata beyond technical specs
 - **Curious**: See what Baudrillard would say about your vacation footage
+
+## Archive
+
+Philm includes a SQLite archive for storing and querying analyses across a corpus.
+
+```bash
+# Initialize the database (~/.vanalyze/archive.db)
+vanalyze archive init
+
+# Scan a folder and register videos
+vanalyze archive scan ./footage --recursive
+
+# Check archive status
+vanalyze archive status
+
+# Process unanalyzed videos
+vanalyze archive process --folder ./footage --affect --gaze
+
+# Search across the corpus
+vanalyze archive search --mode affect --min-intensity 8
+vanalyze archive search --mode gaze --type voyeuristic
+
+# Statistics across all analyzed footage
+vanalyze archive stats
+```
+
+Useful for corpus work: searching for specific theoretical moments across hundreds of videos, or generating statistics on affect intensity, gaze type distribution, etc.
 
 ## Scripts
 
