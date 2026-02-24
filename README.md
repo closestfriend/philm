@@ -201,6 +201,19 @@ vanalyze archive stats
 
 Useful for corpus work: searching for specific theoretical moments across hundreds of videos, or generating statistics on affect intensity, gaze type distribution, etc.
 
+## Web UI
+
+```bash
+vanalyze ui
+```
+
+Launches a local web interface at `http://localhost:8000` for browsing and analyzing your corpus.
+
+- Card grid with description-first navigation
+- Framework coverage per clip — click a hollow pill to trigger analysis
+- Drag-and-drop video intake, or point at a folder
+- Timecode-synced analysis overlay on the video player
+
 ## Scripts
 
 ```bash
