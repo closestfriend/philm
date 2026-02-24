@@ -120,13 +120,19 @@
   </nav>
   <main>{% block content %}{% endblock %}</main>
 <script>
-async function triggerAnalysis(videoId, mode) {
-  const pill = document.getElementById(`pill-${videoId}-${mode}`);
-  if (!pill || pill.classList.contains('done') || pill.classList.contains('running')) return;
+// Event delegation — survives HTMX swaps
+document.addEventListener('click', async (e) => {
+  const pill = e.target.closest('.pill[data-mode]');
+  if (!pill) return;
+  e.stopPropagation();
+
+  const videoId = pill.dataset.videoId;
+  const mode = pill.dataset.mode;
+  if (pill.classList.contains('done') || pill.classList.contains('running')) return;
 
   // Optimistically flip to running
   pill.classList.add('running');
-  pill.setAttribute('onclick', '');
+  delete pill.dataset.mode; // prevent double-click
 
   // Fire the analysis job
   await fetch(`/api/analyze/${videoId}/${mode}`, { method: 'POST' });
@@ -145,7 +151,7 @@ async function triggerAnalysis(videoId, mode) {
       }
     } catch (_) { clearInterval(poll); }
   }, 3000);
-}
+});
 </script>
 </body>
 </html>
