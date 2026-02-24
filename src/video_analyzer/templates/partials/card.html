@@ -1,4 +1,4 @@
-<div class="card" id="card-{{ video.id }}" onclick="window.location='/video/{{ video.id }}'">
+<div class="card" id="card-{{ video.id }}" data-href="/video/{{ video.id }}" onclick="if(!event.target.closest('[data-mode]'))window.location=this.dataset.href">
   {% if video.thumbnail %}
     <img class="card-thumb" src="/thumbnails/{{ video.id }}.jpg" alt="">
   {% else %}
@@ -12,7 +12,8 @@
         <span class="pill {{ 'done' if done else '' }}"
           id="pill-{{ video.id }}-{{ mode }}"
           {% if not done %}
-            onclick="event.stopPropagation(); triggerAnalysis({{ video.id }}, '{{ mode }}')"
+            data-video-id="{{ video.id }}"
+            data-mode="{{ mode }}"
           {% endif %}
         >{{ mode }}</span>
       {% endfor %}
