@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="search-bar">
+  <input
+    type="search"
+    name="q"
+    placeholder="search descriptions..."
+    value="{{ q }}"
+    hx-get="/corpus"
+    hx-trigger="input changed delay:300ms"
+    hx-target="#card-grid"
+    hx-swap="innerHTML"
+  >
+</div>
+
+<div class="drop-zone"
+  id="drop-zone"
+  ondragover="event.preventDefault(); this.classList.add('drag-over')"
+  ondragleave="this.classList.remove('drag-over')"
+  ondrop="handleDrop(event)">
+  drop videos here — or <input type="text" id="folder-input" placeholder="enter folder path"> <button onclick="scanFolder()">scan</button>
+</div>
+
+<div class="grid" id="card-grid">
+  {% include "partials/cards.html" %}
+</div>
+
+<script>
+async function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const files = [...e.dataTransfer.files];
+  for (const file of files) {
+    const fd = new FormData();
+    fd.append('file', file);
+    await fetch('/api/ingest/file', { method: 'POST', body: fd });
+  }
+  htmx.trigger('#card-grid', 'refresh');
+}
+
+async function scanFolder() {
+  const path = document.getElementById('folder-input').value;
+  if (!path) return;
+  await fetch('/api/ingest/folder', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ path })
+  });
+  htmx.trigger('#card-grid', 'refresh');
+}
+</script>
+{% endblock %}

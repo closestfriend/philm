@@ -1,0 +1,5 @@
+{% for video in videos %}
+  {% include "partials/card.html" %}
+{% else %}
+<p style="color:#444; grid-column:1/-1">no clips in archive yet — drop some videos above.</p>
+{% endfor %}
