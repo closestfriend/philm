@@ -119,5 +119,33 @@
     <a href="/">corpus</a>
   </nav>
   <main>{% block content %}{% endblock %}</main>
+<script>
+async function triggerAnalysis(videoId, mode) {
+  const pill = document.getElementById(`pill-${videoId}-${mode}`);
+  if (!pill || pill.classList.contains('done') || pill.classList.contains('running')) return;
+
+  // Optimistically flip to running
+  pill.classList.add('running');
+  pill.setAttribute('onclick', '');
+
+  // Fire the analysis job
+  await fetch(`/api/analyze/${videoId}/${mode}`, { method: 'POST' });
+
+  // Poll status every 3s, swap card when done
+  const poll = setInterval(async () => {
+    try {
+      const res = await fetch(`/api/analyze/status/${videoId}/${mode}`);
+      const { running } = await res.json();
+      if (!running) {
+        clearInterval(poll);
+        const cardRes = await fetch(`/api/card/${videoId}`);
+        const html = await cardRes.text();
+        const card = document.getElementById(`card-${videoId}`);
+        if (card) card.outerHTML = html;
+      }
+    } catch (_) { clearInterval(poll); }
+  }, 3000);
+}
+</script>
 </body>
 </html>

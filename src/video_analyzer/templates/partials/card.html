@@ -1,4 +1,4 @@
-<div class="card" onclick="window.location='/video/{{ video.id }}'">
+<div class="card" id="card-{{ video.id }}" onclick="window.location='/video/{{ video.id }}'">
   {% if video.thumbnail %}
     <img class="card-thumb" src="/thumbnails/{{ video.id }}.jpg" alt="">
   {% else %}
@@ -9,13 +9,10 @@
     <div class="card-desc">{{ video.description or '—' }}</div>
     <div class="coverage">
       {% for mode, done in video.coverage.items() %}
-        {% set running = video.running_jobs is defined and (video.id ~ ':' ~ mode) in video.running_jobs %}
-        <span class="pill {{ 'done' if done else 'running' if running else '' }}"
-          {% if not done and not running %}
-            hx-post="/api/analyze/{{ video.id }}/{{ mode }}"
-            hx-swap="none"
-            hx-on::after-request="htmx.trigger('#card-{{ video.id }}', 'refresh')"
-            onclick="event.stopPropagation()"
+        <span class="pill {{ 'done' if done else '' }}"
+          id="pill-{{ video.id }}-{{ mode }}"
+          {% if not done %}
+            onclick="event.stopPropagation(); triggerAnalysis({{ video.id }}, '{{ mode }}')"
           {% endif %}
         >{{ mode }}</span>
       {% endfor %}
