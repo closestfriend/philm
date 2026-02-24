@@ -150,6 +150,21 @@ async def clip_detail(request: Request, video_id: int):
     })
 
 
+@app.get("/api/card/{video_id}", response_class=HTMLResponse)
+async def card_partial(request: Request, video_id: int):
+    """Single card partial for live refresh after analysis completes."""
+    archive = get_archive()
+    video = archive.get_video(video_id)
+    if not video:
+        archive.close()
+        raise HTTPException(status_code=404)
+    ctx = build_video_context(video, archive)
+    archive.close()
+    return templates.TemplateResponse("partials/card.html", {
+        "request": request, "video": ctx
+    })
+
+
 @app.post("/api/analyze/{video_id}/{mode}")
 async def trigger_analysis(video_id: int, mode: str, background_tasks: BackgroundTasks):
     """Trigger a background analysis job."""
