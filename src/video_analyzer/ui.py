@@ -112,6 +112,34 @@ def _scan_folder(folder: str):
     archive.close()
 
 
+@app.get("/video-file/{video_id}")
+async def serve_video(video_id: int):
+    """Serve the raw video file for the player."""
+    archive = get_archive()
+    video = archive.get_video(video_id)
+    archive.close()
+    if not video or not Path(video.path).exists():
+        raise HTTPException(status_code=404)
+    return FileResponse(video.path, media_type="video/mp4")
+
+
+@app.get("/video/{video_id}", response_class=HTMLResponse)
+async def clip_detail(request: Request, video_id: int):
+    archive = get_archive()
+    video = archive.get_video(video_id)
+    if not video:
+        archive.close()
+        raise HTTPException(status_code=404)
+    moments = archive.get_all_moments(video_id)
+    ctx = build_video_context(video, archive)
+    archive.close()
+    return templates.TemplateResponse("player.html", {
+        "request": request,
+        "video": ctx,
+        "moments": moments,
+    })
+
+
 @app.post("/api/analyze/{video_id}/{mode}")
 async def trigger_analysis(video_id: int, mode: str, background_tasks: BackgroundTasks):
     """Trigger a background analysis job."""

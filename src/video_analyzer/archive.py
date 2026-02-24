@@ -1217,10 +1217,122 @@ class Archive:
         ).fetchall()
         return [dict(r) for r in rows]
 
+    def get_all_moments(self, video_id: int) -> list[dict]:
+        """
+        Return all analyzed moments for a video across all modes,
+        as a list of dicts suitable for JSON serialization in the player template.
+
+        Each dict contains:
+          - mode (str)
+          - timecode (str)
+          - start_sec (float)
+          - end_sec (float, start_sec + 5.0)
+          - summary (str)
+        """
+        conn = self.connect()
+        results: list[dict] = []
+
+        # Dedicated tables: mode name -> (table, summary_column_or_None, fallback_columns)
+        # Each table has a `description` column that serves as the human-readable summary,
+        # except gaze_moments and affect_moments which lack `description` — we build one
+        # from their typed columns instead.
+        dedicated: list[tuple[str, str, list[str]]] = [
+            # (mode, table, [candidate summary columns in priority order])
+            ("gaze",        "gaze_moments",        ["gaze_type", "power_dynamic", "subject_position"]),
+            ("sublime",     "sublime_moments",     ["description", "sublime_type", "overwhelm_source"]),
+            ("affect",      "affect_moments",      ["atmosphere", "vector"]),
+            ("camera",      "camera_moments",      ["description", "intentional_motion", "operator_presence"]),
+            ("baudrillard", "baudrillard_moments", ["description", "simulacra_order", "hyperreality_mode"]),
+            ("epistemic",   "epistemic_moments",   ["description", "claim", "epistemic_mode"]),
+            ("foucault",    "foucault_moments",    ["description", "power_mode", "apparatus"]),
+            ("virilio",     "virilio_moments",     ["description", "speed_regime", "accident"]),
+            ("zizek",       "zizek_moments",       ["description", "parallax_type", "lacanian_register"]),
+            ("barthes",     "barthes_moments",     ["description", "punctum_detail", "denotation"]),
+            ("benjamin",    "benjamin_moments",    ["description", "dialectical_image", "aura_status"]),
+            ("hauntology",  "hauntology_moments",  ["description", "temporal_pathology", "capitalist_realism"]),
+        ]
+
+        for mode, table, candidate_cols in dedicated:
+            try:
+                rows = conn.execute(
+                    f"SELECT * FROM {table} WHERE video_id = ? ORDER BY id",
+                    (video_id,)
+                ).fetchall()
+                for row in rows:
+                    r = dict(row)
+                    # Build summary from first non-empty candidate column
+                    summary_parts = []
+                    for col in candidate_cols:
+                        val = r.get(col)
+                        if val and str(val).strip():
+                            summary_parts.append(str(val).strip())
+                    summary = " — ".join(summary_parts) if summary_parts else mode
+                    tc = r.get("timecode", "")
+                    start = _parse_timecode(tc)
+                    results.append({
+                        "mode": mode,
+                        "timecode": tc,
+                        "start_sec": start,
+                        "end_sec": start + 5.0,
+                        "summary": summary,
+                    })
+            except Exception:
+                pass
+
+        # generic_moments table: data is a JSON blob
+        try:
+            rows = conn.execute(
+                "SELECT mode, timecode, data FROM generic_moments WHERE video_id = ? ORDER BY id",
+                (video_id,)
+            ).fetchall()
+            for row in rows:
+                tc = row["timecode"] or ""
+                data = {}
+                try:
+                    data = json.loads(row["data"]) if row["data"] else {}
+                except (ValueError, TypeError):
+                    pass
+                summary = (
+                    data.get("description")
+                    or data.get("summary")
+                    or data.get("content")
+                    or str(row["mode"])
+                )
+                start = _parse_timecode(tc)
+                results.append({
+                    "mode": row["mode"],
+                    "timecode": tc,
+                    "start_sec": start,
+                    "end_sec": start + 5.0,
+                    "summary": str(summary),
+                })
+        except Exception:
+            pass
+
+        # Sort by start_sec so the sidebar list is chronological
+        results.sort(key=lambda m: m["start_sec"])
+        return results
+
 
 # =========================================================================
 # HELPER FUNCTIONS
 # =========================================================================
+
+def _parse_timecode(tc: str) -> float:
+    """Convert timecode string like '1:15' or '0:30-1:00' to seconds."""
+    # Handle ranges like "0:30-1:00" by taking the start
+    tc = tc.split("-")[0].strip()
+    parts = tc.split(":")
+    try:
+        if len(parts) == 2:
+            return float(parts[0]) * 60 + float(parts[1])
+        elif len(parts) == 3:
+            return float(parts[0]) * 3600 + float(parts[1]) * 60 + float(parts[2])
+        else:
+            return float(tc)
+    except (ValueError, IndexError):
+        return 0.0
+
 
 def get_file_hash(path: Path, chunk_size: int = 8192) -> str:
     """Calculate MD5 hash of file for dedup detection."""

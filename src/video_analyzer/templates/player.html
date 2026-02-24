@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ video.filename }} — Philm{% endblock %}
+{% block content %}
+<div style="display:flex; gap:24px; align-items:flex-start;">
+  <div style="flex:1; min-width:0;">
+    <div style="position:relative;">
+      <video id="player" controls style="width:100%; border:1px solid #222;" src="/video-file/{{ video.id }}"></video>
+      <div id="overlay" style="position:absolute; bottom:48px; left:0; right:0; padding:12px; pointer-events:none; display:none;">
+        <div id="overlay-content" style="background:rgba(0,0,0,0.8); padding:12px; border-left:2px solid #4a9; font-size:12px; line-height:1.6;"></div>
+      </div>
+    </div>
+    <div style="margin-top:8px; display:flex; gap:12px; align-items:center;">
+      <button onclick="toggleOverlay()">toggle overlay</button>
+      <a href="/" style="color:#444; font-size:11px; text-decoration:none;">← corpus</a>
+      <span style="color:#444; font-size:11px;">{{ video.filename }}</span>
+    </div>
+    <div style="margin-top:8px; font-size:12px; color:#888;">{{ video.description }}</div>
+  </div>
+
+  <div style="width:300px; flex-shrink:0; max-height:80vh; overflow-y:auto;">
+    <div style="color:#555; font-size:11px; margin-bottom:12px; position:sticky; top:0; background:#0a0a0a; padding-bottom:8px;">MOMENTS ({{ moments|length }})</div>
+    {% for moment in moments %}
+    <div style="padding:8px 0; border-bottom:1px solid #1a1a1a; cursor:pointer;"
+      onclick="seekTo({{ moment.start_sec }})">
+      <div style="font-size:10px; color:#555;">{{ moment.mode }} · {{ moment.timecode }}</div>
+      <div style="font-size:12px; color:#bbb; margin-top:2px; line-height:1.4;">{{ moment.summary }}</div>
+    </div>
+    {% else %}
+    <div style="color:#444; font-size:12px;">no analyses yet — trigger one from the corpus view.</div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+const player = document.getElementById('player');
+const overlay = document.getElementById('overlay');
+const overlayContent = document.getElementById('overlay-content');
+let overlayEnabled = false;
+
+const moments = {{ moments | tojson }};
+
+function toggleOverlay() {
+  overlayEnabled = !overlayEnabled;
+  overlay.style.display = overlayEnabled ? 'block' : 'none';
+  if (!overlayEnabled) overlayContent.innerHTML = '';
+}
+
+function seekTo(sec) {
+  player.currentTime = sec;
+  player.play();
+}
+
+player.addEventListener('timeupdate', () => {
+  if (!overlayEnabled) return;
+  const t = player.currentTime;
+  const active = moments.filter(m => t >= m.start_sec && t <= m.end_sec);
+  if (active.length) {
+    overlayContent.innerHTML = active.map(m =>
+      `<div style="margin-bottom:6px;"><span style="color:#4a9;">${m.mode}</span> · <span style="color:#666;">${m.timecode}</span><br>${m.summary}</div>`
+    ).join('');
+  } else {
+    overlayContent.innerHTML = '';
+  }
+});
+</script>
+{% endblock %}
