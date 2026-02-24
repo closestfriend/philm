@@ -9,10 +9,13 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from .archive import Archive, DEFAULT_ARCHIVE_PATH
-from .modes import ALL_MODES
+from .analyzer import configure_genai, upload_video, analyze_video
+from .modes import ALL_MODES, get_mode
 from .thumbnails import extract_thumbnail
 
 app = FastAPI(title="Philm UI")
+
+_running_jobs: set[str] = set()
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
@@ -107,3 +110,39 @@ def _scan_folder(folder: str):
     for video in archive.list_videos():
         extract_thumbnail(video.path, video.id)
     archive.close()
+
+
+@app.post("/api/analyze/{video_id}/{mode}")
+async def trigger_analysis(video_id: int, mode: str, background_tasks: BackgroundTasks):
+    """Trigger a background analysis job."""
+    job_key = f"{video_id}:{mode}"
+    if job_key in _running_jobs:
+        return {"status": "already_running"}
+    _running_jobs.add(job_key)
+    background_tasks.add_task(_run_analysis, video_id, mode, job_key)
+    return {"status": "started"}
+
+
+@app.get("/api/analyze/status/{video_id}/{mode}")
+async def job_status(video_id: int, mode: str):
+    """Check if an analysis job is currently running."""
+    job_key = f"{video_id}:{mode}"
+    return {"running": job_key in _running_jobs}
+
+
+def _run_analysis(video_id: int, mode: str, job_key: str):
+    try:
+        archive = get_archive()
+        video = archive.get_video(video_id)
+        archive.close()
+        if not video:
+            return
+        configure_genai(os.getenv("GEMINI_API_KEY"))
+        video_file = upload_video(video.path)
+        analysis_mode = get_mode(mode)
+        result = analyze_video(video_file, analysis_mode)
+        archive = get_archive()
+        archive.store_analysis(video_id, mode, result.model_dump())
+        archive.close()
+    finally:
+        _running_jobs.discard(job_key)
