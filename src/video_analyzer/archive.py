@@ -459,16 +459,29 @@ class Archive:
         return [VideoRecord(*row) for row in rows]
 
     def search_videos(self, query: str) -> list[VideoRecord]:
-        """Search videos by description (LIKE)."""
+        """Search videos by description using FTS5."""
         conn = self.connect()
-        rows = conn.execute(
-            """SELECT id, path, filename, file_hash, file_size, duration_sec,
-                      date_recorded, location, camera, description,
-                      processed_at, processing_cost, tier
-               FROM videos WHERE description LIKE ? ORDER BY id DESC""",
-            (f"%{query}%",)
-        ).fetchall()
-        return [VideoRecord(*row) for row in rows]
+        try:
+            rows = conn.execute("""
+                SELECT v.id, v.path, v.filename, v.file_hash, v.file_size,
+                       v.duration_sec, v.date_recorded, v.location, v.camera,
+                       v.description, v.processed_at, v.processing_cost, v.tier
+                FROM videos v
+                JOIN video_fts f ON v.id = f.rowid
+                WHERE video_fts MATCH ?
+                ORDER BY rank
+            """, (query,)).fetchall()
+            return [VideoRecord(*row) for row in rows]
+        except Exception:
+            # Fallback to LIKE if FTS not available
+            rows = conn.execute(
+                """SELECT id, path, filename, file_hash, file_size, duration_sec,
+                          date_recorded, location, camera, description,
+                          processed_at, processing_cost, tier
+                   FROM videos WHERE description LIKE ? ORDER BY id DESC""",
+                (f"%{query}%",)
+            ).fetchall()
+            return [VideoRecord(*row) for row in rows]
 
     def get_completed_modes(self, video_id: int) -> list[str]:
         """Return list of mode names with completed analyses for this video."""
