@@ -97,19 +97,27 @@ async def ingest_folder(req: FolderRequest, background_tasks: BackgroundTasks):
 
 
 def _register_video(path: str):
-    archive = get_archive()
-    video_id = archive.add_video(Path(path))
-    extract_thumbnail(path, video_id)
-    archive.close()
+    try:
+        archive = get_archive()
+        video_id = archive.add_video(Path(path))
+        archive.close()
+        extract_thumbnail(path, video_id)
+    except Exception as e:
+        import traceback
+        print(f"[ingest error] {e}\n{traceback.format_exc()}")
 
 
 def _scan_folder(folder: str):
-    archive = get_archive()
-    archive.scan_folder(Path(folder), recursive=True)
-    # Extract thumbnails for all videos (they skip if already exists)
-    for video in archive.list_videos():
-        extract_thumbnail(video.path, video.id)
-    archive.close()
+    try:
+        archive = get_archive()
+        archive.scan_folder(Path(folder), recursive=True)
+        videos = archive.list_videos()
+        archive.close()
+        for video in videos:
+            extract_thumbnail(video.path, video.id)
+    except Exception as e:
+        import traceback
+        print(f"[scan error] {e}\n{traceback.format_exc()}")
 
 
 @app.get("/video-file/{video_id}")
@@ -166,7 +174,7 @@ def _run_analysis(video_id: int, mode: str, job_key: str):
         if not video:
             return
         configure_genai(os.getenv("GEMINI_API_KEY"))
-        video_file = upload_video(video.path)
+        video_file = upload_video(Path(video.path))
         analysis_mode = get_mode(mode)
         result = analyze_video(video_file, analysis_mode)
         archive = get_archive()
