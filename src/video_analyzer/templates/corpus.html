@@ -21,11 +21,18 @@
   drop videos here — or <input type="text" id="folder-input" placeholder="enter folder path"> <button onclick="scanFolder()">scan</button>
 </div>
 
-<div class="grid" id="card-grid">
+<div class="grid" id="card-grid"
+  hx-get="/corpus"
+  hx-trigger="refresh"
+  hx-swap="innerHTML">
   {% include "partials/cards.html" %}
 </div>
 
 <script>
+function refreshGrid() {
+  setTimeout(() => htmx.trigger('#card-grid', 'refresh'), 1500);
+}
+
 async function handleDrop(e) {
   e.preventDefault();
   document.getElementById('drop-zone').classList.remove('drag-over');
@@ -35,7 +42,7 @@ async function handleDrop(e) {
     fd.append('file', file);
     await fetch('/api/ingest/file', { method: 'POST', body: fd });
   }
-  htmx.trigger('#card-grid', 'refresh');
+  refreshGrid();
 }
 
 async function scanFolder() {
@@ -46,7 +53,7 @@ async function scanFolder() {
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ path })
   });
-  htmx.trigger('#card-grid', 'refresh');
+  refreshGrid();
 }
 </script>
 {% endblock %}
