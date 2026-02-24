@@ -427,13 +427,90 @@ class Archive:
             ).fetchone()
             return row["id"]
 
-    def get_video(self, video_id: int) -> Optional[dict]:
-        """Get video by ID."""
+    def get_video(self, video_id: int) -> "VideoRecord | None":
+        """Return a single video by id, or None."""
+        conn = self.connect()
+        row = conn.execute(
+            """SELECT id, path, filename, file_hash, file_size, duration_sec,
+                      date_recorded, location, camera, description,
+                      processed_at, processing_cost, tier
+               FROM videos WHERE id=?""",
+            (video_id,)
+        ).fetchone()
+        return VideoRecord(*row) if row else None
+
+    def get_video_dict(self, video_id: int) -> Optional[dict]:
+        """Get video by ID as a dict (internal/legacy use)."""
         conn = self.connect()
         row = conn.execute(
             "SELECT * FROM videos WHERE id = ?", (video_id,)
         ).fetchone()
         return dict(row) if row else None
+
+    def list_videos(self) -> list[VideoRecord]:
+        """Return all videos ordered by id descending."""
+        conn = self.connect()
+        rows = conn.execute(
+            """SELECT id, path, filename, file_hash, file_size, duration_sec,
+                      date_recorded, location, camera, description,
+                      processed_at, processing_cost, tier
+               FROM videos ORDER BY id DESC"""
+        ).fetchall()
+        return [VideoRecord(*row) for row in rows]
+
+    def search_videos(self, query: str) -> list[VideoRecord]:
+        """Search videos by description (LIKE)."""
+        conn = self.connect()
+        rows = conn.execute(
+            """SELECT id, path, filename, file_hash, file_size, duration_sec,
+                      date_recorded, location, camera, description,
+                      processed_at, processing_cost, tier
+               FROM videos WHERE description LIKE ? ORDER BY id DESC""",
+            (f"%{query}%",)
+        ).fetchall()
+        return [VideoRecord(*row) for row in rows]
+
+    def get_completed_modes(self, video_id: int) -> list[str]:
+        """Return list of mode names with completed analyses for this video."""
+        conn = self.connect()
+        # Map mode name -> dedicated table (only tables that exist in SCHEMA)
+        mode_tables = {
+            "gaze": "gaze_moments",
+            "sublime": "sublime_moments",
+            "affect": "affect_moments",
+            "camera": "camera_moments",
+            "baudrillard": "baudrillard_moments",
+            "epistemic": "epistemic_moments",
+            "foucault": "foucault_moments",
+            "virilio": "virilio_moments",
+            "zizek": "zizek_moments",
+            "barthes": "barthes_moments",
+            "benjamin": "benjamin_moments",
+            "hauntology": "hauntology_moments",
+        }
+        completed = []
+        for mode, table in mode_tables.items():
+            try:
+                row = conn.execute(
+                    f"SELECT 1 FROM {table} WHERE video_id=? LIMIT 1", (video_id,)
+                ).fetchone()
+                if row:
+                    completed.append(mode)
+            except Exception:
+                pass
+        # Also check generic_moments for any other modes stored there
+        try:
+            rows = conn.execute(
+                "SELECT DISTINCT mode FROM generic_moments WHERE video_id=?",
+                (video_id,)
+            ).fetchall()
+            for row in rows:
+                mode_name = row[0]
+                if mode_name not in completed:
+                    completed.append(mode_name)
+        except Exception:
+            pass
+        return completed
 
     def get_video_by_path(self, path: Path) -> Optional[dict]:
         """Get video by path."""
