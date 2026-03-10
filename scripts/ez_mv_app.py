@@ -6,6 +6,8 @@ Run: uv run streamlit run scripts/ez_mv_app.py
 
 import json
 import tempfile
+import tkinter as tk
+from tkinter import filedialog
 from pathlib import Path
 
 import streamlit as st
@@ -20,6 +22,16 @@ from ez_mv_core import (
     load_philm_offset,
     probe_duration,
 )
+
+def pick_folder(title="Select folder") -> str | None:
+    """Open native macOS folder picker. Returns path string or None if cancelled."""
+    root = tk.Tk()
+    root.withdraw()
+    root.wm_attributes("-topmost", 1)
+    folder = filedialog.askdirectory(title=title)
+    root.destroy()
+    return folder or None
+
 
 st.set_page_config(page_title="EZ_MV", page_icon="🎬", layout="wide")
 st.title("EZ_MV")
@@ -38,7 +50,20 @@ with st.sidebar:
 # ─── MUSIC TRACK ───────────────────────────────────────────────────────────────
 
 st.header("1. Music Track")
-music_folder = st.text_input("Music folder", value=str(Path.home()))
+if "music_folder" not in st.session_state:
+    st.session_state["music_folder"] = str(Path.home())
+
+_mc1, _mc2 = st.columns([5, 1])
+with _mc1:
+    music_folder = st.text_input("Music folder", key="music_folder")
+with _mc2:
+    st.write("")
+    if st.button("📂", key="browse_music", help="Browse for folder"):
+        folder = pick_folder("Select music folder")
+        if folder:
+            st.session_state["music_folder"] = folder
+            st.rerun()
+
 music_path = None
 music_files = []
 
@@ -68,7 +93,20 @@ if music_files:
 # ─── CLIP POOL ─────────────────────────────────────────────────────────────────
 
 st.header("2. Clips")
-clips_folder = st.text_input("Clips folder")
+if "clips_folder" not in st.session_state:
+    st.session_state["clips_folder"] = ""
+
+_cc1, _cc2 = st.columns([5, 1])
+with _cc1:
+    clips_folder = st.text_input("Clips folder", key="clips_folder")
+with _cc2:
+    st.write("")
+    if st.button("📂", key="browse_clips", help="Browse for folder"):
+        folder = pick_folder("Select clips folder")
+        if folder:
+            st.session_state["clips_folder"] = folder
+            st.rerun()
+
 VIDEO_EXTS = {".mov", ".mp4", ".mxf", ".avi", ".mkv", ".m4v"}
 
 clips_config: list[dict] = []  # [{path, offset, enabled}]
