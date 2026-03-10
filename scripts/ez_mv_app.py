@@ -113,7 +113,7 @@ with _cc2:
             st.session_state["_clips_folder_pending"] = folder  # separate key — avoid widget conflict
             st.rerun()
 
-VIDEO_EXTS = {".mov", ".mp4", ".mxf", ".avi", ".mkv", ".m4v"}
+VIDEO_EXTS = {".mov", ".mp4", ".mxf", ".avi", ".mkv", ".m4v", ".mpg", ".mpeg"}
 
 clips_config: list[dict] = []  # [{path, offset, enabled}]
 
