@@ -50,8 +50,11 @@ with st.sidebar:
 # ─── MUSIC TRACK ───────────────────────────────────────────────────────────────
 
 st.header("1. Music Track")
+# Apply any pending folder picked by the browse button (must happen before widget renders)
 if "music_folder" not in st.session_state:
     st.session_state["music_folder"] = str(Path.home())
+if "_music_folder_pending" in st.session_state:
+    st.session_state["music_folder"] = st.session_state.pop("_music_folder_pending")
 
 _mc1, _mc2 = st.columns([5, 1])
 with _mc1:
@@ -61,7 +64,7 @@ with _mc2:
     if st.button("📂", key="browse_music", help="Browse for folder"):
         folder = pick_folder("Select music folder")
         if folder:
-            st.session_state["music_folder"] = folder
+            st.session_state["_music_folder_pending"] = folder  # separate key — avoid widget conflict
             st.rerun()
 
 music_path = None
@@ -93,8 +96,11 @@ if music_files:
 # ─── CLIP POOL ─────────────────────────────────────────────────────────────────
 
 st.header("2. Clips")
+# Apply any pending folder picked by the browse button (must happen before widget renders)
 if "clips_folder" not in st.session_state:
     st.session_state["clips_folder"] = ""
+if "_clips_folder_pending" in st.session_state:
+    st.session_state["clips_folder"] = st.session_state.pop("_clips_folder_pending")
 
 _cc1, _cc2 = st.columns([5, 1])
 with _cc1:
@@ -104,7 +110,7 @@ with _cc2:
     if st.button("📂", key="browse_clips", help="Browse for folder"):
         folder = pick_folder("Select clips folder")
         if folder:
-            st.session_state["clips_folder"] = folder
+            st.session_state["_clips_folder_pending"] = folder  # separate key — avoid widget conflict
             st.rerun()
 
 VIDEO_EXTS = {".mov", ".mp4", ".mxf", ".avi", ".mkv", ".m4v"}
