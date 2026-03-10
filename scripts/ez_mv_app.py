@@ -146,7 +146,6 @@ with col2:
     flash_prob = st.slider(
         "Flash frequency",
         min_value=0.0, max_value=0.5, value=0.25, step=0.05,
-        format="%.0f%%",
         help="Probability of white flash frame before each cut"
     )
     st.caption(f"{flash_prob*100:.0f}% of cuts")
@@ -155,7 +154,6 @@ with col3:
     stutter_prob = st.slider(
         "Stutter frequency",
         min_value=0.0, max_value=0.3, value=0.15, step=0.05,
-        format="%.0f%%",
         help="Probability of repeating a clip back-to-back"
     )
     st.caption(f"{stutter_prob*100:.0f}% of cuts")
@@ -194,9 +192,12 @@ if ready and st.button("⚡ Generate MV", type="primary", use_container_width=Tr
         output_path = output_dir / f"ez_mv_v{next_v:02d}.mp4"
         st.write(f"Output: `{output_path}`")
 
-        # Flash frame
-        tmp_flash_dir = Path(tempfile.mkdtemp(prefix="ez_mv_flash_"))
-        white_flash = generate_flash_frame(tmp_flash_dir)
+        # Flash frame — reuse across runs via session state
+        if "flash_dir" not in st.session_state:
+            st.session_state["flash_dir"] = Path(tempfile.mkdtemp(prefix="ez_mv_flash_"))
+        if "white_flash" not in st.session_state:
+            st.session_state["white_flash"] = generate_flash_frame(st.session_state["flash_dir"])
+        white_flash = st.session_state["white_flash"]
 
         # Segment extraction + assembly
         progress_bar = st.progress(0)
