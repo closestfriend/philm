@@ -5,9 +5,8 @@ Run: uv run streamlit run scripts/ez_mv_app.py
 """
 
 import json
+import subprocess
 import tempfile
-import tkinter as tk
-from tkinter import filedialog
 from pathlib import Path
 
 import streamlit as st
@@ -24,13 +23,14 @@ from ez_mv_core import (
 )
 
 def pick_folder(title="Select folder") -> str | None:
-    """Open native macOS folder picker. Returns path string or None if cancelled."""
-    root = tk.Tk()
-    root.withdraw()
-    root.wm_attributes("-topmost", 1)
-    folder = filedialog.askdirectory(title=title)
-    root.destroy()
-    return folder or None
+    """Open native macOS folder picker via osascript. Returns path string or None if cancelled."""
+    result = subprocess.run(
+        ["osascript", "-e", f'POSIX path of (choose folder with prompt "{title}")'],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        return None  # user cancelled
+    return result.stdout.strip().rstrip("/") or None
 
 
 st.set_page_config(page_title="EZ_MV", page_icon="🎬", layout="wide")
