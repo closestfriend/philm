@@ -136,8 +136,9 @@ def build_cut_schedule(
             clip = pool[pool_idx % len(pool)]
             pool_idx += 1
         else:
+            # Repeat last clip from same position (stutter effect)
             prev = schedule[-1]
-            clip = {"path": prev["path"], "offset": prev["start_offset"] + prev["duration"]}
+            clip = {"path": prev["path"], "offset": prev["start_offset"]}
 
         schedule.append({
             "path": clip["path"],
@@ -204,6 +205,13 @@ def assemble(
                 playhead[p] = entry["start_offset"]
                 seen.add(p)
 
+        # Cache source durations — avoid N ffprobe calls for repeated clips
+        src_durations: dict[Path, float] = {}
+        for entry in schedule:
+            p = entry["path"]
+            if p not in src_durations:
+                src_durations[p] = probe_duration(p)
+
         total = len(schedule)
         for idx, entry in enumerate(schedule):
             if entry["flash_before"]:
@@ -214,7 +222,7 @@ def assemble(
             start = playhead[src]
             duration = entry["duration"]
 
-            src_dur = probe_duration(src)
+            src_dur = src_durations[src]
             if start + duration > src_dur:
                 start = max(0.0, src_dur - duration - 0.1)
 
