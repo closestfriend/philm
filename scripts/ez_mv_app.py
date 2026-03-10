@@ -42,11 +42,19 @@ music_folder = st.text_input("Music folder", value=str(Path.home()))
 music_path = None
 music_files = []
 
-if music_folder and Path(music_folder).is_dir():
-    music_files = sorted(
-        p for p in Path(music_folder).iterdir()
-        if p.suffix.lower() in (".wav", ".mp3", ".aiff", ".m4a", ".flac")
-    )
+if music_folder:
+    music_folder_path = Path(music_folder)
+    if not music_folder_path.is_dir():
+        st.error(f"Folder not found: `{music_folder}`")
+    else:
+        music_files = sorted(
+            p for p in music_folder_path.iterdir()
+            if p.suffix.lower() in (".wav", ".mp3", ".aiff", ".m4a", ".flac")
+        )
+        if not music_files:
+            st.warning("No audio files found in that folder.")
+        else:
+            st.success(f"✓ {len(music_files)} track{'s' if len(music_files) != 1 else ''} found")
 
 if music_files:
     selected_music = st.selectbox(
@@ -56,8 +64,6 @@ if music_files:
     )
     music_path = selected_music
     st.caption(f"`{music_path}`")
-else:
-    st.info("Enter a folder path above containing audio files.")
 
 # ─── CLIP POOL ─────────────────────────────────────────────────────────────────
 
@@ -67,65 +73,69 @@ VIDEO_EXTS = {".mov", ".mp4", ".mxf", ".avi", ".mkv", ".m4v"}
 
 clips_config: list[dict] = []  # [{path, offset, enabled}]
 
-if clips_folder and Path(clips_folder).is_dir():
-    clip_files = sorted(
-        p for p in Path(clips_folder).iterdir()
-        if p.suffix.lower() in VIDEO_EXTS
-    )
-
-    if not clip_files:
-        st.warning("No video files found in that folder.")
+if clips_folder:
+    clips_folder_path = Path(clips_folder)
+    if not clips_folder_path.is_dir():
+        st.error(f"Folder not found: `{clips_folder}`")
     else:
-        st.caption(f"{len(clip_files)} clips found")
+        clip_files = sorted(
+            p for p in clips_folder_path.iterdir()
+            if p.suffix.lower() in VIDEO_EXTS
+        )
+        if not clip_files:
+            st.warning("No video files found in that folder.")
 
-        # Generate thumbnails (cached by session state)
-        if "thumbnails" not in st.session_state or st.session_state.get("thumb_dir_key") != clips_folder:
-            st.session_state["thumb_dir_key"] = clips_folder
-            thumb_dir = Path(tempfile.mkdtemp(prefix="ez_mv_thumbs_"))
-            thumbs = {}
-            with st.spinner("Generating previews..."):
-                for clip in clip_files:
-                    thumb_path = thumb_dir / f"{clip.stem}.jpg"
-                    try:
-                        extract_thumbnail(clip, thumb_path)
-                        thumbs[clip] = thumb_path
-                    except Exception:
-                        thumbs[clip] = None
-            st.session_state["thumbnails"] = thumbs
+if clips_folder and Path(clips_folder).is_dir() and clip_files:
+    st.success(f"✓ {len(clip_files)} clip{'s' if len(clip_files) != 1 else ''} found — select which to include:")
 
-        thumbs = st.session_state["thumbnails"]
+    # Generate thumbnails (cached by session state)
+    if "thumbnails" not in st.session_state or st.session_state.get("thumb_dir_key") != clips_folder:
+        st.session_state["thumb_dir_key"] = clips_folder
+        thumb_dir = Path(tempfile.mkdtemp(prefix="ez_mv_thumbs_"))
+        thumbs = {}
+        with st.spinner("Generating previews..."):
+            for clip in clip_files:
+                thumb_path = thumb_dir / f"{clip.stem}.jpg"
+                try:
+                    extract_thumbnail(clip, thumb_path)
+                    thumbs[clip] = thumb_path
+                except Exception:
+                    thumbs[clip] = None
+        st.session_state["thumbnails"] = thumbs
 
-        # Render clip checklist in 4-column grid
-        cols_per_row = 4
-        rows = [clip_files[i:i+cols_per_row] for i in range(0, len(clip_files), cols_per_row)]
+    thumbs = st.session_state["thumbnails"]
 
-        for row in rows:
-            cols = st.columns(cols_per_row)
-            for col, clip in zip(cols, row):
-                with col:
-                    # Thumbnail
-                    if thumbs.get(clip):
-                        st.image(str(thumbs[clip]), use_container_width=True)
-                    else:
-                        st.markdown("*(no preview)*")
+    # Render clip checklist in 4-column grid
+    cols_per_row = 4
+    rows = [clip_files[i:i+cols_per_row] for i in range(0, len(clip_files), cols_per_row)]
 
-                    # Checkbox
-                    enabled = st.checkbox(clip.stem, value=True, key=f"chk_{clip}")
+    for row in rows:
+        cols = st.columns(cols_per_row)
+        for col, clip in zip(cols, row):
+            with col:
+                # Thumbnail
+                if thumbs.get(clip):
+                    st.image(str(thumbs[clip]), use_container_width=True)
+                else:
+                    st.markdown("*(no preview)*")
 
-                    # Auto-fill offset from philm if available
-                    auto_offset = None
-                    if philm_dir and philm_dir.is_dir():
-                        auto_offset = load_philm_offset(philm_dir, clip.stem)
+                # Checkbox
+                enabled = st.checkbox(clip.stem, value=True, key=f"chk_{clip}")
 
-                    default_offset = auto_offset if auto_offset is not None else 0.0
-                    label = f"offset (s)" + (" ✦" if auto_offset is not None else "")
-                    offset = st.number_input(
-                        label, min_value=0.0, value=default_offset,
-                        step=0.5, key=f"off_{clip}"
-                    )
+                # Auto-fill offset from philm if available
+                auto_offset = None
+                if philm_dir and philm_dir.is_dir():
+                    auto_offset = load_philm_offset(philm_dir, clip.stem)
 
-                    if enabled:
-                        clips_config.append({"path": clip, "offset": offset})
+                default_offset = auto_offset if auto_offset is not None else 0.0
+                label = f"offset (s)" + (" ✦" if auto_offset is not None else "")
+                offset = st.number_input(
+                    label, min_value=0.0, value=default_offset,
+                    step=0.5, key=f"off_{clip}"
+                )
+
+                if enabled:
+                    clips_config.append({"path": clip, "offset": offset})
 
 # ─── CUT PARAMETERS ────────────────────────────────────────────────────────────
 
