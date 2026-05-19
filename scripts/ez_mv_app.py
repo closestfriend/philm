@@ -403,6 +403,7 @@ with tab_drift:
                 st.rerun()
 
     drift_video_files = []
+    drift_clips_selected = []
     DRIFT_VIDEO_EXTS = {".mov", ".mp4", ".avi", ".mkv", ".mpg", ".mpeg", ".mts", ".m4v"}
 
     if drift_videos_folder:
@@ -437,6 +438,7 @@ with tab_drift:
                 cols_per_row = 4
                 rows = [drift_video_files[i:i+cols_per_row]
                         for i in range(0, len(drift_video_files), cols_per_row)]
+                drift_clips_selected = []
                 for row in rows:
                     cols = st.columns(cols_per_row)
                     for col, clip in zip(cols, row):
@@ -445,7 +447,8 @@ with tab_drift:
                                 st.image(str(dt[clip]), use_container_width=True)
                             else:
                                 st.markdown("*(no preview)*")
-                            st.caption(clip.stem)
+                            if st.checkbox(clip.stem, value=True, key=f"drift_chk_{clip}"):
+                                drift_clips_selected.append(clip)
 
     # ─── AUDIO FILE ──────────────────────────────────────────────────────────
 
@@ -527,7 +530,7 @@ with tab_drift:
 
     st.header("4. Generate")
 
-    drift_ready = bool(drift_video_files) and drift_audio_valid
+    drift_ready = bool(drift_clips_selected) and drift_audio_valid
     if not drift_ready:
         st.info("Select a video folder and audio file to continue.")
 
@@ -535,7 +538,7 @@ with tab_drift:
                                   key="btn_drift_generate"):
         with st.status("Generating drift composition...", expanded=True) as drift_status:
             st.write(f"Audio: `{Path(drift_audio_path).name}` ({drift_audio_dur:.1f}s)")
-            st.write(f"Videos: `{drift_videos_folder}` ({len(drift_video_files)} clips)")
+            st.write(f"Videos: {len(drift_clips_selected)} clips selected")
 
             progress_bar = st.progress(0)
             progress_text = st.empty()
@@ -551,7 +554,7 @@ with tab_drift:
                     progress_text.text("Mixing audio...")
 
             drift_output = drift_build_composition(
-                videos=drift_videos_folder,
+                videos=",".join(str(p) for p in drift_clips_selected),
                 audio=drift_audio_path.strip(),
                 output_dir=str(output_dir),
                 decay_intensity=drift_decay,
