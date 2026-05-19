@@ -208,6 +208,7 @@ with _lc2:
 
 lipsync_clip = None
 lipsync_weight = 3.0
+lipsync_offset = 0.0
 
 if lipsync_path_str.strip():
     lp = Path(lipsync_path_str.strip())
@@ -238,6 +239,11 @@ if lipsync_path_str.strip():
             if n_broll > 0:
                 pct = lipsync_weight / (n_broll + lipsync_weight) * 100
                 st.caption(f"~{pct:.0f}% of cuts will be lip-sync")
+            lipsync_offset = st.number_input(
+                "Song offset (s)",
+                min_value=-60.0, max_value=60.0, value=0.0, step=0.5,
+                help="Shift clip timing relative to the song. Negative = clip starts earlier than song; positive = clip starts later."
+            )
     else:
         st.warning("File not found or unsupported format.")
 
@@ -295,7 +301,7 @@ if ready and st.button("⚡ Generate MV", type="primary", use_container_width=Tr
         # Cut schedule — merge lip-sync clip into pool if provided
         all_clips = list(clips_config)
         if lipsync_clip:
-            all_clips.append({"path": lipsync_clip, "offset": 0.0, "lip_sync": True, "weight": lipsync_weight})
+            all_clips.append({"path": lipsync_clip, "offset": lipsync_offset, "lip_sync": True, "weight": lipsync_weight})
 
         schedule, seed = build_cut_schedule(
             beat_times, all_clips, video_duration, flash_prob, stutter_prob

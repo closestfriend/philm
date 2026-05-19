@@ -143,7 +143,7 @@ def build_cut_schedule(
             prev_is_ls = prev.get("lip_sync", False)
             clip = {
                 "path": prev["path"],
-                "offset": beat_t if prev_is_ls else prev["start_offset"],
+                "offset": prev.get("offset", 0.0),
                 "lip_sync": prev_is_ls,
                 "weight": prev.get("weight", 1.0),
             }
@@ -156,10 +156,11 @@ def build_cut_schedule(
                 pool_idx += 1
 
         is_lip_sync = clip.get("lip_sync", False)
+        start_offset = beat_t + clip.get("offset", 0.0) if is_lip_sync else clip["offset"]
 
         schedule.append({
             "path": clip["path"],
-            "start_offset": beat_t if is_lip_sync else clip["offset"],
+            "start_offset": start_offset,
             "duration": duration,
             "flash_before": rng.random() < flash_prob,
             "stutter": stutter,
@@ -243,7 +244,7 @@ def assemble(
             src_dur = src_durations[src]
 
             if entry.get("lip_sync", False):
-                start = entry["beat_time"]
+                start = max(0.0, entry["start_offset"])
                 if start + duration > src_dur:
                     start = max(0.0, src_dur - duration - 0.1)
             else:
