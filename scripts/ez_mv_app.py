@@ -181,6 +181,66 @@ if clips_folder and Path(clips_folder).is_dir() and clip_files:
                 if enabled:
                     clips_config.append({"path": clip, "offset": offset})
 
+# ─── LIP-SYNC CLIP ─────────────────────────────────────────────────────────────
+
+st.header("Lip-sync clip (optional)")
+
+if "lipsync_path" not in st.session_state:
+    st.session_state["lipsync_path"] = ""
+if "_lipsync_path_pending" in st.session_state:
+    st.session_state["lipsync_path"] = st.session_state.pop("_lipsync_path_pending")
+
+_lc1, _lc2 = st.columns([5, 1])
+with _lc1:
+    lipsync_path_str = st.text_input("Performer clip", key="lipsync_path", placeholder="Path to lip-sync clip (optional)")
+with _lc2:
+    st.write("")
+    if st.button("📂", key="browse_lipsync", help="Browse for file"):
+        result = subprocess.run(
+            ["osascript", "-e", 'POSIX path of (choose file with prompt "Select lip-sync clip")'],
+            capture_output=True, text=True
+        )
+        if result.returncode == 0:
+            p = result.stdout.strip()
+            if p:
+                st.session_state["_lipsync_path_pending"] = p
+                st.rerun()
+
+lipsync_clip = None
+lipsync_weight = 3.0
+
+if lipsync_path_str.strip():
+    lp = Path(lipsync_path_str.strip())
+    if lp.exists() and lp.suffix.lower() in VIDEO_EXTS:
+        lipsync_clip = lp
+
+        col_thumb, col_ctrl = st.columns([1, 2])
+        with col_thumb:
+            if "lipsync_thumb" not in st.session_state or st.session_state.get("lipsync_thumb_key") != str(lp):
+                st.session_state["lipsync_thumb_key"] = str(lp)
+                thumb_dir = Path(tempfile.mkdtemp(prefix="ez_mv_ls_"))
+                thumb_path = thumb_dir / "lipsync_thumb.jpg"
+                try:
+                    extract_thumbnail(lp, thumb_path)
+                    st.session_state["lipsync_thumb"] = str(thumb_path)
+                except Exception:
+                    st.session_state["lipsync_thumb"] = None
+            if st.session_state.get("lipsync_thumb"):
+                st.image(st.session_state["lipsync_thumb"], use_container_width=True)
+
+        with col_ctrl:
+            lipsync_weight = st.slider(
+                "Appearance frequency",
+                min_value=1.0, max_value=10.0, value=3.0, step=0.5,
+                help="Weight vs each B-roll clip at 1.0 — 3 means ~3× more likely than any single B-roll clip"
+            )
+            n_broll = len(clips_config)
+            if n_broll > 0:
+                pct = lipsync_weight / (n_broll + lipsync_weight) * 100
+                st.caption(f"~{pct:.0f}% of cuts will be lip-sync")
+    else:
+        st.warning("File not found or unsupported format.")
+
 # ─── CUT PARAMETERS ────────────────────────────────────────────────────────────
 
 st.header("3. Cut Parameters")
@@ -232,13 +292,19 @@ if ready and st.button("⚡ Generate MV", type="primary", use_container_width=Tr
         beat_times = apply_cut_density(raw_beats, cut_density)
         st.write(f"✓ {tempo:.1f} BPM → {len(beat_times)} cut points at {cut_density}x density")
 
-        # Cut schedule
+        # Cut schedule — merge lip-sync clip into pool if provided
+        all_clips = list(clips_config)
+        if lipsync_clip:
+            all_clips.append({"path": lipsync_clip, "offset": 0.0, "lip_sync": True, "weight": lipsync_weight})
+
         schedule, seed = build_cut_schedule(
-            beat_times, clips_config, video_duration, flash_prob, stutter_prob
+            beat_times, all_clips, video_duration, flash_prob, stutter_prob
         )
         flash_n = sum(1 for s in schedule if s["flash_before"])
         stutter_n = sum(1 for s in schedule if s["stutter"])
-        st.write(f"✓ {len(schedule)} cuts — {flash_n} flashes, {stutter_n} stutters (seed: {seed})")
+        ls_n = sum(1 for s in schedule if s.get("lip_sync"))
+        detail = f"{flash_n} flashes, {stutter_n} stutters" + (f", {ls_n} lip-sync" if ls_n else "")
+        st.write(f"✓ {len(schedule)} cuts — {detail} (seed: {seed})")
 
         # Versioned output path
         existing = sorted(output_dir.glob("ez_mv_v*.mp4"))
@@ -280,6 +346,8 @@ if ready and st.button("⚡ Generate MV", type="primary", use_container_width=Tr
         "flash_prob": flash_prob,
         "stutter_prob": stutter_prob,
         "clips": [str(c["path"]) for c in clips_config],
+        "lipsync_clip": str(lipsync_clip) if lipsync_clip else None,
+        "lipsync_weight": lipsync_weight if lipsync_clip else None,
     }
     meta_path = output_path.with_suffix(".json")
     meta_path.write_text(json.dumps(meta, indent=2))

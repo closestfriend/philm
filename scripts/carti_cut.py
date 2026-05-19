@@ -33,6 +33,12 @@ FLASH_PROBABILITY = 0.25  # every ~4th beat
 # Probability of stutter (repeat same clip twice)
 STUTTER_PROBABILITY = 0.15
 
+# Probability of in-frame resize (video shrunk inside black frame)
+SHRINK_PROBABILITY = 0.20
+
+# Probability of zoom-crop (punch in tight on center)
+ZOOM_PROBABILITY = 0.12
+
 
 # ─── HELPERS ───────────────────────────────────────────────────────────────────
 
@@ -119,43 +125,60 @@ def detect_beats(music_path: Path, video_duration: float) -> list[float]:
 def build_cut_schedule(beat_times: list[float], clip_pool: list) -> list[dict]:
     """
     Assign each beat interval a clip from the pool.
-    Returns list of dicts: {clip_id, start_offset, duration, flash_before, stutter}
+    Returns list of dicts: {clip_id, start_offset, duration, flash_before, stutter, beat_time, effect, lip_sync}
+
+    Clips with lip_sync=True are song-locked: start_offset = beat_time on every occurrence.
+    Weighted selection activates when any clip has lip_sync=True or weight != 1.0.
     """
     seed = random.randint(0, 9999)
     print(f"Random seed: {seed} (rerun with this to reproduce)")
     rng = random.Random(seed)
     pool = list(clip_pool)
-    rng.shuffle(pool)
+
+    use_weights = any(c.get("lip_sync", False) or c.get("weight", 1.0) != 1.0 for c in pool)
+    if not use_weights:
+        rng.shuffle(pool)
 
     schedule = []
     pool_idx = 0
 
     for i, beat_t in enumerate(beat_times):
-        # Duration = time to next beat (or a short clip at end)
         if i + 1 < len(beat_times):
             duration = beat_times[i + 1] - beat_t
         else:
-            duration = 0.5  # tail
+            duration = 0.5
 
-        # Skip very short segments (< 1 frame)
         if duration < FLASH_DURATION:
             continue
 
-        # Occasionally double-cut (stutter) — schedule same clip twice
         stutter = rng.random() < STUTTER_PROBABILITY
 
-        # Advance clip (or stutter stays on same clip)
-        if not stutter or len(schedule) == 0:
-            clip_id, start_offset, _ = pool[pool_idx % len(pool)]
-            pool_idx += 1
-        else:
-            # Repeat last clip
+        if stutter and len(schedule) > 0:
             prev = schedule[-1]
+            prev_is_ls = prev.get("lip_sync", False)
             clip_id = prev["clip_id"]
-            start_offset = prev["start_offset"] + prev["duration"]
+            start_offset = beat_t if prev_is_ls else prev["start_offset"] + prev["duration"]
+            is_lip_sync = prev_is_ls
+        else:
+            if use_weights:
+                weights = [c.get("weight", 1.0) for c in pool]
+                entry = rng.choices(pool, weights=weights, k=1)[0]
+            else:
+                entry = pool[pool_idx % len(pool)]
+                pool_idx += 1
+            clip_id = entry["clip_id"]
+            is_lip_sync = entry.get("lip_sync", False)
+            start_offset = beat_t if is_lip_sync else entry["offset"]
 
-        # Flash frame before this cut?
         flash_before = rng.random() < FLASH_PROBABILITY
+
+        roll = rng.random()
+        if roll < SHRINK_PROBABILITY:
+            effect = "shrink"
+        elif roll < SHRINK_PROBABILITY + ZOOM_PROBABILITY:
+            effect = "zoom"
+        else:
+            effect = "normal"
 
         schedule.append({
             "clip_id": clip_id,
@@ -164,6 +187,8 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list) -> list[dict]:
             "flash_before": flash_before,
             "stutter": stutter,
             "beat_time": beat_t,
+            "effect": effect,
+            "lip_sync": is_lip_sync,
         })
 
     return schedule
@@ -197,20 +222,50 @@ def extract_segment(
     start: float,
     duration: float,
     output: Path,
+    effect: str = "normal",
+    rng: random.Random | None = None,
 ):
-    """Extract a video-only segment, scaled and padded to OUTPUT_SIZE."""
+    """Extract a video-only segment with optional in-frame effects."""
+    if effect == "shrink":
+        # Shrink to 40-70% and float inside black frame
+        scale_pct = (rng.uniform(0.4, 0.7) if rng else 0.55)
+        inner_w = int(1920 * scale_pct)
+        inner_h = int(1080 * scale_pct)
+        # Random position within frame
+        max_x = 1920 - inner_w
+        max_y = 1080 - inner_h
+        off_x = rng.randint(0, max_x) if rng else max_x // 2
+        off_y = rng.randint(0, max_y) if rng else max_y // 2
+        vf = (
+            f"scale={inner_w}:{inner_h}:force_original_aspect_ratio=decrease,"
+            f"pad=1920:1080:{off_x}:{off_y}:black,"
+            f"fps={TARGET_FPS}"
+        )
+    elif effect == "zoom":
+        # Zoom/crop into center 40-70% of frame
+        crop_pct = (rng.uniform(0.4, 0.7) if rng else 0.55)
+        vf = (
+            f"scale={OUTPUT_SIZE}:force_original_aspect_ratio=decrease,"
+            f"pad={OUTPUT_SIZE}:(ow-iw)/2:(oh-ih)/2,"
+            f"crop=iw*{crop_pct:.2f}:ih*{crop_pct:.2f}:(iw-iw*{crop_pct:.2f})/2:(ih-ih*{crop_pct:.2f})/2,"
+            f"scale={OUTPUT_SIZE},"
+            f"fps={TARGET_FPS}"
+        )
+    else:
+        vf = (
+            f"scale={OUTPUT_SIZE}:force_original_aspect_ratio=decrease,"
+            f"pad={OUTPUT_SIZE}:(ow-iw)/2:(oh-ih)/2,"
+            f"fps={TARGET_FPS}"
+        )
+
     run([
         "ffmpeg", "-y",
         "-ss", f"{start:.4f}",
         "-t", f"{duration:.4f}",
         "-i", str(source),
-        "-vf", (
-            f"scale={OUTPUT_SIZE}:force_original_aspect_ratio=decrease,"
-            f"pad={OUTPUT_SIZE}:(ow-iw)/2:(oh-ih)/2,"
-            f"fps={TARGET_FPS}"
-        ),
+        "-vf", vf,
         "-c:v", "libx264", "-preset", "fast", "-crf", "18",
-        "-an",  # strip audio — music added at final stage
+        "-an",
         str(output)
     ])
 
@@ -246,6 +301,8 @@ def main():
     parser.add_argument("--files", nargs="+", type=Path, help="Individual video file paths")
     parser.add_argument("--output", type=Path, default=Path("carti_cuts"), help="Output directory (default: carti_cuts)")
     parser.add_argument("--compress", action="store_true", help="Create 1080p H.264 proxies for faster processing (cached)")
+    parser.add_argument("--lipsync", nargs="+", type=Path, metavar="FILE", help="Lip-sync clip(s) — shot to playback, clip time = song time")
+    parser.add_argument("--lipsync-weight", type=float, default=3.0, metavar="W", help="Weight for lip-sync clips vs B-roll (default: 3.0)")
     args = parser.parse_args()
 
     if not args.clips and not args.files:
@@ -288,10 +345,19 @@ def main():
     CLIP_POOL = []
     for p in clip_files:
         dur = probe_duration(p)
-        # Random offset in the first 75% of clip (leave room for beats)
         max_start = max(0, dur * 0.75)
         offset = random.uniform(0, max_start)
-        CLIP_POOL.append((p.stem, offset, p.name))
+        CLIP_POOL.append({"clip_id": p.stem, "offset": offset, "name": p.name, "lip_sync": False, "weight": 1.0})
+
+    # Add lip-sync clips (song-locked — offset is overridden by beat_time at schedule time)
+    if args.lipsync:
+        for lsp in args.lipsync:
+            if not lsp.exists():
+                raise FileNotFoundError(f"Lip-sync clip not found: {lsp}")
+            clip_paths[lsp.stem] = lsp
+            CLIP_POOL.append({"clip_id": lsp.stem, "offset": 0.0, "name": lsp.name, "lip_sync": True, "weight": args.lipsync_weight})
+        print(f"✓ {len(args.lipsync)} lip-sync clip(s) added (weight {args.lipsync_weight})\n")
+
     print(f"✓ {len(clip_files)} source clips found\n")
 
     # Get track duration
@@ -304,7 +370,9 @@ def main():
     schedule = build_cut_schedule(beat_times, CLIP_POOL)
     flash_count = sum(1 for s in schedule if s["flash_before"])
     stutter_count = sum(1 for s in schedule if s["stutter"])
-    print(f"✓ {len(schedule)} cuts planned ({flash_count} flash frames, {stutter_count} stutters)\n")
+    shrink_count = sum(1 for s in schedule if s.get("effect") == "shrink")
+    zoom_count = sum(1 for s in schedule if s.get("effect") == "zoom")
+    print(f"✓ {len(schedule)} cuts planned ({flash_count} flash, {stutter_count} stutter, {shrink_count} shrink, {zoom_count} zoom)\n")
 
     # Versioned output filename — never overwrite
     existing = sorted(output_dir.glob("carti_cut_v*.mp4"))
@@ -327,8 +395,10 @@ def main():
         ordered_segments: list[Path] = []
         seg_idx = 0
 
-        # Track clip playhead per clip so segments don't overlap
-        clip_playhead: dict[str, float] = {c: off for c, off, _ in CLIP_POOL}
+        # Track clip playhead per B-roll clip (lip-sync clips are song-locked, no playhead)
+        clip_playhead: dict[str, float] = {
+            c["clip_id"]: c["offset"] for c in CLIP_POOL if not c.get("lip_sync", False)
+        }
 
         for entry in schedule:
             clip_id = entry["clip_id"]
@@ -338,20 +408,24 @@ def main():
                 ordered_segments.append(white_flash)
 
             seg_path = segments_dir / f"seg_{seg_idx:05d}.mp4"
-            start = clip_playhead[clip_id]
             duration = entry["duration"]
-
-            # Safety: don't read past end of source
             src_duration = probe_duration(source)
-            if start + duration > src_duration:
-                start = max(0.0, src_duration - duration - 0.1)
 
-            extract_segment(source, start, duration, seg_path)
+            if entry.get("lip_sync", False):
+                start = entry["beat_time"]
+                if start + duration > src_duration:
+                    start = max(0.0, src_duration - duration - 0.1)
+            else:
+                start = clip_playhead[clip_id]
+                if start + duration > src_duration:
+                    start = max(0.0, src_duration - duration - 0.1)
+                if not entry["stutter"]:
+                    clip_playhead[clip_id] = start + duration
+
+            extract_segment(source, start, duration, seg_path,
+                            effect=entry.get("effect", "normal"),
+                            rng=random.Random(seg_idx))
             ordered_segments.append(seg_path)
-
-            # Advance playhead (stutter clips share a short window)
-            if not entry["stutter"]:
-                clip_playhead[clip_id] = start + duration
 
             seg_idx += 1
 
