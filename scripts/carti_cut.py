@@ -261,8 +261,9 @@ def extract_segment(
     run([
         "ffmpeg", "-y",
         "-ss", f"{start:.4f}",
-        "-t", f"{duration:.4f}",
+        "-accurate_seek",
         "-i", str(source),
+        "-t", f"{duration:.4f}",
         "-vf", vf,
         "-c:v", "libx264", "-preset", "fast", "-crf", "18",
         "-an",

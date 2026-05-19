@@ -184,8 +184,10 @@ def generate_flash_frame(tmp_dir: Path) -> Path:
 def extract_segment(source: Path, start: float, duration: float, output: Path):
     run([
         "ffmpeg", "-y",
-        "-ss", f"{start:.4f}", "-t", f"{duration:.4f}",
+        "-ss", f"{start:.4f}",
+        "-accurate_seek",
         "-i", str(source),
+        "-t", f"{duration:.4f}",
         "-vf", (
             f"scale={OUTPUT_SIZE}:force_original_aspect_ratio=decrease,"
             f"pad={OUTPUT_SIZE}:(ow-iw)/2:(oh-ih)/2,"
