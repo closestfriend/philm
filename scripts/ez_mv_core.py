@@ -103,7 +103,7 @@ def load_philm_offset(analysis_dir: Path, clip_stem: str) -> float | None:
 
 def build_cut_schedule(
     beat_times: list[float],
-    clips: list[dict],          # [{"path": Path, "offset": float}, ...]
+    clips: list[dict],          # [{"path": Path, "offset": float, "lip_sync"?: bool, "weight"?: float}, ...]
     video_duration: float,
     flash_prob: float,
     stutter_prob: float,
@@ -111,16 +111,22 @@ def build_cut_schedule(
 ) -> tuple[list[dict], int]:
     """
     Returns (schedule, seed_used).
-    Each schedule entry: {path, start_offset, duration, flash_before, stutter, beat_time}
+    Each schedule entry: {path, start_offset, duration, flash_before, stutter, beat_time, lip_sync}
+
+    Lip-sync clips (lip_sync=True) are song-locked: start_offset = beat_time on every occurrence,
+    including stutters. Weighted selection activates when any clip has lip_sync=True or weight != 1.0;
+    otherwise existing round-robin shuffle runs unchanged.
     """
     if seed is None:
         seed = random.randint(0, 9999)
     rng = random.Random(seed)
 
     pool = list(clips)
-    rng.shuffle(pool)
+    use_weights = any(c.get("lip_sync", False) or c.get("weight", 1.0) != 1.0 for c in pool)
 
-    # Filter beats to track duration
+    if not use_weights:
+        rng.shuffle(pool)
+
     beat_times = [t for t in beat_times if t < video_duration]
 
     schedule = []
@@ -132,21 +138,33 @@ def build_cut_schedule(
             continue
 
         stutter = rng.random() < stutter_prob
-        if not stutter or len(schedule) == 0:
-            clip = pool[pool_idx % len(pool)]
-            pool_idx += 1
-        else:
-            # Repeat last clip from same position (stutter effect)
+        if stutter and len(schedule) > 0:
             prev = schedule[-1]
-            clip = {"path": prev["path"], "offset": prev["start_offset"]}
+            prev_is_ls = prev.get("lip_sync", False)
+            clip = {
+                "path": prev["path"],
+                "offset": beat_t if prev_is_ls else prev["start_offset"],
+                "lip_sync": prev_is_ls,
+                "weight": prev.get("weight", 1.0),
+            }
+        else:
+            if use_weights:
+                weights = [c.get("weight", 1.0) for c in pool]
+                clip = rng.choices(pool, weights=weights, k=1)[0]
+            else:
+                clip = pool[pool_idx % len(pool)]
+                pool_idx += 1
+
+        is_lip_sync = clip.get("lip_sync", False)
 
         schedule.append({
             "path": clip["path"],
-            "start_offset": clip["offset"],
+            "start_offset": beat_t if is_lip_sync else clip["offset"],
             "duration": duration,
             "flash_before": rng.random() < flash_prob,
             "stutter": stutter,
             "beat_time": beat_t,
+            "lip_sync": is_lip_sync,
         })
 
     return schedule, seed
@@ -197,11 +215,11 @@ def assemble(
         ordered_segments: list[Path] = []
         playhead: dict[Path, float] = {}
 
-        # Initialize playheads from first occurrence of each clip
+        # Initialize playheads for B-roll clips only (lip-sync clips are song-locked, no playhead needed)
         seen = set()
         for entry in schedule:
             p = entry["path"]
-            if p not in seen:
+            if p not in seen and not entry.get("lip_sync", False):
                 playhead[p] = entry["start_offset"]
                 seen.add(p)
 
@@ -219,18 +237,22 @@ def assemble(
 
             seg_path = segs_dir / f"seg_{idx:05d}.mp4"
             src = entry["path"]
-            start = playhead[src]
             duration = entry["duration"]
-
             src_dur = src_durations[src]
-            if start + duration > src_dur:
-                start = max(0.0, src_dur - duration - 0.1)
+
+            if entry.get("lip_sync", False):
+                start = entry["beat_time"]
+                if start + duration > src_dur:
+                    start = max(0.0, src_dur - duration - 0.1)
+            else:
+                start = playhead[src]
+                if start + duration > src_dur:
+                    start = max(0.0, src_dur - duration - 0.1)
+                if not entry["stutter"]:
+                    playhead[src] = start + duration
 
             extract_segment(src, start, duration, seg_path)
             ordered_segments.append(seg_path)
-
-            if not entry["stutter"]:
-                playhead[src] = start + duration
 
             if progress_callback:
                 progress_callback(idx + 1, total)
