@@ -58,3 +58,6 @@ htmlcov/
 *.m4v
 *.webm
 documentary/output/
+
+# MIR prototype venv (essentia, Python 3.13)
+.venv-mir/
