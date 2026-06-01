@@ -12,7 +12,7 @@ from rich.console import Console
 from dotenv import load_dotenv
 
 from . import __version__
-from .analyzer import configure_genai, upload_video, analyze_video, analyze_with_custom_prompt
+from .analyzer import configure_genai, upload_video, analyze_video, analyze_with_custom_prompt, delete_video
 from .technical import get_technical_metrics, format_technical_context
 from .modes import get_mode, get_chart_prompt, ALL_MODES, CHART_MODES
 from .models import SimpleResult, NumericResult
@@ -360,6 +360,7 @@ def main(
                     mode_def = get_mode_def(mode_name)
                     result_obj = mode_def.result_model.model_validate(result_data)
                     format_for_display(result_obj, mode_name)
+        delete_video(video_file)
         return
 
     # =========================================================================
@@ -412,6 +413,9 @@ def main(
     else:
         # Rich formatted display
         format_for_display(result, mode_name)
+
+    # Clean up uploaded file from Gemini storage
+    delete_video(video_file)
 
 
 # Register archive subcommands

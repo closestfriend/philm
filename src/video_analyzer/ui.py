@@ -183,6 +183,12 @@ async def job_status(video_id: int, mode: str):
     return {"running": job_key in _running_jobs}
 
 
+@app.get("/api/analyze/running")
+async def running_jobs():
+    """Return all currently running job keys (video_id:mode)."""
+    return {"running": list(_running_jobs)}
+
+
 def _run_analysis(video_id: int, mode: str, job_key: str):
     try:
         archive = get_archive()

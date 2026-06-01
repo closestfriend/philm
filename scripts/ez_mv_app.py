@@ -143,6 +143,13 @@ with tab_ezmv:
 
     VIDEO_EXTS = {".mov", ".mp4", ".mxf", ".avi", ".mkv", ".m4v", ".mpg", ".mpeg"}
 
+    clips_exclude = st.text_input(
+        "Exclude subfolder (optional)",
+        key="clips_exclude",
+        placeholder="e.g. photography by hunter karman",
+        help="Any clip whose path contains this string will be skipped",
+    )
+
     clips_config: list[dict] = []
     clip_files = []
 
@@ -152,8 +159,9 @@ with tab_ezmv:
             st.error(f"Folder not found: `{clips_folder}`")
         else:
             clip_files = sorted(
-                p for p in clips_folder_path.iterdir()
+                p for p in clips_folder_path.rglob("*")
                 if p.suffix.lower() in VIDEO_EXTS
+                and (not clips_exclude or clips_exclude not in str(p))
             )
             if not clip_files:
                 st.warning("No video files found in that folder.")
@@ -406,13 +414,22 @@ with tab_drift:
     drift_clips_selected = []
     DRIFT_VIDEO_EXTS = {".mov", ".mp4", ".avi", ".mkv", ".mpg", ".mpeg", ".mts", ".m4v"}
 
+    drift_exclude = st.text_input(
+        "Exclude subfolder (optional)",
+        key="drift_exclude",
+        placeholder="e.g. photography by hunter karman",
+        help="Any clip whose path contains this string will be skipped",
+    )
+
     if drift_videos_folder:
         dvf_path = Path(drift_videos_folder)
         if not dvf_path.is_dir():
             st.error(f"Folder not found: `{drift_videos_folder}`")
         else:
             drift_video_files = sorted(
-                f for f in dvf_path.iterdir() if f.suffix.lower() in DRIFT_VIDEO_EXTS
+                f for f in dvf_path.rglob("*")
+                if f.suffix.lower() in DRIFT_VIDEO_EXTS
+                and (not drift_exclude or drift_exclude not in str(f))
             )
             if not drift_video_files:
                 st.warning("No video files found in that folder.")

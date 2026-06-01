@@ -12,7 +12,7 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 from rich.panel import Panel
 
-from .analyzer import upload_video, analyze_video, VIDEO_MIME_TYPES
+from .analyzer import upload_video, analyze_video, delete_video, VIDEO_MIME_TYPES
 from .modes import get_mode, ALL_MODES
 from .output import format_for_display, format_as_json
 
@@ -185,6 +185,9 @@ def run_batch(
                     }, f, indent=2)
 
                 console.print(f"  [green]Saved:[/green] {video_output.name}")
+
+                # Clean up uploaded file from Gemini storage
+                delete_video(video_file)
 
             except Exception as e:
                 console.print(f"  [red]Failed:[/red] {e}")

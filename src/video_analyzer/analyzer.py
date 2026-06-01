@@ -235,3 +235,13 @@ Place each relevant moment into the timecodes array with the timestamp and descr
         return result
     except Exception as e:
         raise RuntimeError(f"Failed to parse response: {e}\n\nRaw response: {response.text}")
+
+
+def delete_video(video_file: Any) -> None:
+    """Delete an uploaded video from Gemini storage to free quota."""
+    try:
+        client = get_client()
+        client.files.delete(name=video_file.name)
+        print(f"Cleaned up: {video_file.display_name}", file=sys.stderr, flush=True)
+    except Exception as e:
+        print(f"Cleanup warning: {e}", file=sys.stderr, flush=True)

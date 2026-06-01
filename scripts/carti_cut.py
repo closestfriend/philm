@@ -300,6 +300,8 @@ def main():
     parser.add_argument("--music", required=True, type=Path, help="Path to music track (WAV/MP3)")
     parser.add_argument("--clips", type=Path, help="Folder containing video clips")
     parser.add_argument("--files", nargs="+", type=Path, help="Individual video file paths")
+    parser.add_argument("--recursive", action="store_true", help="Scan clips folder recursively")
+    parser.add_argument("--exclude", type=str, metavar="STR", help="Skip clips whose path contains this string")
     parser.add_argument("--output", type=Path, default=Path("carti_cuts"), help="Output directory (default: carti_cuts)")
     parser.add_argument("--compress", action="store_true", help="Create 1080p H.264 proxies for faster processing (cached)")
     parser.add_argument("--lipsync", nargs="+", type=Path, metavar="FILE", help="Lip-sync clip(s) — shot to playback, clip time = song time")
@@ -328,9 +330,11 @@ def main():
                 raise FileNotFoundError(f"Clip not found: {f}")
             clip_files.append(f)
     else:
+        scanner = args.clips.rglob("*") if args.recursive else args.clips.iterdir()
         clip_files = sorted(
-            p for p in args.clips.iterdir()
+            p for p in scanner
             if p.suffix.lower() in VIDEO_EXTS
+            and (not args.exclude or args.exclude not in str(p))
         )
     if not clip_files:
         raise FileNotFoundError("No video files found")
