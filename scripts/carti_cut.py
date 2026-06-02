@@ -104,7 +104,29 @@ def ensure_proxies(clip_files: list[Path]) -> list[Path]:
 
 # ─── STEP 1: BEAT DETECTION ────────────────────────────────────────────────────
 
-def detect_beats(music_path: Path, video_duration: float) -> list[float]:
+def apply_cut_density(beat_times: list[float], density: float) -> list[float]:
+    """
+    density: 1.0 = every beat, 0.25 = every 4th beat, 2.0 = every half-beat.
+    Values < 1.0 subsample; values > 1.0 interpolate midpoints between beats.
+    """
+    if density <= 0 or density == 1.0:
+        return beat_times
+    if density < 1.0:
+        step = max(1, round(1.0 / density))
+        return beat_times[::step]
+    n_interp = round(density) - 1
+    result = []
+    for i in range(len(beat_times) - 1):
+        result.append(beat_times[i])
+        for j in range(1, n_interp + 1):
+            t = beat_times[i] + (beat_times[i + 1] - beat_times[i]) * j / (n_interp + 1)
+            result.append(t)
+    if beat_times:
+        result.append(beat_times[-1])
+    return result
+
+
+def detect_beats(music_path: Path, video_duration: float, density: float = 1.0) -> list[float]:
     print(f"Loading music: {music_path.name}")
     y, sr = librosa.load(str(music_path))
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
@@ -115,8 +137,10 @@ def detect_beats(music_path: Path, video_duration: float) -> list[float]:
     if BEAT_DIVISOR > 1:
         beat_times = beat_times[::BEAT_DIVISOR]
 
+    beat_times = apply_cut_density(beat_times, density)
+
     tempo_val = float(tempo) if tempo.ndim == 0 else float(tempo[0])
-    print(f"Detected tempo: {tempo_val:.1f} BPM → {len(beat_times)} cut points")
+    print(f"Detected tempo: {tempo_val:.1f} BPM → {len(beat_times)} cut points (density {density})")
     return beat_times
 
 
@@ -302,6 +326,7 @@ def main():
     parser.add_argument("--files", nargs="+", type=Path, help="Individual video file paths")
     parser.add_argument("--recursive", action="store_true", help="Scan clips folder recursively")
     parser.add_argument("--exclude", type=str, metavar="STR", help="Skip clips whose path contains this string")
+    parser.add_argument("--density", type=float, default=1.0, metavar="D", help="Cut density: 1.0=every beat, 2.0=half-beat (2x cuts), 0.5=every other beat")
     parser.add_argument("--output", type=Path, default=Path("carti_cuts"), help="Output directory (default: carti_cuts)")
     parser.add_argument("--compress", action="store_true", help="Create 1080p H.264 proxies for faster processing (cached)")
     parser.add_argument("--lipsync", nargs="+", type=Path, metavar="FILE", help="Lip-sync clip(s) — shot to playback, clip time = song time")
@@ -369,7 +394,7 @@ def main():
     video_duration = probe_duration(music_track)
 
     # Step 1: Beat detection
-    beat_times = detect_beats(music_track, video_duration)
+    beat_times = detect_beats(music_track, video_duration, density=args.density)
 
     # Step 2: Cut schedule
     schedule = build_cut_schedule(beat_times, CLIP_POOL)
