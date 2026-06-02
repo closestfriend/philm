@@ -12,6 +12,7 @@ import tempfile
 from pathlib import Path
 
 import librosa
+import numpy as np
 from media_utils import ffprobe_duration as probe_duration  # noqa: F401
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────────
@@ -131,7 +132,7 @@ def detect_beats(music_path: Path, video_duration: float, density: float = 1.0) 
 
     beat_times = apply_cut_density(beat_times, density)
 
-    tempo_val = float(tempo) if tempo.ndim == 0 else float(tempo[0])
+    tempo_val = float(np.asarray(tempo).flatten()[0])
     print(f"Detected tempo: {tempo_val:.1f} BPM → {len(beat_times)} cut points (density {density})")
     return beat_times
 
