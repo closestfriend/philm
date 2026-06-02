@@ -8,7 +8,6 @@ compression artifacts accumulate, the image becomes a memory of itself.
 """
 
 import argparse
-import json
 import os
 import random
 import shutil
@@ -16,37 +15,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-
-VIDEO_EXTENSIONS = {'.mov', '.mp4', '.avi', '.mkv', '.mpg', '.mpeg', '.mts', '.m4v'}
-
-
-def ffprobe_duration(path):
-    result = subprocess.run(
-        ['ffprobe', '-v', 'quiet', '-show_entries', 'format=duration',
-         '-of', 'csv=p=0', path],
-        capture_output=True, text=True
-    )
-    return float(result.stdout.strip())
-
-
-def ffprobe_resolution(path):
-    result = subprocess.run(
-        ['ffprobe', '-v', 'quiet', '-select_streams', 'v:0',
-         '-show_entries', 'stream=width,height',
-         '-of', 'json', path],
-        capture_output=True, text=True
-    )
-    info = json.loads(result.stdout)
-    stream = info['streams'][0]
-    return int(stream['width']), int(stream['height'])
-
-
-def get_video_files(path):
-    p = Path(path)
-    if p.is_dir():
-        return sorted(f for f in p.iterdir() if f.suffix.lower() in VIDEO_EXTENSIONS)
-    else:
-        return [Path(v.strip()) for v in path.split(',')]
+from media_utils import VIDEO_EXTENSIONS, ffprobe_duration, ffprobe_resolution, get_video_files  # noqa: F401
 
 
 def extract_clip(video_path, start, duration, output_path,
