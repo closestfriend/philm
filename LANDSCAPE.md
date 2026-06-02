@@ -97,10 +97,26 @@ defining leap here is **MoviePy → raw FFmpeg** and **manual BPM → real beat 
 | 3 (philm) | `carti_cut.py` | **raw FFmpeg** | **real `librosa.beat_track`** | flash/stutter/zoom/shrink, proxies, lip-sync, versioned output, CLI |
 | 4 (philm) | `ez_mv_core.py` | **raw FFmpeg** | librosa + `apply_cut_density` | pure fn + `progress_callback`; reads philm affect/sizzle JSON to cut on peak-intensity moments |
 
-**Keeper:** `ez_mv_core.py` (most evolved engine, library-only) + CLI from `carti_cut.py`.
-The av-pair pair (`random_montage.py`, `beat_strobe.py`) are obsolete MoviePy prototypes —
-strictly superseded. Historical note: `beat_strobe.py`'s `--drift` flag is the conceptual
-seed that later became the entire *drift* family.
+**Most-evolved beat-sync engine:** `ez_mv_core.py` + CLI from `carti_cut.py`.
+
+⚠️ **The av-pair pair are NOT disposable (corrected 2026-05-31).** Earlier framing called
+`random_montage.py` / `beat_strobe.py` "obsolete prototypes — strictly superseded." That was
+wrong. They are **distinct creative instruments with capabilities the philm tools lack**, and
+are never-committed (working file is the only copy):
+- `random_montage.py` — aspect modes (`letterbox`/`stretch`/`native`) + **pure random montage,
+  no beat sync**. Referenced by 4 shell scripts (`batch_random_montage.sh`,
+  `batch_zeiss_montage.sh`, `test_aspect_modes*.sh`) and CLAUDE.md; the engine behind real
+  named output (*Zeiss*, *Glass Orchard*). **KEEP.**
+- `beat_strobe.py` — manual `--bpm`, `--beat-influence`, `--drift` (the dreamlike-timing idea
+  that seeded the whole *drift* family). Documented in CLAUDE.md. **KEEP.**
+
+The philm FFmpeg tools always beat-sync and always letterbox to 1920×1080, so they do **not**
+cover non-beat random montage, `stretch`/`native` aspect, manual BPM, or drift. These are real
+feature gaps, not redundancy.
+
+> Lesson: untracked + older-lineage ≠ disposable. For creative tooling, judge by what it makes,
+> not by code ancestry. Only `drift_composition.py` is a true byte-identical duplicate (of
+> philm's drift) — and even that is av-pair's sole drift engine.
 
 So the full montage picture is **two families × the same 3-4 stage av-pair→philm rewrite**:
 the philm `scripts/` versions are the evolved survivors in both.
@@ -175,8 +191,9 @@ the philm `scripts/` versions are the evolved survivors in both.
    submodules). Highest-risk-to-tooling, smallest effort.
 3. **Pick the canonical drift:** `drift_core.py` engine + CLI from `drift_cut.py`; retire the
    other two. Mind the seed gotcha for any saved seeds.
-4. **Pick the canonical strobe/rapid-cut:** `ez_mv_core.py` engine + CLI from `carti_cut.py`;
-   retire av-pair's `random_montage.py` + `beat_strobe.py` (obsolete MoviePy prototypes).
+4. **Pick the canonical *beat-synced* strobe/rapid-cut:** `ez_mv_core.py` engine + CLI from
+   `carti_cut.py`. **KEEP `random_montage.py` + `beat_strobe.py`** — they cover non-beat /
+   aspect-mode / drift cases the beat-synced tools don't, and are tied to real output.
 5. **Decide the canonical home for the montage engine** — does it live in `av-pair`, or has
    philm `scripts/` become the real one? Pick one repo; the other imports or is archived.
 6. **Collapse av-pair's ~6 interfaces** toward one Streamlit entry + one deploy target.

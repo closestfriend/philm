@@ -172,34 +172,45 @@ Expected: `src/` now lists only `av_pair/`, `cursed_generator/`, `replicate_clie
 
 ## Phase 3: Archive provably-dead code (both repos)
 
+> ⚠️ **CORRECTION (2026-05-31):** an earlier draft of this phase deleted
+> `random_montage.py`, `beat_strobe.py`, `drift_composition.py` as "obsolete prototypes."
+> That was wrong. Verified usage check shows `random_montage.py` is referenced by 4 shell
+> scripts (`batch_random_montage.sh`, `batch_zeiss_montage.sh`, `test_aspect_modes*.sh`) and
+> CLAUDE.md, and is the engine behind real named output (*Zeiss*, *Glass Orchard*).
+> `beat_strobe.py` has unique creative knobs (manual BPM, beat-influence, drift). They have
+> capabilities the philm tools lack (non-beat random montage, stretch/native aspect, drift) and
+> were **never committed** (working file is the only copy). **They are KEEPERS — not deleted
+> here.** Only clearly-dead artifacts are removed in this phase.
+
 **Files:**
-- Remove (untracked, philm): `PHILM/cli.ts`, `PHILM/functions.ts`, `PHILM/modes.ts`
+- Remove (untracked, philm — orphaned TypeScript ancestor): `PHILM/cli.ts`, `PHILM/functions.ts`, `PHILM/modes.ts`
 - Remove (empty, philm): `PHILM/100CANON_results/`, `PHILM/101CANON_results/`
-- Remove (UNTRACKED, av-pair — back up first, no git recovery!): `AVPAIR/src/av_pair/random_montage.py`, `AVPAIR/src/av_pair/beat_strobe.py`, `AVPAIR/src/av_pair/drift_composition.py`
 - Remove (TRACKED, av-pair): `AVPAIR/legacy/av_pair/create_composition.py`
+- **KEEP** (av-pair, do NOT delete): `random_montage.py`, `beat_strobe.py` (live creative instruments)
+- **DEFER** to Phase 7 (av-pair): `drift_composition.py` — the only true duplicate, but av-pair's sole drift engine; decide alongside the canonical-home question.
 
-- [ ] **Step 1: Verify nothing imports the av-pair prototypes (re-confirm before deleting)**
-
-```bash
-cd "/Volumes/2025_exSSD_2tb/💻 Development & Code/Development/av-pair"
-grep -rn -E 'random_montage|beat_strobe|drift_composition' . \
-  --include='*.py' --include='*.sh' | grep -vE 'src/av_pair/(random_montage|beat_strobe|drift_composition)\.py'
-```
-
-Expected: **no output** (confirmed 2026-05-31 — nothing imports them).
-
-- [ ] **Step 2: Back up the untracked files (these are NOT in git — backup is the only safety net)**
+- [ ] **Step 1: Back up the philm orphans (untracked → not in git, backup is the only safety net)**
 
 ```bash
 ARCH="/Volumes/2025_exSSD_2tb/_consolidation_2026-05-31/code-backups"
+mkdir -p "$ARCH"
 cd "/Volumes/2025_exSSD_2tb/video-analyzer-v2"
 cp cli.ts functions.ts modes.ts "$ARCH"/
-cd "/Volumes/2025_exSSD_2tb/💻 Development & Code/Development/av-pair"
-cp src/av_pair/random_montage.py src/av_pair/beat_strobe.py src/av_pair/drift_composition.py "$ARCH"/
 ls -la "$ARCH"
 ```
 
-Expected: 6 files in the archive (`cli.ts`, `functions.ts`, `modes.ts`, `random_montage.py`, `beat_strobe.py`, `drift_composition.py`).
+Expected: `cli.ts`, `functions.ts`, `modes.ts` present in the archive.
+
+- [ ] **Step 2: Confirm the `.ts` files really are the orphaned Google ancestor (not something live)**
+
+```bash
+cd "/Volumes/2025_exSSD_2tb/video-analyzer-v2"
+head -6 cli.ts modes.ts functions.ts
+grep -rln -E 'cli\.ts|functions\.ts|modes\.ts' . --include='*.json' --include='*.md' --include='*.py' 2>/dev/null \
+  | grep -v LANDSCAPE | grep -v drive-consolidation || echo "  (no project references — confirmed orphan)"
+```
+
+Expected: Apache/Google-LLC headers; no package.json/tsconfig referencing them (no Node project) → confirmed orphan.
 
 - [ ] **Step 3: Remove the philm orphans (untracked → plain rm) and empty dirs**
 
@@ -212,17 +223,7 @@ ls *.ts 2>/dev/null || echo "no .ts files remain (correct)"
 
 Expected: "no .ts files remain"; the two CANON dirs gone (`rmdir` only succeeds if truly empty — a built-in safety check).
 
-- [ ] **Step 4: Remove the av-pair untracked prototypes (backed up in Step 2)**
-
-```bash
-cd "/Volumes/2025_exSSD_2tb/💻 Development & Code/Development/av-pair"
-rm -f src/av_pair/random_montage.py src/av_pair/beat_strobe.py src/av_pair/drift_composition.py
-ls src/av_pair/
-```
-
-Expected: `src/av_pair/` now lists `create_composition.py`, `__init__.py` (the survivors).
-
-- [ ] **Step 5: Remove the tracked av-pair legacy copy via git (recoverable from history)**
+- [ ] **Step 4: Remove the tracked av-pair legacy copy via git (recoverable from history)**
 
 ```bash
 cd "/Volumes/2025_exSSD_2tb/💻 Development & Code/Development/av-pair"
@@ -236,9 +237,11 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 
 Expected: one commit; `legacy/av_pair/` now empty or gone.
 
-**Rollback:** philm `.ts` + av-pair prototypes → copy back from the archive area. legacy file → `git revert HEAD` or `git checkout HEAD~1 -- legacy/av_pair/create_composition.py`.
+**Rollback:** philm `.ts` → copy back from the archive area. legacy file → `git revert HEAD` or `git checkout HEAD~1 -- legacy/av_pair/create_composition.py`.
 
-**✅ STOP POINT 3 — dead code removed, all of it backed up.** The orphaned TypeScript ancestor and the two obsolete MoviePy prototypes are gone from the working trees.
+**✅ STOP POINT 3 — only genuinely-dead code removed, all backed up.** The orphaned TypeScript
+ancestor (philm) and the tracked `legacy/` duplicate are gone. `random_montage.py` and
+`beat_strobe.py` are intentionally retained as live creative instruments.
 
 ---
 
