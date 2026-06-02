@@ -12,6 +12,7 @@ import tempfile
 from pathlib import Path
 
 import librosa
+from media_utils import ffprobe_duration as probe_duration  # noqa: F401
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────────
 
@@ -52,15 +53,6 @@ def parse_timecode(tc: str) -> float:
 
 def run(cmd: list, **kwargs):
     subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs)
-
-
-def probe_duration(path: Path) -> float:
-    result = subprocess.run(
-        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-         "-of", "default=noprint_wrappers=1:nokey=1", str(path)],
-        capture_output=True, text=True, check=True
-    )
-    return float(result.stdout.strip())
 
 
 # ─── PROXY COMPRESSION ────────────────────────────────────────────────────────

@@ -11,6 +11,7 @@ import tempfile
 from pathlib import Path
 
 import librosa
+from media_utils import ffprobe_duration as probe_duration  # noqa: F401
 
 TARGET_FPS = 30
 OUTPUT_SIZE = "1920:1080"
@@ -28,15 +29,6 @@ def parse_timecode(tc: str) -> float:
 
 def run(cmd: list):
     subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-
-def probe_duration(path: Path) -> float:
-    result = subprocess.run(
-        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-         "-of", "default=noprint_wrappers=1:nokey=1", str(path)],
-        capture_output=True, text=True, check=True
-    )
-    return float(result.stdout.strip())
 
 
 def extract_thumbnail(source: Path, output: Path, at: float = 1.0):
