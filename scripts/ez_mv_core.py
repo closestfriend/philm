@@ -11,6 +11,7 @@ import tempfile
 from pathlib import Path
 
 import librosa
+import numpy as np
 from media_utils import ffprobe_duration as probe_duration  # noqa: F401
 
 TARGET_FPS = 30
@@ -46,7 +47,7 @@ def detect_beats(music_path: Path) -> tuple[list[float], float]:
     y, sr = librosa.load(str(music_path))
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
     beat_times = librosa.frames_to_time(beat_frames, sr=sr).tolist()
-    tempo_val = float(tempo) if tempo.ndim == 0 else float(tempo[0])
+    tempo_val = float(np.asarray(tempo).flatten()[0])
     return beat_times, tempo_val
 
 
