@@ -42,11 +42,12 @@ Design: `docs/superpowers/specs/2026-06-01-video-praxis-consolidation-design.md`
   plan defaults to B** because `carti_cut` prints its seed and the user may rely on it.
 
 **⏳ Pending / not yet run:**
-- **Cleanup Phase 3 (dead code):** `cli.ts` / `functions.ts` / `modes.ts` orphans + empty
-  `100CANON_results/` `101CANON_results/` still present. **Now genuinely safe** — `modes.ts`'s
-  9 unique theory modes were harvested into philm (see Done), and all three `.ts` files are
-  recoverable from git history regardless. Plan:
-  `docs/superpowers/plans/2026-05-31-drive-consolidation.md` (corrected Phase 3).
+- **Cleanup Phase 3 — ✅ DONE (2026-06-03):** deleted `cli.ts` / `functions.ts` / `modes.ts`
+  (backed up to `_consolidation_2026-05-31/code-backups/` + recoverable from git history; their
+  9 unique modes already harvested into philm) and the empty `100CANON_results/`
+  `101CANON_results/` dirs. **KEPT** `av-pair/legacy/av_pair/create_composition.py` — it's a
+  15-line `runpy` compat *shim* to `src/`, not a duplicate (the 3rd "dead code" item this cleanup
+  found to be intentional, after random_montage and modes.ts).
 - **Deprioritized (space, not organization):** render corral (cleanup Phase 4), av-pair history
   rewrite (Phase 6).
 - **video-praxis P3–P6 (future):** bring in av-pair keepers (`random_montage`, `beat_strobe`,
