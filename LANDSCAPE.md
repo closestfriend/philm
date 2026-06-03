@@ -16,6 +16,42 @@ empty `.git` shells.
 
 ---
 
+## Consolidation status — updated 2026-06-02
+
+**Decision:** unify both repos into one home named **`video-praxis`** (solo creative practice →
+monorepo, not a shared library); `philm` survives as the analysis module + `vanalyze`/`philm`
+CLI; **organization is the goal — reclaimed space is a bonus, not the point.**
+Design: `docs/superpowers/specs/2026-06-01-video-praxis-consolidation-design.md`.
+
+**✅ Done (merged to `main`):**
+- **Cleanup:** `git gc` reclaimed ~1.5 GB of dangling committed media; removed the two nested
+  `.git` repos inside `av-pair/src/`; pinned Python to 3.11 (the 3.14 venv was broken).
+- **Montage dedup:** extracted shared `scripts/media_utils.py` (tested) and repointed drift +
+  strobe scripts at it; **drift engine unified** — `drift_cut.py` 343→38 lines, now a thin CLI
+  over `drift_core.py` (Phase 2a).
+- **Bug fix:** librosa-0.11 `tempo.ndim` crash in `carti_cut`/`ez_mv_core` beat detection.
+- Committed the user's in-progress `--density` carti_cut feature as its own checkpoint.
+
+**📋 Planned — gated on user go:**
+- **Strobe engine unify (Phase 2b)** — `docs/superpowers/plans/2026-06-02-video-praxis-phase2b-strobe-engine.md`.
+  Deferred until the user's active `carti_cut` work is parked + tree clean.
+  **Open decision: seed reproducibility — Option A (accept change) vs B (preserve carti seeds);
+  plan defaults to B** because `carti_cut` prints its seed and the user may rely on it.
+
+**⏳ Pending / not yet run:**
+- **Cleanup Phase 3 (dead code):** `cli.ts` / `functions.ts` / `modes.ts` orphans + empty
+  `100CANON_results/` `101CANON_results/` are STILL present. Safe to remove (plan:
+  `docs/superpowers/plans/2026-05-31-drive-consolidation.md`, corrected Phase 3).
+- **Deprioritized (space, not organization):** render corral (cleanup Phase 4), av-pair history
+  rewrite (Phase 6).
+- **video-praxis P3–P6 (future):** bring in av-pair keepers (`random_montage`, `beat_strobe`,
+  `cursed`) → relocate MCP servers → collapse the ~6 apps → rename repo + archive av-pair.
+
+> The detailed redundancy analysis below predates this work — treat the status block above as the
+> current source of truth for what's resolved.
+
+---
+
 ## The two active repos
 
 ### 1. `philm` / video-analyzer-v2
