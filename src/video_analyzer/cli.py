@@ -12,7 +12,13 @@ from rich.console import Console
 from dotenv import load_dotenv
 
 from . import __version__
-from .analyzer import configure_genai, upload_video, analyze_video, analyze_with_custom_prompt, delete_video
+from .analyzer import (
+    configure_genai,
+    upload_video,
+    analyze_video,
+    analyze_with_custom_prompt,
+    delete_video,
+)
 from .technical import get_technical_metrics, format_technical_context
 from .modes import get_mode, get_chart_prompt, ALL_MODES, CHART_MODES
 from .models import SimpleResult, NumericResult
@@ -47,7 +53,6 @@ def main(
         None,
         help="Path to video file (or use --folder for batch)",
     ),
-
     # Analysis modes (can combine multiple)
     captions: bool = typer.Option(False, "--captions", help="A/V captions"),
     paragraph: bool = typer.Option(False, "--paragraph", help="3-5 sentence summary"),
@@ -59,48 +64,64 @@ def main(
     gaze: bool = typer.Option(False, "--gaze", help="Mulvey gaze analysis"),
     sublime: bool = typer.Option(False, "--sublime", help="Sublime classification"),
     rhythm: bool = typer.Option(False, "--rhythm", help="Deleuzian rhythm analysis"),
-    baudrillard: bool = typer.Option(False, "--baudrillard", help="Simulacra/hyperreality analysis"),
+    baudrillard: bool = typer.Option(
+        False, "--baudrillard", help="Simulacra/hyperreality analysis"
+    ),
     epistemic: bool = typer.Option(False, "--epistemic", help="Truth claims/evidence analysis"),
     foucault: bool = typer.Option(False, "--foucault", help="Power/surveillance analysis"),
     virilio: bool = typer.Option(False, "--virilio", help="Speed/accident analysis"),
     zizek: bool = typer.Option(False, "--zizek", help="Parallax/ideology analysis"),
     barthes: bool = typer.Option(False, "--barthes", help="Punctum/studium/mythology analysis"),
     benjamin: bool = typer.Option(False, "--benjamin", help="Aura/dialectical image analysis"),
-    hauntology: bool = typer.Option(False, "--hauntology", help="Fisher/Han/Curtis capitalist realism"),
+    hauntology: bool = typer.Option(
+        False, "--hauntology", help="Fisher/Han/Curtis capitalist realism"
+    ),
+    ranciere: bool = typer.Option(
+        False, "--ranciere", help="Distribution of the sensible/dissensus analysis"
+    ),
+    sontag: bool = typer.Option(False, "--sontag", help="Camp sensibility/artifice analysis"),
+    haraway: bool = typer.Option(False, "--haraway", help="Cyborg/situated knowledge analysis"),
+    marks: bool = typer.Option(False, "--marks", help="Haptic visuality/skin of the film analysis"),
+    chion: bool = typer.Option(False, "--chion", help="Audio-vision/synchresis analysis"),
+    bazin: bool = typer.Option(False, "--bazin", help="Bazinian realism/long-take analysis"),
+    eisenstein: bool = typer.Option(
+        False, "--eisenstein", help="Montage/dialectical collision analysis"
+    ),
+    greenberg: bool = typer.Option(
+        False, "--greenberg", help="Modernist flatness/medium specificity analysis"
+    ),
+    ngai: bool = typer.Option(
+        False, "--ngai", help="Cute/zany/interesting/gimmicky aesthetic categories"
+    ),
     sizzle: bool = typer.Option(False, "--sizzle", help="Sizzle reel production analysis"),
-
     # Chart mode
     chart: Optional[str] = typer.Option(
-        None,
-        "--chart",
-        help=f"Generate chart data: {', '.join(CHART_MODES.keys())}"
+        None, "--chart", help=f"Generate chart data: {', '.join(CHART_MODES.keys())}"
     ),
-
     # Custom prompt
     custom: Optional[str] = typer.Option(None, "--custom", help="Custom analysis prompt"),
-
     # Options
     deep: bool = typer.Option(False, "--deep", help="Include FFmpeg technical analysis"),
-    no_audio: bool = typer.Option(False, "--no-audio", help="Strip audio before upload (reduces cost ~25%)"),
+    no_audio: bool = typer.Option(
+        False, "--no-audio", help="Strip audio before upload (reduces cost ~25%)"
+    ),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Save to file"),
-
     # Batch processing
-    folder: Optional[str] = typer.Option(None, "--folder", "-f", help="Process all videos in folder"),
+    folder: Optional[str] = typer.Option(
+        None, "--folder", "-f", help="Process all videos in folder"
+    ),
     recursive: bool = typer.Option(False, "--recursive", "-r", help="Recursive folder processing"),
-    output_dir: Optional[Path] = typer.Option(None, "--output-dir", help="Output directory for batch results"),
-
+    output_dir: Optional[Path] = typer.Option(
+        None, "--output-dir", help="Output directory for batch results"
+    ),
     # Local mode (Ollama)
     local: bool = typer.Option(False, "--local", help="Use local Ollama model instead of Gemini"),
     model: str = typer.Option("qwen3-vl:4b", "--model", help="Ollama model for local analysis"),
     frames: int = typer.Option(4, "--frames", help="Number of frames to extract (local mode)"),
-
     # Version
     version: bool = typer.Option(
-        False,
-        "--version",
-        callback=version_callback,
-        help="Show version"
+        False, "--version", callback=version_callback, help="Show version"
     ),
 ):
     """
@@ -139,6 +160,15 @@ def main(
         "barthes": barthes,
         "benjamin": benjamin,
         "hauntology": hauntology,
+        "ranciere": ranciere,
+        "sontag": sontag,
+        "haraway": haraway,
+        "marks": marks,
+        "chion": chion,
+        "bazin": bazin,
+        "eisenstein": eisenstein,
+        "greenberg": greenberg,
+        "ngai": ngai,
         "sizzle": sizzle,
     }
 
@@ -154,7 +184,9 @@ def main(
             exists = folder_path.exists()
         except PermissionError:
             console.print(f"[red]Error:[/red] Permission denied: {folder}")
-            console.print("[dim]Grant Full Disk Access in System Settings → Privacy & Security[/dim]")
+            console.print(
+                "[dim]Grant Full Disk Access in System Settings → Privacy & Security[/dim]"
+            )
             raise typer.Exit(1)
 
         if not exists:
@@ -232,17 +264,17 @@ def main(
             console=console,
         ) as progress:
             for i, vid in enumerate(videos):
-                task = progress.add_task(f"[{i+1}/{len(videos)}] {vid.name}", total=None)
+                task = progress.add_task(f"[{i + 1}/{len(videos)}] {vid.name}", total=None)
 
                 def progress_cb(stage, msg):
-                    progress.update(task, description=f"[{i+1}/{len(videos)}] {vid.name}: {msg}")
+                    progress.update(task, description=f"[{i + 1}/{len(videos)}] {vid.name}: {msg}")
 
                 try:
                     result = analyze_video_local(vid, config, progress_callback=progress_cb)
                     result["video"] = vid.name
                     result["path"] = str(vid)
                     results.append(result)
-                    progress.update(task, description=f"[{i+1}/{len(videos)}] {vid.name}: ✓ Done")
+                    progress.update(task, description=f"[{i + 1}/{len(videos)}] {vid.name}: ✓ Done")
                 except Exception as e:
                     console.print(f"[red]Error processing {vid.name}:[/red] {e}")
                     results.append({"video": vid.name, "path": str(vid), "error": str(e)})
@@ -254,7 +286,7 @@ def main(
             # Single video output
             result = results[0]
             if output:
-                with open(output, 'w') as f:
+                with open(output, "w") as f:
                     json.dump(result, f, indent=2)
                 console.print(f"[green]Saved:[/green] {output}")
             elif json_output:
@@ -262,7 +294,9 @@ def main(
             else:
                 console.print(f"\n[bold]{video.name}[/bold]")
                 console.print(f"[cyan]Description:[/cyan] {result['video_description']}")
-                console.print(f"\n[dim]Frames analyzed: {result['num_frames']} | Model: {result['model']}[/dim]")
+                console.print(
+                    f"\n[dim]Frames analyzed: {result['num_frames']} | Model: {result['model']}[/dim]"
+                )
         else:
             # Batch output
             out_dir = output_dir or Path("./local_results")
@@ -271,7 +305,7 @@ def main(
             for result in results:
                 if "error" not in result:
                     out_file = out_dir / f"{Path(result['video']).stem}_local.json"
-                    with open(out_file, 'w') as f:
+                    with open(out_file, "w") as f:
                         json.dump(result, f, indent=2)
 
             console.print(f"\n[green]✓[/green] Processed {len(results)} videos")
@@ -341,11 +375,11 @@ def main(
             "video": video.name,
             "path": str(video),
             "modes": active_modes,
-            "analyses": results
+            "analyses": results,
         }
 
         if output:
-            with open(output, 'w') as f:
+            with open(output, "w") as f:
                 json.dump(combined, f, indent=2)
             console.print(f"[green]Saved:[/green] {output}")
         elif json_output:
@@ -382,21 +416,13 @@ def main(
 
             chart_prompt = get_chart_prompt(chart)
             result = analyze_with_custom_prompt(
-                video_file,
-                chart_prompt,
-                NumericResult,
-                technical_context
+                video_file, chart_prompt, NumericResult, technical_context
             )
             mode_name = f"chart-{chart}"
 
         else:
             # Custom prompt
-            result = analyze_with_custom_prompt(
-                video_file,
-                custom,
-                SimpleResult,
-                technical_context
-            )
+            result = analyze_with_custom_prompt(video_file, custom, SimpleResult, technical_context)
             mode_name = "custom"
 
     except Exception as e:

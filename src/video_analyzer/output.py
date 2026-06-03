@@ -29,6 +29,15 @@ from .models import (
     HauntologyMoment,
     SizzleMoment,
     SizzleResult,
+    RanciereMoment,
+    SontagMoment,
+    HarawayMoment,
+    MarksMoment,
+    ChionMoment,
+    BazinMoment,
+    EisensteinMoment,
+    GreenbergMoment,
+    NgaiMoment,
 )
 
 
@@ -49,11 +58,12 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
 
     # Header
     console.print()
-    console.print(Panel(
-        f"[bold cyan]{mode_name.upper()}[/bold cyan]\n"
-        f"[dim]{result.video_description}[/dim]",
-        expand=False
-    ))
+    console.print(
+        Panel(
+            f"[bold cyan]{mode_name.upper()}[/bold cyan]\n[dim]{result.video_description}[/dim]",
+            expand=False,
+        )
+    )
     console.print()
 
     # Sizzle summary (if SizzleResult)
@@ -68,11 +78,11 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
         console.print()
         console.print("[bold]MOMENTS[/bold]")
         console.print()
-    
+
     # Timecodes - format based on type
     for item in result.timecodes:
         time_str = f"[yellow]{item.time}[/yellow]"
-        
+
         if isinstance(item, AffectMoment):
             # Affect analysis
             captured = "[green]CAPTURED[/green]" if item.captures else "[blue]escapes[/blue]"
@@ -80,30 +90,32 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
             console.print(f"         atmosphere: {item.atmosphere}")
             console.print(f"         vector: {item.vector}")
             console.print()
-            
+
         elif isinstance(item, CameraMoment):
             # Camera analysis
             restless = " [red][RESTLESS][/red]" if item.restlessness else ""
-            console.print(f"{time_str} {item.stability} | frenetic: [bold]{item.frenetic}/10[/bold] | "
-                        f"proximity: {item.proximity or '?'}/10{restless}")
+            console.print(
+                f"{time_str} {item.stability} | frenetic: [bold]{item.frenetic}/10[/bold] | "
+                f"proximity: {item.proximity or '?'}/10{restless}"
+            )
             console.print(f"         motion: {item.intentional_motion}")
             console.print(f"         {item.description}")
             if item.operator_presence:
                 console.print(f"         operator: [dim]{item.operator_presence}[/dim]")
             console.print()
-            
+
         elif isinstance(item, LevinasianMoment):
             # Levinas analysis
-            mode_color = {
-                "revelation": "green",
-                "concealment": "red", 
-                "trace": "blue"
-            }.get(item.mode.value, "white")
-            console.print(f"{time_str} intensity: [bold]{item.intensity}/10[/bold] | "
-                        f"[{mode_color}]{item.mode.value}[/{mode_color}]")
+            mode_color = {"revelation": "green", "concealment": "red", "trace": "blue"}.get(
+                item.mode.value, "white"
+            )
+            console.print(
+                f"{time_str} intensity: [bold]{item.intensity}/10[/bold] | "
+                f"[{mode_color}]{item.mode.value}[/{mode_color}]"
+            )
             console.print(f"         {item.encounter}")
             console.print()
-            
+
         elif isinstance(item, GazeMoment):
             # Gaze analysis
             fourth_wall = " [red]↔ 4TH WALL[/red]" if item.breaks_fourth_wall else ""
@@ -111,7 +123,7 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
             console.print(f"         subject: {item.subject_position}")
             console.print(f"         power: {item.power_dynamic}")
             console.print()
-            
+
         elif isinstance(item, SublimeMoment):
             # Sublime analysis
             recovery = " [green]→ recovery[/green]" if item.recovery else ""
@@ -119,7 +131,7 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
             console.print(f"         source: {item.overwhelm_source}")
             console.print(f"         {item.description}")
             console.print()
-            
+
         elif isinstance(item, RhythmMoment):
             # Rhythm analysis
             console.print(f"{time_str} tempo: [bold]{item.tempo}/10[/bold] | {item.movement.value}")
@@ -131,7 +143,9 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
         elif isinstance(item, BaudrillardMoment):
             # Baudrillard analysis
             precession_marker = " [red]⟲ PRECESSION[/red]" if item.precession else ""
-            console.print(f"{time_str} [{item.order.value}] | {item.hyperreality_mode.value}{precession_marker}")
+            console.print(
+                f"{time_str} [{item.order.value}] | {item.hyperreality_mode.value}{precession_marker}"
+            )
             console.print(f"         sign: {item.sign_value}")
             if item.implosion:
                 console.print(f"         [dim]implosion: {item.implosion}[/dim]")
@@ -141,7 +155,9 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
         elif isinstance(item, EpistemicMoment):
             # Epistemic analysis
             verifiable = "[green]✓[/green]" if item.verifiable else "[red]✗[/red]"
-            console.print(f"{time_str} [{item.mode.value}] | certainty: {item.certainty.value} {verifiable}")
+            console.print(
+                f"{time_str} [{item.mode.value}] | certainty: {item.certainty.value} {verifiable}"
+            )
             console.print(f"         claim: {item.claim}")
             if item.evidence_type:
                 console.print(f"         evidence: {item.evidence_type}")
@@ -152,7 +168,9 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
 
         elif isinstance(item, FoucaultMoment):
             # Foucault analysis
-            console.print(f"{time_str} [{item.power_mode.value}] | surveillance: {item.surveillance.value}")
+            console.print(
+                f"{time_str} [{item.power_mode.value}] | surveillance: {item.surveillance.value}"
+            )
             console.print(f"         subject produced: {item.subject_produced}")
             if item.norm_enforced:
                 console.print(f"         norm: {item.norm_enforced}")
@@ -166,7 +184,9 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
             # Virilio analysis
             collapse = " [red]↯ COLLAPSE[/red]" if item.territory_collapse else ""
             real_time = " [cyan]⚡RT[/cyan]" if item.real_time else ""
-            console.print(f"{time_str} [{item.speed_regime.value}] | accident: {item.accident.value}{collapse}{real_time}")
+            console.print(
+                f"{time_str} [{item.speed_regime.value}] | accident: {item.accident.value}{collapse}{real_time}"
+            )
             console.print(f"         dromology: {item.dromology}")
             if item.war_machine:
                 console.print(f"         [red]war machine: {item.war_machine}[/red]")
@@ -218,10 +238,16 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
         elif isinstance(item, HauntologyMoment):
             # Hauntology analysis (Fisher/Han/Curtis)
             individual = " [red]↓ INDIVIDUALIZED[/red]" if item.suffering_individualized else ""
-            achievement = " [yellow]⚙ ACHIEVEMENT-SUBJECT[/yellow]" if item.achievement_subject else ""
-            console.print(f"{time_str} [{item.temporal_pathology.value}] | {item.smoothness.value}{individual}{achievement}")
+            achievement = (
+                " [yellow]⚙ ACHIEVEMENT-SUBJECT[/yellow]" if item.achievement_subject else ""
+            )
+            console.print(
+                f"{time_str} [{item.temporal_pathology.value}] | {item.smoothness.value}{individual}{achievement}"
+            )
             if item.capitalist_realism:
-                console.print(f"         [dim]capitalist realism: {item.capitalist_realism.value}[/dim]")
+                console.print(
+                    f"         [dim]capitalist realism: {item.capitalist_realism.value}[/dim]"
+                )
             if item.hypernormal:
                 console.print(f"         hypernormal: {item.hypernormal.value}")
             if item.lost_future:
@@ -236,23 +262,129 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
             energy_color = "red" if item.energy >= 8 else "yellow" if item.energy >= 5 else "dim"
             positions = ", ".join([p.value for p in item.sizzle_position])
             shot_type_upper = item.shot_type.value.upper()
-            console.print(f"{time_str} [magenta]{shot_type_upper}[/magenta] | [{energy_color}]energy: {item.energy}/10[/{energy_color}] | {item.tone.value}")
+            console.print(
+                f"{time_str} [magenta]{shot_type_upper}[/magenta] | [{energy_color}]energy: {item.energy}/10[/{energy_color}] | {item.tone.value}"
+            )
             console.print(f"         subjects: {', '.join(item.subjects)}")
             console.print(f"         motion: {item.motion} | usable: {item.usable_seconds}")
             console.print(f"         [cyan]fits: {positions}[/cyan]")
             console.print(f"         [dim]{item.notes}[/dim]")
             console.print()
 
-        elif hasattr(item, 'objects'):
+        elif isinstance(item, RanciereMoment):
+            # Rancière analysis
+            dissensus = " [green]✦ DISSENSUS[/green]" if item.dissensus else ""
+            console.print(f"{time_str} [{item.partition.value}]{dissensus}")
+            console.print(f"         policing act: {item.policing_act}")
+            if item.subject_of_politics:
+                console.print(
+                    f"         [bold]subject of politics: {item.subject_of_politics}[/bold]"
+                )
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, SontagMoment):
+            # Sontag camp analysis
+            console.print(
+                f"{time_str} [{item.camp_mode.value}] | "
+                f"stylization: [bold]{item.stylization}/10[/bold] | "
+                f"seriousness: {item.seriousness}/10 | "
+                f"irony: {item.irony_temperature}/10"
+            )
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, HarawayMoment):
+            # Haraway analysis
+            partial = (
+                "[green]situated[/green]" if item.partial_perspective else "[red]god-trick[/red]"
+            )
+            console.print(
+                f"{time_str} [{item.boundary_transgression.value}] | "
+                f"{item.technoculture_tone.value} | {partial}"
+            )
+            if item.kin_making:
+                console.print(f"         kin making: {item.kin_making}")
+            if item.control_infrastructure:
+                console.print(f"         [dim]control infra: {item.control_infrastructure}[/dim]")
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, MarksMoment):
+            # Marks haptic visuality analysis
+            syn = " [cyan]↔ SYNAESTHESIA[/cyan]" if item.synaesthesia else ""
+            console.print(
+                f"{time_str} [{item.scopic_mode.value}] | "
+                f"proximity: [bold]{item.proximity}/10[/bold] | "
+                f"indexicality: {item.indexicality.value}{syn}"
+            )
+            console.print(f"         texture: {item.texture_language}")
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, ChionMoment):
+            # Chion audio-vision analysis
+            vog = " [bold]VOG[/bold]" if item.voice_of_god else ""
+            audio_leads = " [yellow]↑ AUDIO LEADS[/yellow]" if item.audio_leads_image else ""
+            console.print(f"{time_str} [{item.sound_relation.value}]{vog}{audio_leads}")
+            console.print(f"         causality: {item.perceived_causality}")
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, BazinMoment):
+            # Bazin realism analysis
+            ambiguity = " [green]~ AMBIGUOUS[/green]" if item.ambiguity else ""
+            take = f"{item.take_length_sec}s | " if item.take_length_sec is not None else ""
+            console.print(
+                f"{time_str} {take}[{item.staging_mode.value}] | "
+                f"depth: {item.depth_focus.value} | "
+                f"trust: {item.indexical_trust.value}{ambiguity}"
+            )
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, EisensteinMoment):
+            # Eisenstein montage analysis
+            console.print(
+                f"{time_str} [{item.montage_type.value}] | "
+                f"cut: [bold]{item.cut_intensity}/10[/bold] | "
+                f"collision: [bold]{item.collision_intensity}/10[/bold]"
+            )
+            console.print(f"         [bold]ideogram: {item.ideogram}[/bold]")
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, GreenbergMoment):
+            # Greenberg flatness analysis
+            reflexive = " [cyan]⊞ REFLEXIVE[/cyan]" if item.medium_reflexivity else ""
+            console.print(
+                f"{time_str} flatness: [bold]{item.flatness_index}/10[/bold] | "
+                f"{item.illusionism.value} | {item.surface_emphasis.value}{reflexive}"
+            )
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif isinstance(item, NgaiMoment):
+            # Ngai aesthetic categories analysis
+            console.print(
+                f"{time_str} [{item.category.value}] | intensity: [bold]{item.intensity}/10[/bold]"
+            )
+            console.print(f"         rationale: {item.rationale}")
+            if item.affect_register:
+                console.print(f"         affect: {item.affect_register}")
+            console.print(f"         {item.description}")
+            console.print()
+
+        elif hasattr(item, "objects"):
             # Table format with objects
             console.print(f"{time_str} {item.text}")
             console.print(f"         Objects: {', '.join(item.objects)}")
             console.print()
-            
-        elif hasattr(item, 'value'):
+
+        elif hasattr(item, "value"):
             # Numeric chart data
             console.print(f"{time_str} [bold]{item.value}[/bold]")
-            
+
         else:
             # Simple timecode
             console.print(f"{time_str} {item.text}")
@@ -261,7 +393,7 @@ def format_for_display(result: BaseAnalysisResult, mode_name: str) -> None:
 
 def save_json(result: BaseAnalysisResult, output_path: str) -> None:
     """Save result to JSON file."""
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         f.write(format_as_json(result))
     console.print(f"[green]✓[/green] Saved to: {output_path}")
 
@@ -271,13 +403,13 @@ def format_technical_summary(metrics: Any) -> None:
     table = Table(title="Technical Metrics (FFmpeg)", show_header=False)
     table.add_column("Metric", style="cyan")
     table.add_column("Value", style="yellow")
-    
+
     table.add_row("Duration", f"{metrics.duration:.1f}s")
     table.add_row("Framerate", f"{metrics.framerate:.1f} fps")
     table.add_row("Scene changes", str(metrics.scene_changes))
     table.add_row("Change density", f"{metrics.change_density:.2f}/sec")
     table.add_row("Chaos index", f"{metrics.chaos_index:.1f}/10")
-    
+
     console.print()
     console.print(table)
     console.print()
