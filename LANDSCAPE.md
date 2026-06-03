@@ -31,6 +31,9 @@ Design: `docs/superpowers/specs/2026-06-01-video-praxis-consolidation-design.md`
   over `drift_core.py` (Phase 2a).
 - **Bug fix:** librosa-0.11 `tempo.ndim` crash in `carti_cut`/`ez_mv_core` beat detection.
 - Committed the user's in-progress `--density` carti_cut feature as its own checkpoint.
+- **Ported 9 theory modes** out of the legacy `modes.ts` into philm (ranciere, sontag, haraway,
+  marks, chion, bazin, eisenstein, greenberg, ngai) → **28 modes total**. This harvests the
+  unique value that made `modes.ts` worth keeping.
 
 **📋 Planned — gated on user go:**
 - **Strobe engine unify (Phase 2b)** — `docs/superpowers/plans/2026-06-02-video-praxis-phase2b-strobe-engine.md`.
@@ -40,8 +43,10 @@ Design: `docs/superpowers/specs/2026-06-01-video-praxis-consolidation-design.md`
 
 **⏳ Pending / not yet run:**
 - **Cleanup Phase 3 (dead code):** `cli.ts` / `functions.ts` / `modes.ts` orphans + empty
-  `100CANON_results/` `101CANON_results/` are STILL present. Safe to remove (plan:
-  `docs/superpowers/plans/2026-05-31-drive-consolidation.md`, corrected Phase 3).
+  `100CANON_results/` `101CANON_results/` still present. **Now genuinely safe** — `modes.ts`'s
+  9 unique theory modes were harvested into philm (see Done), and all three `.ts` files are
+  recoverable from git history regardless. Plan:
+  `docs/superpowers/plans/2026-05-31-drive-consolidation.md` (corrected Phase 3).
 - **Deprioritized (space, not organization):** render corral (cleanup Phase 4), av-pair history
   rewrite (Phase 6).
 - **video-praxis P3–P6 (future):** bring in av-pair keepers (`random_montage`, `beat_strobe`,
