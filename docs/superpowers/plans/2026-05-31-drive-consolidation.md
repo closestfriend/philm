@@ -185,7 +185,7 @@ Expected: `src/` now lists only `av_pair/`, `cursed_generator/`, `replicate_clie
 **Files:**
 - Remove (untracked, philm — orphaned TypeScript ancestor): `PHILM/cli.ts`, `PHILM/functions.ts`, `PHILM/modes.ts`
 - Remove (empty, philm): `PHILM/100CANON_results/`, `PHILM/101CANON_results/`
-- Remove (TRACKED, av-pair): `AVPAIR/legacy/av_pair/create_composition.py`
+- ~~Remove (TRACKED, av-pair): `AVPAIR/legacy/av_pair/create_composition.py`~~ **KEEP (corrected 2026-06-03)** — it's a 15-line `runpy` compat shim to `src/`, not a duplicate. Skip Step 4's git rm.
 - **KEEP** (av-pair, do NOT delete): `random_montage.py`, `beat_strobe.py` (live creative instruments)
 - **DEFER** to Phase 7 (av-pair): `drift_composition.py` — the only true duplicate, but av-pair's sole drift engine; decide alongside the canonical-home question.
 
