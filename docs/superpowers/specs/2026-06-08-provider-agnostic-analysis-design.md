@@ -16,13 +16,15 @@ schemas, and is not wired into batch or archive.
 The trigger: an **expired `GEMINI_API_KEY` walled off the entire footage pipeline** —
 a single-vendor key should not be a single point of failure.
 
-**Goal:** Introduce a provider abstraction so analysis can run through **OpenRouter
-(the new default)**, **Gemini-direct**, or **Ollama**, all behind one interface, with
+**Goal:** Introduce a provider abstraction so analysis can run through **Gemini-direct
+(the default)**, **OpenRouter (opt-in)**, or **Ollama**, all behind one interface, with
 OpenRouter preserving the real modes and structured output that make `philm` useful.
 
 ### Decisions (locked with user)
 
-- **OpenRouter is the default provider.** Gemini-direct remains available; Ollama too.
+- **Gemini-direct is the default provider** (its File API gives full-motion fidelity,
+  the trusted path). **OpenRouter is opt-in** via `--provider openrouter` or
+  `VANALYZE_PROVIDER=openrouter`. Ollama also available.
 - **Full provider abstraction**: a `Provider` interface that Gemini, OpenRouter, and
   Ollama all implement, wired through single-clip, batch, and archive paths.
 - **Native video on OpenRouter** (verified — see §3), not frame sampling. Frame
@@ -114,7 +116,7 @@ def get_provider(name: str | None = None) -> Provider: ...
 ```
 
 Resolution order: explicit `name` arg (from `--provider`) → `VANALYZE_PROVIDER` env →
-default **`openrouter`**.
+default **`gemini`**.
 
 ## 4. OpenRouter provider detail
 
@@ -191,7 +193,7 @@ in output so degraded analyses are auditable.
 
 | Var | Purpose | Default |
 |---|---|---|
-| `VANALYZE_PROVIDER` | default provider | `openrouter` |
+| `VANALYZE_PROVIDER` | default provider | `gemini` |
 | `OPENROUTER_API_KEY` | OpenRouter auth | — (required for openrouter) |
 | `OPENROUTER_MODEL` | model id | `google/gemini-2.5-flash` |
 | `OPENROUTER_INLINE_MAX_MB` | empirical base64 inline threshold (§2.4) | `25` |
@@ -237,7 +239,7 @@ move.
 ## 9. Testing (TDD)
 
 Unit (no network, mocked HTTP):
-- Provider registry resolution order (`--provider` > env > default openrouter).
+- Provider registry resolution order (`--provider` > env > default gemini).
 - `pydantic_to_strict_schema`: `additionalProperties:false` everywhere, all props
   required, `$defs` preserved — against `SizzleResult` + one nested philosophical mode.
 - OpenRouter request construction: correct `video_url` part, `response_format`,
