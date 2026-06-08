@@ -74,6 +74,7 @@ def run_batch(
     output_dir: Optional[Path] = None,
     technical: bool = False,
     no_audio: bool = False,
+    provider_name: Optional[str] = None,
 ) -> dict[str, Any]:
     """
     Run batch analysis on all videos in a folder.
@@ -85,6 +86,7 @@ def run_batch(
         output_dir: Where to save results (default: folder/vanalysis_results)
         technical: Include FFmpeg technical analysis
         no_audio: Strip audio before upload to reduce token cost
+        provider_name: Backend provider name (gemini|openrouter|ollama|local)
 
     Returns:
         Combined results dict
@@ -121,7 +123,7 @@ def run_batch(
 
     # Resolve provider once for the whole batch
     from .providers import get_provider
-    provider = get_provider(os.getenv("VANALYZE_PROVIDER"))
+    provider = get_provider(provider_name or os.getenv("VANALYZE_PROVIDER"))
 
     # Process each video
     all_results = {
