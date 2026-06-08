@@ -5,6 +5,7 @@ Handles multi-video, multi-mode analysis with efficient single-upload-per-video.
 """
 
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
@@ -12,7 +13,7 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 from rich.panel import Panel
 
-from .analyzer import upload_video, analyze_video, delete_video, VIDEO_MIME_TYPES
+from .analyzer import VIDEO_MIME_TYPES
 from .modes import get_mode, ALL_MODES
 from .output import format_for_display, format_as_json
 
@@ -44,26 +45,25 @@ def find_videos(folder: Path, recursive: bool = False) -> list[Path]:
 
 
 def analyze_video_multi_mode(
-    video_file: Any,
+    handle: Any,
     modes: list[str],
-    technical_context: str = ""
+    technical_context: str = "",
+    provider: Any = None,
 ) -> dict[str, Any]:
-    """
-    Run multiple analysis modes on a single uploaded video.
+    """Run multiple analysis modes on one prepared video handle."""
+    from .providers import get_provider
+    if provider is None:
+        provider = get_provider()
 
-    Returns dict mapping mode name to result.
-    """
     results = {}
-
     for mode_name in modes:
         try:
             mode = get_mode(mode_name)
-            result = analyze_video(video_file, mode, technical_context)
+            result = provider.analyze(handle, mode, technical_context)
             results[mode_name] = result.model_dump()
         except Exception as e:
             console.print(f"  [red]Error in {mode_name}:[/red] {e}")
             results[mode_name] = {"error": str(e)}
-
     return results
 
 
@@ -119,6 +119,10 @@ def run_batch(
         output_dir = folder / "vanalysis_results"
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Resolve provider once for the whole batch
+    from .providers import get_provider
+    provider = get_provider(os.getenv("VANALYZE_PROVIDER"))
+
     # Process each video
     all_results = {
         "batch_info": {
@@ -159,13 +163,11 @@ def run_batch(
 
                 # Upload once
                 console.print(f"\n[bold]{video_name}[/bold]")
-                video_file = upload_video(video_path, no_audio=no_audio)
+                handle = provider.prepare(video_path, no_audio=no_audio)
 
                 # Run all modes
                 video_results = analyze_video_multi_mode(
-                    video_file,
-                    modes,
-                    technical_context
+                    handle, modes, technical_context, provider=provider
                 )
 
                 # Store results
@@ -186,8 +188,8 @@ def run_batch(
 
                 console.print(f"  [green]Saved:[/green] {video_output.name}")
 
-                # Clean up uploaded file from Gemini storage
-                delete_video(video_file)
+                # Clean up uploaded file
+                provider.cleanup(handle)
 
             except Exception as e:
                 console.print(f"  [red]Failed:[/red] {e}")
