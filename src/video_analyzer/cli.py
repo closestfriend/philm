@@ -13,7 +13,6 @@ from dotenv import load_dotenv
 
 from . import __version__
 from .analyzer import (
-    configure_genai,
     analyze_with_custom_prompt,
 )
 from .technical import get_technical_metrics, format_technical_context
@@ -115,7 +114,7 @@ def main(
     provider: Optional[str] = typer.Option(
         None, "--provider", help="Backend: gemini (default) | openrouter | ollama"),
     local: bool = typer.Option(False, "--local", help="Use local Ollama model instead of Gemini"),
-    model: str = typer.Option("qwen3-vl:4b", "--model", help="Model id for the active provider"),
+    model: Optional[str] = typer.Option(None, "--model", help="Model id for the active provider"),
     frames: int = typer.Option(4, "--frames", help="Number of frames to extract (local mode)"),
     # Version
     version: bool = typer.Option(
@@ -200,9 +199,16 @@ def main(
             console.print(f"Available: {', '.join(ALL_MODES.keys())}")
             raise typer.Exit(1)
 
-        # Configure Gemini
+        # Resolve provider (mirrors single-video path)
+        import os
+        from .providers import get_provider
+        provider_name = provider or ("ollama" if local else None) or os.getenv("VANALYZE_PROVIDER")
+        if model and local:
+            os.environ["OLLAMA_MODEL"] = model
+        if model and provider_name == "openrouter":
+            os.environ["OPENROUTER_MODEL"] = model
         try:
-            configure_genai()
+            get_provider(provider_name)  # validate key/availability early, friendly error
         except ValueError as e:
             console.print(f"[red]Error:[/red] {e}")
             raise typer.Exit(1)
@@ -215,6 +221,7 @@ def main(
             output_dir=output_dir,
             technical=deep,
             no_audio=no_audio,
+            provider_name=provider_name,
         )
         return
 
