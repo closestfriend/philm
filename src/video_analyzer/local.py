@@ -244,3 +244,26 @@ def check_ollama_available(config: LocalConfig = None) -> tuple[bool, str]:
         return False, "Ollama not running. Start with: ollama serve"
     except Exception as e:
         return False, f"Error checking Ollama: {e}"
+
+
+def _chat_json(model: str, prompt: str, image_paths, ollama_url: str,
+               schema: dict, timeout: int = 180) -> str:
+    """POST a vision chat request to Ollama with JSON-schema-constrained output.
+
+    Returns the raw JSON string from the model's message content.
+    """
+    import base64 as _b64
+
+    images = [_b64.b64encode(Path(p).read_bytes()).decode("ascii") for p in image_paths]
+    resp = requests.post(
+        f"{ollama_url}/api/chat",
+        json={
+            "model": model,
+            "stream": False,
+            "format": schema,  # Ollama accepts a JSON schema object for structured output
+            "messages": [{"role": "user", "content": prompt, "images": images}],
+        },
+        timeout=timeout,
+    )
+    resp.raise_for_status()
+    return resp.json()["message"]["content"]
