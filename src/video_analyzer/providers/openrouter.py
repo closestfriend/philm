@@ -8,12 +8,22 @@ import sys
 import tempfile
 from pathlib import Path
 
+import requests
+
 from ..analyzer import strip_audio
 from ..local import extract_frames
+from ..modes import AnalysisMode
+from ..models import BaseAnalysisResult
 from .base import VideoHandle
+from .schema import pydantic_to_strict_schema
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_MODEL = "google/gemini-2.5-flash"
+SYSTEM_INSTRUCTION = (
+    "You are a sophisticated video analysis system. When given a video and "
+    "analytical framework, provide structured insights following the schema "
+    "precisely. Be theoretically rigorous but practically clear."
+)
 
 _MIME_BY_EXT = {
     ".mp4": "video/mp4",
@@ -109,3 +119,65 @@ class OpenRouterProvider:
     def cleanup(self, handle: VideoHandle) -> None:
         for p in handle.meta.get("temp_files", []):
             Path(p).unlink(missing_ok=True)
+
+    # -- request ---------------------------------------------------------
+    def _media_part(self, handle: VideoHandle) -> dict | list:
+        payload = handle.payload
+        if payload["kind"] == "video_url":
+            return {"type": "video_url", "video_url": {"url": payload["data_url"]}}
+        return [{"type": "image_url", "image_url": {"url": u}}
+                for u in payload["image_urls"]]
+
+    def _build_body(self, handle: VideoHandle, mode: AnalysisMode,
+                    prompt_prefix: str) -> dict:
+        media = self._media_part(handle)
+        media_parts = media if isinstance(media, list) else [media]
+        return {
+            "model": self.model,
+            "stream": False,
+            "temperature": 0.5,
+            "provider": {"require_parameters": True},
+            "plugins": [{"id": "response-healing"}],
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": mode.name.replace("-", "_"),
+                    "strict": True,
+                    "schema": pydantic_to_strict_schema(mode.result_model),
+                },
+            },
+            "messages": [
+                {"role": "system", "content": SYSTEM_INSTRUCTION},
+                {"role": "user", "content": [
+                    {"type": "text", "text": prompt_prefix + mode.prompt},
+                    *media_parts,
+                ]},
+            ],
+        }
+
+    def analyze(self, handle: VideoHandle, mode: AnalysisMode,
+                prompt_prefix: str = "") -> BaseAnalysisResult:
+        body = self._build_body(handle, mode, prompt_prefix)
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://github.com/philm",
+            "X-Title": "philm",
+        }
+        max_retries = int(os.getenv("OPENROUTER_MAX_RETRIES", "2"))
+        last_error: Exception | None = None
+        raw = ""
+        for attempt in range(max_retries + 1):
+            print(f"Analyzing with mode: {mode.name} (OpenRouter, attempt "
+                  f"{attempt + 1})...", file=sys.stderr, flush=True)
+            resp = requests.post(OPENROUTER_URL, headers=headers, json=body, timeout=300)
+            resp.raise_for_status()
+            raw = resp.json()["choices"][0]["message"]["content"]
+            try:
+                return mode.result_model.model_validate_json(raw)
+            except Exception as exc:  # schema-adherence failure healing can't fix
+                last_error = exc
+        raise RuntimeError(
+            f"Failed to parse OpenRouter response after {max_retries + 1} attempts: "
+            f"{last_error}\n\nRaw response: {raw}"
+        )
