@@ -1,0 +1,111 @@
+"""OpenRouter provider: native video_url transport + structured-output requests."""
+from __future__ import annotations
+
+import base64
+import os
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+from ..analyzer import strip_audio
+from ..local import extract_frames
+from .base import VideoHandle
+
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+DEFAULT_MODEL = "google/gemini-2.5-flash"
+
+_MIME_BY_EXT = {
+    ".mp4": "video/mp4",
+    ".mpg": "video/mpeg",
+    ".mpeg": "video/mpeg",
+    ".mov": "video/mov",
+    ".webm": "video/webm",
+}
+
+
+def _inline_threshold_bytes() -> int:
+    # Empirical, configurable knob — NOT an OpenRouter-documented limit.
+    mb = float(os.getenv("OPENROUTER_INLINE_MAX_MB", "25"))
+    return int(mb * 1024 * 1024)
+
+
+def _data_url(path: Path) -> str:
+    mime = _MIME_BY_EXT.get(path.suffix.lower(), "video/mp4")
+    b64 = base64.b64encode(path.read_bytes()).decode("ascii")
+    return f"data:{mime};base64,{b64}"
+
+
+class OpenRouterProvider:
+    name = "openrouter"
+
+    def __init__(self) -> None:
+        self.api_key = os.getenv("OPENROUTER_API_KEY")
+        if not self.api_key:
+            raise ValueError("OPENROUTER_API_KEY not found. Set it in .env.")
+        self.model = os.getenv("OPENROUTER_MODEL", DEFAULT_MODEL)
+
+    # -- transport -------------------------------------------------------
+    def _compress(self, path: Path) -> Path:
+        """Downscale to 720p + cap bitrate to shrink the base64 payload."""
+        fd, out = tempfile.mkstemp(suffix=".mp4")
+        os.close(fd)
+        out_path = Path(out)
+        print("  Compressing for OpenRouter...", file=sys.stderr, flush=True)
+        result = subprocess.run(
+            ["ffmpeg", "-y", "-i", str(path),
+             "-vf", "scale='min(1280,iw)':-2",
+             "-c:v", "libx264", "-preset", "veryfast", "-crf", "28",
+             "-c:a", "aac", "-b:a", "96k", str(out_path)],
+            capture_output=True, text=True, timeout=600,
+        )
+        if result.returncode != 0:
+            out_path.unlink(missing_ok=True)
+            raise RuntimeError(f"ffmpeg compress failed: {result.stderr[-500:]}")
+        return out_path
+
+    def prepare(self, video_path: Path, *, no_audio: bool = False) -> VideoHandle:
+        threshold = _inline_threshold_bytes()
+        temp_files: list[Path] = []
+        source = video_path
+        if no_audio:
+            source = strip_audio(video_path)
+            temp_files.append(source)
+
+        if source.stat().st_size <= threshold:
+            return VideoHandle(
+                provider="openrouter",
+                payload={"kind": "video_url", "data_url": _data_url(source)},
+                meta={"transport": "native", "temp_files": [str(p) for p in temp_files]},
+            )
+
+        compressed = self._compress(source)
+        temp_files.append(compressed)
+        if compressed.stat().st_size <= threshold or compressed.stat().st_size < source.stat().st_size:
+            return VideoHandle(
+                provider="openrouter",
+                payload={"kind": "video_url", "data_url": _data_url(compressed)},
+                meta={"transport": "native", "temp_files": [str(p) for p in temp_files]},
+            )
+
+        # Last resort: frame sampling (degraded — warn loudly).
+        n = int(os.getenv("OPENROUTER_FALLBACK_FRAMES", "12"))
+        print(
+            f"  WARNING: {video_path.name} too large even after compression; "
+            f"falling back to {n}-frame sampling (temporal fidelity lost).",
+            file=sys.stderr, flush=True,
+        )
+        frames = extract_frames(compressed, num_frames=n)
+        frame_urls = []
+        for fr in frames:
+            b64 = base64.b64encode(Path(fr).read_bytes()).decode("ascii")
+            frame_urls.append(f"data:image/jpeg;base64,{b64}")
+        return VideoHandle(
+            provider="openrouter",
+            payload={"kind": "frames", "image_urls": frame_urls},
+            meta={"transport": "frames", "temp_files": [str(p) for p in temp_files]},
+        )
+
+    def cleanup(self, handle: VideoHandle) -> None:
+        for p in handle.meta.get("temp_files", []):
+            Path(p).unlink(missing_ok=True)
