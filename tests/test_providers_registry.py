@@ -3,28 +3,24 @@ from video_analyzer.providers import get_provider
 from video_analyzer.providers.base import Provider, VideoHandle
 
 
-@pytest.mark.xfail(reason="provider class lands in a later task", raises=Exception, strict=False)
 def test_default_is_gemini(monkeypatch):
     monkeypatch.delenv("VANALYZE_PROVIDER", raising=False)
     monkeypatch.setenv("GEMINI_API_KEY", "x")  # GeminiProvider validates key on init
     assert get_provider().name == "gemini"
 
 
-@pytest.mark.xfail(reason="provider class lands in a later task", raises=Exception, strict=False)
 def test_env_selects_provider(monkeypatch):
     monkeypatch.setenv("VANALYZE_PROVIDER", "openrouter")
     monkeypatch.setenv("OPENROUTER_API_KEY", "x")
     assert get_provider().name == "openrouter"
 
 
-@pytest.mark.xfail(reason="provider class lands in a later task", raises=Exception, strict=False)
 def test_explicit_arg_overrides_env(monkeypatch):
     monkeypatch.setenv("VANALYZE_PROVIDER", "openrouter")
     monkeypatch.setenv("GEMINI_API_KEY", "x")
     assert get_provider("gemini").name == "gemini"
 
 
-@pytest.mark.xfail(reason="provider class lands in a later task", raises=Exception, strict=False)
 def test_local_is_alias_for_ollama():
     assert get_provider("local").name == "ollama"
 

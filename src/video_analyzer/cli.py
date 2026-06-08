@@ -14,18 +14,14 @@ from dotenv import load_dotenv
 from . import __version__
 from .analyzer import (
     configure_genai,
-    upload_video,
-    analyze_video,
     analyze_with_custom_prompt,
-    delete_video,
 )
 from .technical import get_technical_metrics, format_technical_context
 from .modes import get_mode, get_chart_prompt, ALL_MODES, CHART_MODES
 from .models import SimpleResult, NumericResult
 from .output import format_for_display, format_as_json, save_json, format_technical_summary
-from .batch import run_batch, find_videos
+from .batch import run_batch
 from .archive_cli import register_archive_commands
-from .local import LocalConfig, analyze_video_local, check_ollama_available
 from .ui_cli import app as ui_app
 
 
@@ -115,9 +111,11 @@ def main(
     output_dir: Optional[Path] = typer.Option(
         None, "--output-dir", help="Output directory for batch results"
     ),
-    # Local mode (Ollama)
+    # Provider / local mode
+    provider: Optional[str] = typer.Option(
+        None, "--provider", help="Backend: gemini (default) | openrouter | ollama"),
     local: bool = typer.Option(False, "--local", help="Use local Ollama model instead of Gemini"),
-    model: str = typer.Option("qwen3-vl:4b", "--model", help="Ollama model for local analysis"),
+    model: str = typer.Option("qwen3-vl:4b", "--model", help="Model id for the active provider"),
     frames: int = typer.Option(4, "--frames", help="Number of frames to extract (local mode)"),
     # Version
     version: bool = typer.Option(
@@ -221,100 +219,7 @@ def main(
         return
 
     # =========================================================================
-    # LOCAL MODE (Ollama)
-    # =========================================================================
-    if local:
-        # Validate video path
-        if folder:
-            # Local batch mode
-            folder_path = Path(folder)
-            if not folder_path.exists():
-                console.print(f"[red]Error:[/red] Folder not found: {folder}")
-                raise typer.Exit(1)
-
-            videos = find_videos(folder_path, recursive)
-            if not videos:
-                console.print(f"[red]Error:[/red] No videos found in {folder}")
-                raise typer.Exit(1)
-        elif video:
-            if not video.exists():
-                console.print(f"[red]Error:[/red] Video not found: {video}")
-                raise typer.Exit(1)
-            videos = [video]
-        else:
-            console.print("[red]Error:[/red] No video file or --folder specified")
-            raise typer.Exit(1)
-
-        # Check Ollama availability
-        config = LocalConfig(model=model, num_frames=frames)
-        available, msg = check_ollama_available(config)
-        if not available:
-            console.print(f"[red]Error:[/red] {msg}")
-            raise typer.Exit(1)
-        console.print(f"[green]✓[/green] {msg}")
-
-        # Process videos
-        from rich.progress import Progress, SpinnerColumn, TextColumn
-        import json
-
-        results = []
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
-        ) as progress:
-            for i, vid in enumerate(videos):
-                task = progress.add_task(f"[{i + 1}/{len(videos)}] {vid.name}", total=None)
-
-                def progress_cb(stage, msg):
-                    progress.update(task, description=f"[{i + 1}/{len(videos)}] {vid.name}: {msg}")
-
-                try:
-                    result = analyze_video_local(vid, config, progress_callback=progress_cb)
-                    result["video"] = vid.name
-                    result["path"] = str(vid)
-                    results.append(result)
-                    progress.update(task, description=f"[{i + 1}/{len(videos)}] {vid.name}: ✓ Done")
-                except Exception as e:
-                    console.print(f"[red]Error processing {vid.name}:[/red] {e}")
-                    results.append({"video": vid.name, "path": str(vid), "error": str(e)})
-
-                progress.remove_task(task)
-
-        # Output
-        if len(videos) == 1 and not folder:
-            # Single video output
-            result = results[0]
-            if output:
-                with open(output, "w") as f:
-                    json.dump(result, f, indent=2)
-                console.print(f"[green]Saved:[/green] {output}")
-            elif json_output:
-                print(json.dumps(result, indent=2))
-            else:
-                console.print(f"\n[bold]{video.name}[/bold]")
-                console.print(f"[cyan]Description:[/cyan] {result['video_description']}")
-                console.print(
-                    f"\n[dim]Frames analyzed: {result['num_frames']} | Model: {result['model']}[/dim]"
-                )
-        else:
-            # Batch output
-            out_dir = output_dir or Path("./local_results")
-            out_dir.mkdir(parents=True, exist_ok=True)
-
-            for result in results:
-                if "error" not in result:
-                    out_file = out_dir / f"{Path(result['video']).stem}_local.json"
-                    with open(out_file, "w") as f:
-                        json.dump(result, f, indent=2)
-
-            console.print(f"\n[green]✓[/green] Processed {len(results)} videos")
-            console.print(f"[dim]Results saved to: {out_dir}[/dim]")
-
-        return
-
-    # =========================================================================
-    # SINGLE VIDEO MODE (Gemini)
+    # SINGLE VIDEO MODE
     # =========================================================================
 
     # Validate video path
@@ -334,9 +239,16 @@ def main(
         console.print("Or use --chart or --custom")
         raise typer.Exit(1)
 
-    # Configure Gemini
+    import os
+    from .providers import get_provider
+    # --local is a back-compat alias for --provider ollama
+    provider_name = provider or ("ollama" if local else None) or os.getenv("VANALYZE_PROVIDER")
+    if model and local:
+        os.environ["OLLAMA_MODEL"] = model
+    if model and provider_name == "openrouter":
+        os.environ["OPENROUTER_MODEL"] = model
     try:
-        configure_genai()
+        active_provider = get_provider(provider_name)
     except ValueError as e:
         console.print(f"[red]Error:[/red] {e}")
         raise typer.Exit(1)
@@ -352,9 +264,9 @@ def main(
             console.print(f"[yellow]Warning:[/yellow] Technical analysis failed: {e}")
             console.print("Continuing without technical context...")
 
-    # Upload video once
+    # Prepare video once
     try:
-        video_file = upload_video(video, no_audio=no_audio)
+        handle = active_provider.prepare(video, no_audio=no_audio)
     except Exception as e:
         console.print(f"[red]Error:[/red] Video upload failed: {e}")
         raise typer.Exit(1)
@@ -368,7 +280,7 @@ def main(
 
         console.print(f"\n[bold]Running {len(active_modes)} analyses...[/bold]\n")
 
-        results = analyze_video_multi_mode(video_file, active_modes, technical_context)
+        results = analyze_video_multi_mode(handle, active_modes, technical_context, provider=active_provider)
 
         # Output
         combined = {
@@ -394,7 +306,7 @@ def main(
                     mode_def = get_mode_def(mode_name)
                     result_obj = mode_def.result_model.model_validate(result_data)
                     format_for_display(result_obj, mode_name)
-        delete_video(video_file)
+        active_provider.cleanup(handle)
         return
 
     # =========================================================================
@@ -405,10 +317,13 @@ def main(
             # Standard mode
             mode_name = active_modes[0]
             mode = get_mode(mode_name)
-            result = analyze_video(video_file, mode, technical_context)
+            result = active_provider.analyze(handle, mode, technical_context)
 
         elif chart:
             # Chart mode
+            if active_provider.name != "gemini":
+                console.print("[yellow]--chart/--custom currently require --provider gemini[/yellow]")
+                raise typer.Exit(1)
             if chart not in CHART_MODES:
                 console.print(f"[red]Error:[/red] Unknown chart type: {chart}")
                 console.print(f"Available: {', '.join(CHART_MODES.keys())}")
@@ -416,13 +331,16 @@ def main(
 
             chart_prompt = get_chart_prompt(chart)
             result = analyze_with_custom_prompt(
-                video_file, chart_prompt, NumericResult, technical_context
+                handle.payload, chart_prompt, NumericResult, technical_context
             )
             mode_name = f"chart-{chart}"
 
         else:
             # Custom prompt
-            result = analyze_with_custom_prompt(video_file, custom, SimpleResult, technical_context)
+            if active_provider.name != "gemini":
+                console.print("[yellow]--chart/--custom currently require --provider gemini[/yellow]")
+                raise typer.Exit(1)
+            result = analyze_with_custom_prompt(handle.payload, custom, SimpleResult, technical_context)
             mode_name = "custom"
 
     except Exception as e:
@@ -440,8 +358,8 @@ def main(
         # Rich formatted display
         format_for_display(result, mode_name)
 
-    # Clean up uploaded file from Gemini storage
-    delete_video(video_file)
+    # Clean up uploaded file
+    active_provider.cleanup(handle)
 
 
 # Register archive subcommands
