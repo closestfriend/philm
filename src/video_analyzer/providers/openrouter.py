@@ -81,7 +81,7 @@ class OpenRouterProvider:
 
         compressed = self._compress(source)
         temp_files.append(compressed)
-        if compressed.stat().st_size <= threshold or compressed.stat().st_size < source.stat().st_size:
+        if compressed.stat().st_size <= threshold:
             return VideoHandle(
                 provider="openrouter",
                 payload={"kind": "video_url", "data_url": _data_url(compressed)},
