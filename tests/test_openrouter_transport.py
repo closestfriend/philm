@@ -28,7 +28,9 @@ def test_mpeg_mime_used_for_mpg(provider, tmp_path):
 
 
 def test_oversize_triggers_compress(provider, tmp_path, monkeypatch):
-    monkeypatch.setenv("OPENROUTER_INLINE_MAX_MB", "0")  # force "over threshold"
+    # Threshold ~1048 bytes: source (2048) is over it → compress; compressed (16) is
+    # under it → inline as native. Exercises the genuine compress→native path.
+    monkeypatch.setenv("OPENROUTER_INLINE_MAX_MB", "0.001")
     f = tmp_path / "big.mp4"
     f.write_bytes(b"\x00" * 2048)
     small = tmp_path / "compressed.mp4"
