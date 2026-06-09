@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 from pathlib import Path
 
 from ..local import LocalConfig, _chat_json, extract_frames
@@ -21,8 +22,10 @@ class OllamaProvider:
 
     def prepare(self, video_path: Path, *, no_audio: bool = False) -> VideoHandle:
         frames = extract_frames(video_path, num_frames=self.config.num_frames)
+        frame_dir = frames[0].parent if frames else None
         return VideoHandle(provider="ollama", payload={"frames": frames},
-                           meta={"transport": "frames"})
+                           meta={"transport": "frames",
+                                 "frame_dir": str(frame_dir) if frame_dir else None})
 
     def analyze(self, handle: VideoHandle, mode: AnalysisMode,
                 prompt_prefix: str = "") -> BaseAnalysisResult:
@@ -39,3 +42,6 @@ class OllamaProvider:
     def cleanup(self, handle: VideoHandle) -> None:
         for fr in handle.payload.get("frames", []):
             Path(fr).unlink(missing_ok=True)
+        frame_dir = handle.meta.get("frame_dir")
+        if frame_dir:
+            shutil.rmtree(frame_dir, ignore_errors=True)

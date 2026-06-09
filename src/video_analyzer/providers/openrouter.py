@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -106,6 +107,7 @@ class OpenRouterProvider:
             file=sys.stderr, flush=True,
         )
         frames = extract_frames(compressed, num_frames=n)
+        frame_dir = frames[0].parent if frames else None
         frame_urls = []
         for fr in frames:
             b64 = base64.b64encode(Path(fr).read_bytes()).decode("ascii")
@@ -113,12 +115,16 @@ class OpenRouterProvider:
         return VideoHandle(
             provider="openrouter",
             payload={"kind": "frames", "image_urls": frame_urls},
-            meta={"transport": "frames", "temp_files": [str(p) for p in temp_files]},
+            meta={"transport": "frames", "temp_files": [str(p) for p in temp_files],
+                  "frame_dir": str(frame_dir) if frame_dir else None},
         )
 
     def cleanup(self, handle: VideoHandle) -> None:
         for p in handle.meta.get("temp_files", []):
             Path(p).unlink(missing_ok=True)
+        frame_dir = handle.meta.get("frame_dir")
+        if frame_dir:
+            shutil.rmtree(frame_dir, ignore_errors=True)
 
     # -- request ---------------------------------------------------------
     def _media_part(self, handle: VideoHandle) -> dict | list:

@@ -28,3 +28,18 @@ def test_ollama_analyze_validates(monkeypatch, tmp_path):
     with patch("video_analyzer.providers.ollama._chat_json", return_value=valid):
         result = OllamaProvider().analyze(handle, mode)
         assert isinstance(result, mode.result_model)
+
+
+def test_ollama_cleanup_removes_frame_dir(tmp_path):
+    import shutil
+    from video_analyzer.providers.ollama import OllamaProvider
+    from video_analyzer.providers.base import VideoHandle
+    frame_dir = tmp_path / "frames"
+    frame_dir.mkdir()
+    f0 = frame_dir / "f0.jpg"
+    f0.write_bytes(b"\xff")
+    handle = VideoHandle(provider="ollama",
+                         payload={"frames": [f0]},
+                         meta={"transport": "frames", "frame_dir": str(frame_dir)})
+    OllamaProvider().cleanup(handle)
+    assert not frame_dir.exists()

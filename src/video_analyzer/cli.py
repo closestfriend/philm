@@ -114,8 +114,11 @@ def main(
     provider: Optional[str] = typer.Option(
         None, "--provider", help="Backend: gemini (default) | openrouter | ollama"),
     local: bool = typer.Option(False, "--local", help="Use local Ollama model instead of Gemini"),
-    model: Optional[str] = typer.Option(None, "--model", help="Model id for the active provider"),
-    frames: int = typer.Option(4, "--frames", help="Number of frames to extract (local mode)"),
+    model: Optional[str] = typer.Option(
+        None, "--model",
+        help="Model id (used by openrouter/ollama; gemini is fixed to gemini-2.5-flash)"),
+    frames: Optional[int] = typer.Option(
+        None, "--frames", help="Frame count for ollama / openrouter fallback"),
     # Version
     version: bool = typer.Option(
         False, "--version", callback=version_callback, help="Show version"
@@ -203,10 +206,13 @@ def main(
         import os
         from .providers import get_provider
         provider_name = provider or ("ollama" if local else None) or os.getenv("VANALYZE_PROVIDER")
-        if model and local:
+        if model and (local or provider_name == "ollama"):
             os.environ["OLLAMA_MODEL"] = model
         if model and provider_name == "openrouter":
             os.environ["OPENROUTER_MODEL"] = model
+        if frames is not None:
+            os.environ["OLLAMA_FRAMES"] = str(frames)
+            os.environ["OPENROUTER_FALLBACK_FRAMES"] = str(frames)
         try:
             get_provider(provider_name)  # validate key/availability early, friendly error
         except ValueError as e:
@@ -250,10 +256,13 @@ def main(
     from .providers import get_provider
     # --local is a back-compat alias for --provider ollama
     provider_name = provider or ("ollama" if local else None) or os.getenv("VANALYZE_PROVIDER")
-    if model and local:
+    if model and (local or provider_name == "ollama"):
         os.environ["OLLAMA_MODEL"] = model
     if model and provider_name == "openrouter":
         os.environ["OPENROUTER_MODEL"] = model
+    if frames is not None:
+        os.environ["OLLAMA_FRAMES"] = str(frames)
+        os.environ["OPENROUTER_FALLBACK_FRAMES"] = str(frames)
     try:
         active_provider = get_provider(provider_name)
     except ValueError as e:
@@ -320,53 +329,56 @@ def main(
     # SINGLE MODE ANALYSIS
     # =========================================================================
     try:
-        if active_modes:
-            # Standard mode
-            mode_name = active_modes[0]
-            mode = get_mode(mode_name)
-            result = active_provider.analyze(handle, mode, technical_context)
+        try:
+            if active_modes:
+                # Standard mode
+                mode_name = active_modes[0]
+                mode = get_mode(mode_name)
+                result = active_provider.analyze(handle, mode, technical_context)
 
-        elif chart:
-            # Chart mode
-            if active_provider.name != "gemini":
-                console.print("[yellow]--chart/--custom currently require --provider gemini[/yellow]")
-                raise typer.Exit(1)
-            if chart not in CHART_MODES:
-                console.print(f"[red]Error:[/red] Unknown chart type: {chart}")
-                console.print(f"Available: {', '.join(CHART_MODES.keys())}")
-                raise typer.Exit(1)
+            elif chart:
+                # Chart mode
+                if active_provider.name != "gemini":
+                    console.print("[yellow]--chart/--custom currently require --provider gemini[/yellow]")
+                    raise typer.Exit(1)
+                if chart not in CHART_MODES:
+                    console.print(f"[red]Error:[/red] Unknown chart type: {chart}")
+                    console.print(f"Available: {', '.join(CHART_MODES.keys())}")
+                    raise typer.Exit(1)
 
-            chart_prompt = get_chart_prompt(chart)
-            result = analyze_with_custom_prompt(
-                handle.payload, chart_prompt, NumericResult, technical_context
-            )
-            mode_name = f"chart-{chart}"
+                chart_prompt = get_chart_prompt(chart)
+                result = analyze_with_custom_prompt(
+                    handle.payload, chart_prompt, NumericResult, technical_context
+                )
+                mode_name = f"chart-{chart}"
 
+            else:
+                # Custom prompt
+                if active_provider.name != "gemini":
+                    console.print("[yellow]--chart/--custom currently require --provider gemini[/yellow]")
+                    raise typer.Exit(1)
+                result = analyze_with_custom_prompt(handle.payload, custom, SimpleResult, technical_context)
+                mode_name = "custom"
+
+        except typer.Exit:
+            raise
+        except Exception as e:
+            console.print(f"[red]Error:[/red] Analysis failed: {e}")
+            raise typer.Exit(1)
+
+        # Output
+        if output:
+            # Save to file
+            save_json(result, str(output))
+        elif json_output:
+            # Print JSON to stdout
+            print(format_as_json(result))
         else:
-            # Custom prompt
-            if active_provider.name != "gemini":
-                console.print("[yellow]--chart/--custom currently require --provider gemini[/yellow]")
-                raise typer.Exit(1)
-            result = analyze_with_custom_prompt(handle.payload, custom, SimpleResult, technical_context)
-            mode_name = "custom"
-
-    except Exception as e:
-        console.print(f"[red]Error:[/red] Analysis failed: {e}")
-        raise typer.Exit(1)
-
-    # Output
-    if output:
-        # Save to file
-        save_json(result, str(output))
-    elif json_output:
-        # Print JSON to stdout
-        print(format_as_json(result))
-    else:
-        # Rich formatted display
-        format_for_display(result, mode_name)
-
-    # Clean up uploaded file
-    active_provider.cleanup(handle)
+            # Rich formatted display
+            format_for_display(result, mode_name)
+    finally:
+        # Clean up uploaded file on every path (success or error)
+        active_provider.cleanup(handle)
 
 
 # Register archive subcommands
