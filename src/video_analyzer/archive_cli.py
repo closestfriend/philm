@@ -351,7 +351,8 @@ def process(
     db_path: Optional[Path] = typer.Option(None, "--db", help="Database path"),
 ):
     """Process unprocessed videos in the archive."""
-    from .analyzer import configure_genai, upload_video, analyze_video
+    import os
+    from .providers import get_provider
     from .modes import get_mode
     from dotenv import load_dotenv
 
@@ -381,9 +382,9 @@ def process(
         expand=False
     ))
 
-    # Configure Gemini
+    # Resolve provider (env var VANALYZE_PROVIDER or default "gemini")
     try:
-        configure_genai()
+        provider = get_provider(os.getenv("VANALYZE_PROVIDER"))
     except ValueError as e:
         console.print(f"[red]Error:[/red] {e}")
         raise typer.Exit(1)
@@ -413,29 +414,32 @@ def process(
                 continue
 
             try:
-                # Upload once
+                # Prepare video via provider
                 console.print(f"\n[bold]{video_path.name}[/bold]")
-                video_file = upload_video(video_path, no_audio=no_audio)
+                handle = provider.prepare(video_path, no_audio=no_audio)
 
-                # Run each mode
-                for mode_name in mode_list:
-                    try:
-                        mode = get_mode(mode_name)
-                        result = analyze_video(video_file, mode, "")
+                try:
+                    # Run each mode
+                    for mode_name in mode_list:
+                        try:
+                            mode = get_mode(mode_name)
+                            result = provider.analyze(handle, mode, "")
 
-                        # Store in database
-                        archive.store_analysis(
-                            video["id"],
-                            mode_name,
-                            result.model_dump()
-                        )
-                        console.print(f"  [green]✓[/green] {mode_name}")
+                            # Store in database
+                            archive.store_analysis(
+                                video["id"],
+                                mode_name,
+                                result.model_dump()
+                            )
+                            console.print(f"  [green]✓[/green] {mode_name}")
 
-                    except Exception as e:
-                        console.print(f"  [red]✗[/red] {mode_name}: {e}")
+                        except Exception as e:
+                            console.print(f"  [red]✗[/red] {mode_name}: {e}")
 
-                # Update tier
-                archive.update_video(video["id"], tier=tier)
+                    # Update tier
+                    archive.update_video(video["id"], tier=tier)
+                finally:
+                    provider.cleanup(handle)
 
             except Exception as e:
                 console.print(f"  [red]Failed:[/red] {e}")
