@@ -56,3 +56,15 @@ def test_frame_fallback_when_still_too_big(provider, tmp_path, monkeypatch):
         ef.assert_called_once()
         assert handle.meta["transport"] == "frames"
         assert handle.payload["kind"] == "frames"
+
+
+def test_openrouter_cleanup_removes_frame_dir(provider, tmp_path):
+    from video_analyzer.providers.base import VideoHandle
+    frame_dir = tmp_path / "frames"
+    frame_dir.mkdir()
+    (frame_dir / "f0.jpg").write_bytes(b"\xff")
+    handle = VideoHandle(provider="openrouter",
+                         payload={"kind": "frames", "image_urls": ["data:image/jpeg;base64,AA"]},
+                         meta={"transport": "frames", "temp_files": [], "frame_dir": str(frame_dir)})
+    provider.cleanup(handle)
+    assert not frame_dir.exists()
