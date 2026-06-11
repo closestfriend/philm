@@ -21,8 +21,9 @@ assembly.
   → voice-cloned voiceover → clips played roughly in order, trimmed to match
   narration length, voiceover on top → downloadable MP4.
 - **Out:** auto-edit EDL matched to narration beats (the "option 1" full
-  Curtis experience), music bed, user accounts, archive integration. All can
-  come later.
+  Curtis experience), music bed, user accounts, archive integration, Whisper
+  transcription of clip audio to feed spoken lines into the script ("And
+  then, she said something strange…"). All can come later.
 
 ## Architecture
 
