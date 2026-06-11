@@ -1,0 +1,14 @@
+build:
+  gpu: true
+  python_version: "3.11"
+  python_packages:
+    - "torch==2.4.0"
+    - "qwen-tts==0.1.1"
+    - "soundfile==0.12.1"
+    - "numpy<2"
+    - "huggingface_hub>=0.24"
+  run:
+    # Bake weights into the image so cold starts skip the 3.5GB download.
+    # /weights, not /src — /src is overlaid with project files at runtime.
+    - "python -c \"from huggingface_hub import snapshot_download; snapshot_download('Qwen/Qwen3-TTS-12Hz-0.6B-Base', local_dir='/weights')\""
+predict: "predict.py:Predictor"
