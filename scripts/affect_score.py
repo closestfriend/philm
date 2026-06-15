@@ -1,16 +1,25 @@
 #!/usr/bin/env python3
-"""Affect Scores — compose an intensity curve, render it from the affect catalog.
+"""Affect Scores — STRUCTURE-AWARE variant. Compose from the affect catalog, but
+make the engine HEAR SONG STRUCTURE and change editing grammar per section.
 
-Pushes SINGLE_SOURCE's "affect-intensity as edit curve" method further. Instead of one
-hand-placed peak per clip, this uses the full per-clip affect time-series (~23 samples/clip),
-Massumi's `vector` (affect DIRECTION), and `atmosphere`, and fits the catalog to a TARGET
-CURVE: it walks a timeline, and at each step picks the clip-SUB-WINDOW whose mean intensity,
-internal slope, and vector best match the target level + slope at that moment. Editing as
-curve-fitting against feeling.
+Copy of affect_score.py. The flat audio engine treats every beat the same: cut-rate
+and clip-pick are a pure function of instantaneous loudness. This variant adds a
+deterministic section detector (`detect_sections`) that labels each span of the track
+as breakdown / build / drop / outro from the heavily-smoothed loudness envelope, and
+then modulates the editing GRAMMAR per section (`section_grammar`):
+
+  drop/peak  -> shortest holds (fast cuts), target biased HIGH, strongly prefer
+                forward/expanding vectors -> footage erupts.
+  breakdown  -> longest holds (shots breathe), target biased LOW, prefer
+                static/receding vectors -> stillness.
+  build      -> holds SHRINK across the span, target RISES, prefer expanding/forward.
+  outro      -> holds lengthen, target falls.
+
+Cuts stay beat-aligned. The detected section map is printed.
 
 Usage:
-  uv run python scripts/affect_score.py --score swell [--dry]
-  uv run python scripts/affect_score.py --score all
+  uv run python scripts/affect_score_struct.py --audio <track.wav>
+  uv run python scripts/affect_score_struct.py --score swell [--dry]   # flat curves unchanged
 """
 from __future__ import annotations
 
@@ -141,11 +150,23 @@ def proxy_for(path: str) -> Path | None:
     return p if p.exists() else None
 
 
-def load_clips() -> list[Clip]:
+def load_clips(min_peak_intensity: int | None = None,
+               tones: set[str] | None = None,
+               best_for_any: set[str] | None = None,
+               min_energy: int | None = None,
+               tone_or_best_for: bool = False) -> list[Clip]:
     """Build the clip pool from the catalog JSONs (source of truth). Honors an explicit
-    ``proxy`` field (segment chunks) and skips clips flagged ``segmented`` (long takes that
-    have been replaced by their chunks)."""
+    ``proxy`` field (chunks) and skips clips flagged ``segmented``.
+
+    STRUCTURED-FACET POOL FILTERING — cast the cut from a curated subset, not the whole pool.
+    When any facet filter is given, a clip enters only if it passes ALL of them (AND), each
+    reading an aggregate the analysis already wrote: ``min_peak_intensity`` (max affect
+    intensity), ``tones`` (sizzle.dominant_tone in set), ``best_for_any`` (sizzle.best_for
+    intersects set), ``min_energy`` (sizzle.overall_energy). ``tone_or_best_for`` switches just
+    the tone/best_for pair to OR (the cinematic disjunction: peak>=8 AND (tone OR best_for))."""
+    filtering = any(v is not None for v in (min_peak_intensity, tones, best_for_any, min_energy))
     clips = []
+    full_pool = 0
     for f in sorted(CATALOG.glob("*.json")):
         if f.name.startswith("_"):
             continue
@@ -159,17 +180,39 @@ def load_clips() -> list[Clip]:
         if not isinstance(af, dict) or "error" in af:
             continue
         samples = []
+        peak_intensity = 0
         for t in (af.get("timecodes") or []):
             iv = t.get("intensity")
             if isinstance(iv, int):
                 samples.append((tc_to_sec(t.get("time", "0")), iv,
                                 (t.get("atmosphere") or "").strip(),
                                 (t.get("vector") or "").lower().strip()))
+                if iv > peak_intensity:
+                    peak_intensity = iv
         if len(samples) < 2:
             continue
         proxy = Path(d["proxy"]) if d.get("proxy") else proxy_for(d.get("path", ""))
         if proxy is None or not proxy.exists():
             continue
+        full_pool += 1
+
+        if filtering:
+            sz = d.get("analyses", {}).get("sizzle") or {}
+            if min_peak_intensity is not None and peak_intensity < min_peak_intensity:
+                continue
+            tone_ok = tones is None or (sz.get("dominant_tone") or "") in tones
+            bf_ok = best_for_any is None or bool(set(sz.get("best_for") or []) & best_for_any)
+            if tone_or_best_for and tones is not None and best_for_any is not None:
+                if not (tone_ok or bf_ok):
+                    continue
+            else:
+                if not tone_ok or not bf_ok:
+                    continue
+            if min_energy is not None:
+                oe = sz.get("overall_energy")
+                if not isinstance(oe, int) or oe < min_energy:
+                    continue
+
         samples.sort(key=lambda s: s[0])
         vecs = [s[3] for s in samples if s[3]]
         atmos = [s[2] for s in samples if s[2]]
@@ -179,6 +222,17 @@ def load_clips() -> list[Clip]:
                           intens=[s[1] for s in samples],
                           dom_vector=Counter(vecs).most_common(1)[0][0] if vecs else "neutral",
                           dom_atmo=Counter(atmos).most_common(1)[0][0] if atmos else ""))
+    if filtering:
+        crit = []
+        if min_peak_intensity is not None: crit.append(f"peak>={min_peak_intensity}")
+        join = " OR " if (tone_or_best_for and tones and best_for_any) else " AND "
+        tb = []
+        if tones is not None: tb.append(f"tone in {sorted(tones)}")
+        if best_for_any is not None: tb.append(f"best_for-any {sorted(best_for_any)}")
+        if tb: crit.append(("(" + join.join(tb) + ")") if len(tb) > 1 else tb[0])
+        if min_energy is not None: crit.append(f"energy>={min_energy}")
+        print(f"  facet cast [{' AND '.join(crit)}]: {len(clips)} cast / {full_pool} full pool "
+              f"({100*len(clips)/max(1,full_pool):.0f}%)")
     return clips
 
 
@@ -239,17 +293,22 @@ def compose(score: str, clips: list[Clip]):
     return seq
 
 
-def pick_clip(clips, used, level, tslope, last_atmo, rnd, jitter=0.5):
+def pick_clip(clips, used, level, tslope, last_atmo, rnd, jitter=0.5, section_label=None):
     """Best unused clip + sub-window for a target (level, slope). `jitter` controls how much
-    near-equal-fit clips get reshuffled — the iteration/diversity knob."""
+    near-equal-fit clips get reshuffled — the iteration/diversity knob.
+
+    When `section_label` is given (structure-aware mode), an extra per-section vector penalty
+    pushes the pick toward the section's feel (erupt vs stillness vs climb vs fall)."""
     best = None
     for c in clips:
         if c.vid in used:
             continue
         start, wmean, wslope = c.best_window(level)
+        sec_pen = 0.0 if section_label is None else 0.9 * section_vector_pen(section_label, c.dom_vector)
         cost = (abs(wmean - level)
                 + 0.6 * (0 if sgn(wslope, 0.5) == tslope or tslope == 0 else 1)
                 + 0.7 * vector_pen(c.dom_vector, tslope)
+                + sec_pen
                 + 0.25 * (0 if c.dom_atmo == last_atmo else 1)
                 + jitter * rnd.random())
         if best is None or cost < best[0]:
@@ -279,22 +338,207 @@ def audio_curve(path: Path):
     tempo, beats = librosa.beat.beat_track(y=y, sr=sr, hop_length=hop)
     beat_times = librosa.frames_to_time(beats, sr=sr, hop_length=hop)
     dur = float(librosa.get_duration(y=y, sr=sr))
-    return dur, level_at, list(beat_times), float(np.atleast_1d(tempo)[0])
+
+    # per-frame level series (1-10), for the section detector
+    lvl_series = np.clip(1.0 + 9.0 * (db_s - p5) / rng, 1.0, 10.0)
+    return (dur, level_at, list(beat_times), float(np.atleast_1d(tempo)[0]),
+            times, lvl_series)
+
+
+# --------------------------------------------------------------------------- #
+# SECTION DETECTION  (structure-aware addition)
+# --------------------------------------------------------------------------- #
+@dataclass
+class Section:
+    start: float
+    end: float
+    label: str            # breakdown | build | drop | outro
+
+
+def detect_sections(times, lvl_series, dur: float) -> list[Section]:
+    """Deterministically label spans of the track as breakdown/build/drop/outro from the
+    heavily-smoothed loudness envelope.
+
+    Method (no randomness): smooth `lvl_series` with a ~4s box, compute a slope (per-second)
+    on the smoothed curve, then label each frame:
+      high sustained energy -> drop, rising over a span -> build, low energy -> breakdown,
+      falling tail near the end -> outro. Merge adjacent same-label frames into spans and
+      absorb spans shorter than MIN_SEC into their louder/longer neighbour so the map is clean.
+    """
+    import numpy as np
+
+    n = len(lvl_series)
+    if n == 0:
+        return [Section(0.0, dur, "drop")]
+    dt = float(times[1] - times[0]) if n > 1 else 0.05
+
+    # heavy smoothing -> structural envelope
+    hwin = max(1, int(round(4.0 / max(dt, 1e-6))))
+    heavy = np.convolve(lvl_series, np.ones(hwin) / hwin, mode="same")
+    # slope per second over a ~3s lookahead/back
+    sw = max(1, int(round(3.0 / max(dt, 1e-6))))
+    slope = np.zeros(n)
+    for i in range(n):
+        a = max(0, i - sw)
+        b = min(n - 1, i + sw)
+        slope[i] = (heavy[b] - heavy[a]) / max(dt * (b - a), 1e-6)
+
+    hi = float(np.percentile(heavy, 60))   # "loud" threshold
+    lo = float(np.percentile(heavy, 35))   # "quiet" threshold
+    RISE_TH = 0.12                          # level units / second to count as a build
+
+    labels = []
+    for i in range(n):
+        t = times[i]
+        h = heavy[i]
+        s = slope[i]
+        if t >= dur - 18.0 and s < -RISE_TH and h < hi:
+            lab = "outro"
+        elif s > RISE_TH and h < hi + 1.0:
+            lab = "build"
+        elif h >= hi:
+            lab = "drop"
+        elif h <= lo:
+            lab = "breakdown"
+        else:
+            lab = "build" if s > 0 else "breakdown"
+        labels.append(lab)
+
+    # merge contiguous same-label frames into spans
+    spans = []
+    cur = labels[0]
+    start_t = float(times[0])
+    for i in range(1, n):
+        if labels[i] != cur:
+            spans.append(Section(start_t, float(times[i]), cur))
+            cur = labels[i]
+            start_t = float(times[i])
+    spans.append(Section(start_t, dur, cur))
+
+    # absorb tiny spans into a neighbour (prefer the louder/longer one)
+    MIN_SEC = 6.0
+
+    def mean_lvl(sec):
+        m = (times >= sec.start) & (times < sec.end)
+        return float(np.mean(heavy[m])) if np.any(m) else 0.0
+
+    changed = True
+    while changed and len(spans) > 1:
+        changed = False
+        for i, sec in enumerate(spans):
+            if sec.end - sec.start >= MIN_SEC:
+                continue
+            left = spans[i - 1] if i > 0 else None
+            right = spans[i + 1] if i < len(spans) - 1 else None
+            # pick neighbour to merge into
+            if left and right:
+                tgt = left if mean_lvl(left) >= mean_lvl(right) else right
+            else:
+                tgt = left or right
+            tgt.start = min(tgt.start, sec.start)
+            tgt.end = max(tgt.end, sec.end)
+            spans.pop(i)
+            changed = True
+            break
+
+    # final pass: stitch any now-adjacent same-label spans
+    merged = [spans[0]]
+    for sec in spans[1:]:
+        if sec.label == merged[-1].label:
+            merged[-1].end = sec.end
+        else:
+            merged.append(sec)
+    return merged
+
+
+def section_at(sections: list[Section], t: float) -> Section:
+    for sec in sections:
+        if sec.start <= t < sec.end:
+            return sec
+    return sections[-1]
+
+
+def section_span_progress(sec: Section, t: float) -> float:
+    """0->1 position of t within section `sec` (for builds where holds shrink across the span)."""
+    span = max(1e-6, sec.end - sec.start)
+    return max(0.0, min(1.0, (t - sec.start) / span))
+
+
+# --------------------------------------------------------------------------- #
+# PER-SECTION GRAMMAR  (structure-aware addition)
+# --------------------------------------------------------------------------- #
+# Vector preference buckets per section. Penalty applied on top of the loudness-slope
+# vector_pen so the section's "feel" wins where the slope is ambiguous.
+def section_vector_pen(label: str, dom_vector: str) -> float:
+    if label in ("drop", "build"):              # erupt / climb -> forward/expanding
+        if dom_vector in RISE:
+            return 0.0
+        if dom_vector in FLAT:
+            return 0.5
+        return 1.0
+    if label == "breakdown":                    # stillness -> static/receding
+        if dom_vector in FLAT:
+            return 0.0
+        if dom_vector in FALL:
+            return 0.2
+        return 1.0
+    if label == "outro":                        # let it fall away -> receding/static
+        if dom_vector in FALL:
+            return 0.0
+        if dom_vector in FLAT:
+            return 0.3
+        return 1.0
+    return 0.5
+
+
+def section_grammar(label: str, base_bpc: int, level: float, span_u: float):
+    """Return (beats_per_cut, target_level) modulated by the current section.
+
+    span_u is the 0->1 progress within the section (used by `build` to SHRINK holds and
+    RAISE the target across the span). Cuts stay beat-aligned because we only ever change
+    how many beats each cut spans, never where the beats are.
+    """
+    bpc = base_bpc
+    tgt = level
+    if label == "drop":                 # fast cuts, target biased HIGH
+        bpc = max(1, base_bpc - 2)
+        tgt = min(10.0, level + 1.5)
+    elif label == "breakdown":          # longest holds, target biased LOW
+        bpc = min(8, base_bpc + 3)
+        tgt = max(1.0, level - 1.5)
+    elif label == "build":              # holds shrink across span, target rises
+        bpc = max(1, int(round(base_bpc + 2 - 4.0 * span_u)))
+        tgt = min(10.0, level + 1.0 + 3.0 * span_u)
+    elif label == "outro":             # lengthen holds, target falls
+        bpc = min(8, base_bpc + 2)
+        tgt = max(1.0, level - 1.0 - 1.5 * span_u)
+    return max(1, min(8, bpc)), max(1.0, min(10.0, tgt))
 
 
 def compose_audio(path: Path, clips, seed=None, jitter=0.5):
-    """Tile [0, track] on a beat-aligned grid; cut rate driven by loudness (fewer beats per
-    cut when loud). Each segment's clip-window matches the track's intensity+slope at that
-    moment, vector matched to the loudness slope. Cuts land on the beat. `seed` varies the
-    cut while holding the curve; `jitter` widens the candidate pool per placement."""
-    dur, level_at, beats, tempo = audio_curve(path)
+    """STRUCTURE-AWARE tile of [0, track] on a beat-aligned grid. Detect song structure
+    (breakdown/build/drop/outro) and change the editing GRAMMAR per section:
+    beats-per-cut and the target level are modulated by `section_grammar`, and the
+    clip pick is biased toward each section's feel via `section_vector_pen`. Cuts stay
+    beat-aligned (we only change how many beats a cut spans). Returns (seq, sections)."""
+    dur, level_at, beats, tempo, times, lvl_series = audio_curve(path)
+    sections = detect_sections(times, lvl_series, dur)
+    print("  detected sections:")
+    for s in sections:
+        print(f"    {s.start:6.1f}s -> {s.end:6.1f}s  [{s.label}]  ({s.end - s.start:.1f}s)")
+
     rnd = random.Random(seed if seed is not None else path.stem)
-    # build beat-aligned cut boundaries; beats-per-cut shrinks as loudness rises
+    # build beat-aligned cut boundaries; base beats-per-cut shrinks as loudness rises,
+    # then is re-shaped by the active section's grammar.
     cuts = [0.0]
     i = 0
     while i < len(beats) - 1:
-        lvl = level_at(beats[i])
-        bpc = int(max(1, min(8, round(8.5 - 0.78 * lvl))))
+        t = beats[i]
+        lvl = level_at(t)
+        base_bpc = int(max(1, min(8, round(8.5 - 0.78 * lvl))))
+        sec = section_at(sections, t)
+        span_u = section_span_progress(sec, t)
+        bpc, _ = section_grammar(sec.label, base_bpc, lvl, span_u)
         j = min(i + bpc, len(beats) - 1)
         cuts.append(beats[j])
         i = j
@@ -308,7 +552,12 @@ def compose_audio(path: Path, clips, seed=None, jitter=0.5):
             continue
         level = level_at(a)
         tslope = sgn(level_at(min(dur, a + 0.4)) - level_at(max(0, a - 0.4)), 0.4)
-        best = pick_clip(clips, used, level, tslope, last_atmo, rnd, jitter)
+        sec = section_at(sections, a)
+        span_u = section_span_progress(sec, a)
+        # section grammar shifts the TARGET the clip-window must match
+        _, tgt_level = section_grammar(sec.label, 4, level, span_u)
+        best = pick_clip(clips, used, tgt_level, tslope, last_atmo, rnd, jitter,
+                         section_label=sec.label)
         if best is None:
             break
         _, c, start, wmean, wslope = best
@@ -316,19 +565,21 @@ def compose_audio(path: Path, clips, seed=None, jitter=0.5):
             c.dur = ffdur(c.proxy)
         seek = max(0.0, min(start, max(0.0, c.dur - hold))) if c.dur > 0 else max(0.0, start)
         seq.append({"clip": c, "seek": round(seek, 2), "hold": round(hold, 2),
-                    "target": round(level, 1), "achieved": round(wmean, 1),
-                    "tslope": tslope, "vector": c.dom_vector, "atmo": c.dom_atmo})
+                    "target": round(tgt_level, 1), "achieved": round(wmean, 1),
+                    "tslope": tslope, "vector": c.dom_vector, "atmo": c.dom_atmo,
+                    "section": sec.label})
         used.add(c.vid)
         last_atmo = c.dom_atmo
     print(f"  track {dur:.0f}s, tempo~{tempo:.0f} BPM, {len(beats)} beats -> {len(seq)} cuts")
-    return seq
+    return seq, sections
 
 
 def spark(vals: list[float]) -> str:
     return "".join(BLOCKS[max(0, min(7, int(round((v - 1) / 9 * 7))))] for v in vals)
 
 
-def render(score: str, seq: list, dry: bool, audio: Path | None = None):
+def render(score: str, seq: list, dry: bool, audio: Path | None = None,
+           sections: list | None = None):
     OUT.mkdir(parents=True, exist_ok=True)
     name = score.upper()
     tgt = [s["target"] for s in seq]
@@ -336,21 +587,42 @@ def render(score: str, seq: list, dry: bool, audio: Path | None = None):
     total = sum(s["hold"] for s in seq)
     fit = sum(abs(a - t) for a, t in zip(ach, tgt)) / max(1, len(seq))
 
-    lines = [f"# {name} — affect score", "",
+    lines = [f"# {name} — affect score (structure-aware)", "",
              f"A data-composed cut: {len(seq)} clips, ~{total/60:.1f} min, fit to the **{score}** "
              f"intensity curve (mean |target−achieved| = {fit:.2f}). Clip sub-windows chosen so the "
-             f"piece's affect intensity tracks the target; `vector` matched to the curve's local slope.",
-             "",
-             "```",
-             "target   " + spark(tgt),
-             "achieved " + spark(ach),
-             "```",
-             "",
-             "| # | clip | seek | hold | tgt | got | slope | vector | atmosphere |",
-             "|--:|------|-----:|-----:|:---:|:---:|:-----:|--------|------------|"]
+             f"piece's affect intensity tracks the target; `vector` matched to the curve's local slope. "
+             f"The editing GRAMMAR (cut-rate, target bias, vector preference) shifts per detected song section.",
+             ""]
+
+    if sections:
+        # per-section cut-rate summary
+        per = {}
+        for s in seq:
+            lab = s.get("section", "?")
+            per.setdefault(lab, []).append(s["hold"])
+        lines += ["## Detected section map", "",
+                  "| start | end | label | dur | cuts | mean hold | cuts/min |",
+                  "|------:|----:|-------|----:|-----:|----------:|---------:|"]
+        for sec in sections:
+            holds = per.get(sec.label, [])
+            ncut = len(holds)
+            mh = (sum(holds) / ncut) if ncut else 0.0
+            spd = sec.end - sec.start
+            cpm = (ncut / spd * 60.0) if spd > 0 else 0.0
+            lines.append(f"| {sec.start:.1f}s | {sec.end:.1f}s | **{sec.label}** | "
+                         f"{spd:.1f}s | {ncut} | {mh:.2f}s | {cpm:.1f} |")
+        lines.append("")
+
+    lines += ["```",
+              "target   " + spark(tgt),
+              "achieved " + spark(ach),
+              "```",
+              "",
+              "| # | section | clip | seek | hold | tgt | got | slope | vector | atmosphere |",
+              "|--:|---------|------|-----:|-----:|:---:|:---:|:-----:|--------|------------|"]
     for i, s in enumerate(seq, 1):
         sl = {1: "↑", -1: "↓", 0: "→"}[s["tslope"]]
-        lines.append(f"| {i} | `{s['clip'].proxy.stem}` | {s['seek']}s | {s['hold']}s | "
+        lines.append(f"| {i} | {s.get('section','-')} | `{s['clip'].proxy.stem}` | {s['seek']}s | {s['hold']}s | "
                      f"{s['target']} | {s['achieved']} | {sl} | {s['vector']} | {s['atmo'][:34]} |")
     (OUT / f"{name}_cut.md").write_text("\n".join(lines))
     print(f"[{score}] {len(seq)} clips, ~{total/60:.1f}min, fit={fit:.2f} -> {OUT / (name+'_cut.md')}")
@@ -399,23 +671,38 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=None, help="base RNG seed (variations = seed, seed+1, ...)")
     ap.add_argument("--diversity", type=float, default=0.5, help="0=always best-fit; higher=wilder/varied")
     ap.add_argument("--dry", action="store_true", help="cut sheet + curve only, no render")
+    # structured-facet pool casting — curate the subset the cut draws from
+    ap.add_argument("--pool-min-intensity", type=int, default=None, help="cast only clips with peak affect intensity >= N (1-10)")
+    ap.add_argument("--pool-tone", default=None, help="cast only clips whose sizzle tone in this comma-list (dramatic,exciting,...)")
+    ap.add_argument("--pool-best-for", default=None, help="cast only clips whose sizzle best_for intersects this comma-list (hook,climax,...)")
+    ap.add_argument("--pool-min-energy", type=int, default=None, help="cast only clips with sizzle overall_energy >= N (1-10)")
+    ap.add_argument("--pool-tone-or-best-for", action="store_true", help="combine --pool-tone and --pool-best-for with OR (cinematic disjunction)")
+    ap.add_argument("--label", default=None, help="suffix on the output basename (e.g. CAST -> RAV3RZ_CAST_*)")
     args = ap.parse_args()
     if not args.score and not args.audio:
         ap.error("pass --score <curve|all> or --audio <track>")
+
+    def _csv_set(v):
+        return {x.strip() for x in v.split(",") if x.strip()} if v else None
+
     print("loading affect catalog ...")
-    clips = load_clips()
+    clips = load_clips(min_peak_intensity=args.pool_min_intensity, tones=_csv_set(args.pool_tone),
+                       best_for_any=_csv_set(args.pool_best_for), min_energy=args.pool_min_energy,
+                       tone_or_best_for=args.pool_tone_or_best_for)
     print(f"{len(clips)} clips with usable affect time-series + proxies")
     if args.audio:
         apath = Path(args.audio)
         base = apath.stem.upper().replace(" ", "_").replace(".", "_")
+        if args.label:
+            base = f"{base}_{args.label.upper()}"
         n = max(1, args.variations)
         print(f"composing to track: {apath.name}  ({n} variation{'s' if n > 1 else ''}, diversity {args.diversity})")
         for i in range(n):
             seed = (args.seed if args.seed is not None else 1) + i
             label = f"{base}_V{seed:02d}" if (n > 1 or args.seed is not None) else base
             print(f"--- {label} (seed {seed}) ---")
-            seq = compose_audio(apath, clips, seed=seed, jitter=args.diversity)
-            render(label, seq, args.dry, audio=apath)
+            seq, sections = compose_audio(apath, clips, seed=seed, jitter=args.diversity)  # structure-aware
+            render(label, seq, args.dry, audio=apath, sections=sections)
         return 0
     scores = list(CURVES) if args.score == "all" else [args.score]
     for sc in scores:
