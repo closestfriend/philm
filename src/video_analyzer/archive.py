@@ -77,6 +77,14 @@ class Archive:
         -- Denormalized for fast search
         description TEXT,
 
+        -- structured facets (clip-level, filterable) — from sizzle + affect
+        overall_energy INTEGER,
+        dominant_tone TEXT,
+        best_for TEXT,
+        peak_intensity INTEGER,
+        mean_intensity REAL,
+        dominant_atmosphere TEXT,
+
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
@@ -379,10 +387,20 @@ class Archive:
             self._conn.close()
             self._conn = None
 
+    FACET_COLUMNS = [
+        ("overall_energy", "INTEGER"), ("dominant_tone", "TEXT"), ("best_for", "TEXT"),
+        ("peak_intensity", "INTEGER"), ("mean_intensity", "REAL"),
+        ("dominant_atmosphere", "TEXT"),
+    ]
+
     def init_db(self):
-        """Initialize database schema."""
+        """Initialize database schema (and migrate older DBs to add facet columns)."""
         conn = self.connect()
         conn.executescript(self.SCHEMA)
+        existing = {r["name"] for r in conn.execute("PRAGMA table_info(videos)")}
+        for col, typ in self.FACET_COLUMNS:
+            if col not in existing:
+                conn.execute(f"ALTER TABLE videos ADD COLUMN {col} {typ}")
         conn.commit()
 
     def __enter__(self):
@@ -538,7 +556,9 @@ class Archive:
         conn = self.connect()
         allowed = {
             "description", "duration_sec", "date_recorded", "location",
-            "camera", "tier", "processed_at", "processing_cost"
+            "camera", "tier", "processed_at", "processing_cost",
+            "overall_energy", "dominant_tone", "best_for",
+            "peak_intensity", "mean_intensity", "dominant_atmosphere",
         }
         updates = {k: v for k, v in kwargs.items() if k in allowed}
         if not updates:
@@ -944,10 +964,35 @@ class Archive:
             )
         conn.commit()
 
+    @staticmethod
+    def compute_facets(mode: str, result: dict) -> dict:
+        """Pull clip-level filterable facets out of a mode result. sizzle → energy/tone/
+        best_for; affect → peak/mean intensity + dominant atmosphere. (These top-level
+        fields are otherwise dropped on import.)"""
+        from collections import Counter
+        facets: dict = {}
+        if mode == "sizzle":
+            if isinstance(result.get("overall_energy"), int):
+                facets["overall_energy"] = result["overall_energy"]
+            if result.get("dominant_tone"):
+                facets["dominant_tone"] = result["dominant_tone"]
+            if result.get("best_for"):
+                facets["best_for"] = json.dumps(result["best_for"])
+        if mode == "affect":
+            ints = [t.get("intensity") for t in (result.get("timecodes") or [])
+                    if isinstance(t.get("intensity"), int)]
+            if ints:
+                facets["peak_intensity"] = max(ints)
+                facets["mean_intensity"] = round(sum(ints) / len(ints), 2)
+            atmos = [t.get("atmosphere") for t in (result.get("timecodes") or []) if t.get("atmosphere")]
+            if atmos:
+                facets["dominant_atmosphere"] = Counter(atmos).most_common(1)[0][0]
+        return facets
+
     def store_analysis(self, video_id: int, mode: str, result: dict):
         """
         Store analysis result, routing to appropriate table.
-        Updates video description and tier.
+        Updates video description, structured facets, and tier.
         """
         timecodes = result.get("timecodes", [])
         description = result.get("video_description", "")
@@ -955,6 +1000,11 @@ class Archive:
         # Update video description if present
         if description:
             self.update_video(video_id, description=description)
+
+        # Capture clip-level filterable facets (sizzle energy/tone/best_for, affect intensity)
+        facets = self.compute_facets(mode, result)
+        if facets:
+            self.update_video(video_id, **facets)
 
         # Route to specific table or generic
         if mode == "gaze":
@@ -1001,6 +1051,35 @@ class Archive:
             (query, limit)
         ).fetchall()
         return [dict(r) for r in rows]
+
+    def search_facets(self, query: Optional[str] = None, min_intensity: Optional[int] = None,
+                      max_intensity: Optional[int] = None, tone: Optional[str] = None,
+                      best_for: Optional[str] = None, min_energy: Optional[int] = None,
+                      atmosphere: Optional[str] = None, limit: int = 50) -> list[dict]:
+        """Structured search: optional FTS query AND-combined with clip-level facet filters
+        (affect intensity, sizzle energy/tone/best_for, atmosphere). Ordered by peak intensity."""
+        conn = self.connect()
+        join, where, params = "", [], []
+        if query:
+            join = " JOIN video_fts fts ON v.id = fts.rowid"
+            where.append("video_fts MATCH ?"); params.append(query)
+        if min_intensity is not None:
+            where.append("v.peak_intensity >= ?"); params.append(min_intensity)
+        if max_intensity is not None:
+            where.append("v.peak_intensity <= ?"); params.append(max_intensity)
+        if min_energy is not None:
+            where.append("v.overall_energy >= ?"); params.append(min_energy)
+        if tone:
+            where.append("v.dominant_tone = ?"); params.append(tone)
+        if best_for:
+            where.append("v.best_for LIKE ?"); params.append(f"%{best_for}%")
+        if atmosphere:
+            where.append("v.dominant_atmosphere LIKE ?"); params.append(f"%{atmosphere}%")
+        wc = (" WHERE " + " AND ".join(where)) if where else ""
+        sql = (f"SELECT v.* FROM videos v{join}{wc} "
+               f"ORDER BY v.peak_intensity DESC NULLS LAST LIMIT ?")
+        params.append(limit)
+        return [dict(r) for r in conn.execute(sql, params).fetchall()]
 
     def search_gaze(
         self,

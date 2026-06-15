@@ -223,6 +223,11 @@ def search(
     no_recovery: bool = typer.Option(False, "--no-recovery", help="Only no-recovery sublime"),
     frenetic_min: Optional[int] = typer.Option(None, "--frenetic-min", help="Minimum frenetic level"),
     frenetic_max: Optional[int] = typer.Option(None, "--frenetic-max", help="Maximum frenetic level"),
+    min_intensity: Optional[int] = typer.Option(None, "--min-intensity", help="affect peak intensity >= (1-10)"),
+    tone: Optional[str] = typer.Option(None, "--tone", help="sizzle dominant tone (e.g. dramatic)"),
+    best_for: Optional[str] = typer.Option(None, "--best-for", help="sizzle best_for contains (e.g. hook)"),
+    min_energy: Optional[int] = typer.Option(None, "--min-energy", help="sizzle overall_energy >= (1-10)"),
+    atmosphere: Optional[str] = typer.Option(None, "--atmosphere", help="affect atmosphere contains (e.g. blazing)"),
     limit: int = typer.Option(20, "--limit", "-n", help="Max results"),
     db_path: Optional[Path] = typer.Option(None, "--db", help="Database path"),
 ):
@@ -236,9 +241,30 @@ def search(
         raise typer.Exit(1)
 
     results = []
+    facet_filters = any(x is not None for x in (min_intensity, tone, best_for, min_energy, atmosphere))
+
+    # Structured / faceted search (intensity, energy, tone, best_for, atmosphere) — optionally + text
+    if facet_filters:
+        results = archive.search_facets(
+            query=query, min_intensity=min_intensity, tone=tone, best_for=best_for,
+            min_energy=min_energy, atmosphere=atmosphere, limit=limit)
+        if results:
+            table = Table(title=f"Structured search ({len(results)})")
+            table.add_column("File", style="cyan", max_width=26)
+            table.add_column("i", style="red"); table.add_column("E", style="yellow")
+            table.add_column("tone", style="green"); table.add_column("best_for", style="magenta", max_width=22)
+            table.add_column("Description", style="white", max_width=44)
+            for r in results:
+                table.add_row(
+                    r["filename"], str(r.get("peak_intensity") or "-"), str(r.get("overall_energy") or "-"),
+                    (r.get("dominant_tone") or "-"), (r.get("best_for") or "").strip("[]\"").replace('"', "")[:22],
+                    (r.get("description") or "")[:44])
+            console.print(table)
+        else:
+            console.print("[yellow]No clips match those filters.[/yellow]")
 
     # Text search
-    if query:
+    elif query:
         results = archive.search_text(query, limit)
         if results:
             table = Table(title=f"Text Search: '{query}'")
