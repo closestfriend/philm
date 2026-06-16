@@ -345,6 +345,34 @@ def audio_curve(path: Path):
             times, lvl_series)
 
 
+def kick_track(path: Path, dur: float):
+    """Isolate the kick (low band ~150 Hz), detect its onsets, and a 0-1 *density* envelope
+    (how hard the kick is pumping). Cuts lock to the kick where density is high and relax to
+    free holds where it isn't — so the picture pulses with the 4-on-the-floor and breathes
+    when the kick drops out. Returns (onset_times, density(t))."""
+    import numpy as np
+    import librosa
+    from scipy.signal import butter, sosfiltfilt
+    y, sr = librosa.load(str(path), mono=True)
+    sos = butter(4, 150, btype="low", fs=sr, output="sos")
+    y_low = sosfiltfilt(sos, y).astype(np.float32)
+    hop = 256
+    oenv = librosa.onset.onset_strength(y=y_low, sr=sr, hop_length=hop)
+    onsets = np.asarray(librosa.onset.onset_detect(onset_envelope=oenv, sr=sr,
+                        hop_length=hop, units="time", backtrack=False), dtype=float)
+    grid = np.arange(0.0, dur + 0.25, 0.25)
+    rate = np.array([np.sum((onsets >= g - 1.0) & (onsets < g + 1.0)) for g in grid], float)
+    if rate.max() > 0:
+        k = max(1, int(round(1.0 / 0.25)))
+        rate = np.convolve(rate, np.ones(k) / k, mode="same")
+    hi = max(1.0, float(np.percentile(rate, 85)))
+
+    def density(t: float) -> float:
+        return float(np.clip(np.interp(t, grid, rate) / hi, 0.0, 1.0))
+
+    return sorted(float(o) for o in onsets), density
+
+
 # --------------------------------------------------------------------------- #
 # SECTION DETECTION  (structure-aware addition)
 # --------------------------------------------------------------------------- #
@@ -515,7 +543,7 @@ def section_grammar(label: str, base_bpc: int, level: float, span_u: float):
     return max(1, min(8, bpc)), max(1.0, min(10.0, tgt))
 
 
-def compose_audio(path: Path, clips, seed=None, jitter=0.5):
+def compose_audio(path: Path, clips, seed=None, jitter=0.5, transient=False):
     """STRUCTURE-AWARE tile of [0, track] on a beat-aligned grid. Detect song structure
     (breakdown/build/drop/outro) and change the editing GRAMMAR per section:
     beats-per-cut and the target level are modulated by `section_grammar`, and the
@@ -528,20 +556,51 @@ def compose_audio(path: Path, clips, seed=None, jitter=0.5):
         print(f"    {s.start:6.1f}s -> {s.end:6.1f}s  [{s.label}]  ({s.end - s.start:.1f}s)")
 
     rnd = random.Random(seed if seed is not None else path.stem)
-    # build beat-aligned cut boundaries; base beats-per-cut shrinks as loudness rises,
-    # then is re-shaped by the active section's grammar.
-    cuts = [0.0]
-    i = 0
-    while i < len(beats) - 1:
-        t = beats[i]
-        lvl = level_at(t)
-        base_bpc = int(max(1, min(8, round(8.5 - 0.78 * lvl))))
-        sec = section_at(sections, t)
-        span_u = section_span_progress(sec, t)
-        bpc, _ = section_grammar(sec.label, base_bpc, lvl, span_u)
-        j = min(i + bpc, len(beats) - 1)
-        cuts.append(beats[j])
-        i = j
+    if transient:
+        # TRANSIENT MAPPING: lock cuts to the kick where it's pumping, relax to free holds
+        # where it drops out. target hold shrinks with kick density; each boundary snaps to the
+        # nearest kick onset while the kick is active (density>=0.18), else stands as a free hold.
+        import numpy as np
+        import bisect
+        onsets, kdens = kick_track(path, dur)
+        MINH = 0.16
+        cuts = [0.0]
+        t = 0.0
+        while t < dur - 0.3:
+            d = kdens(t)
+            cand = t + max(MINH, 5.2 - 4.8 * d)         # dense kick → ~0.4s, no kick → ~5.2s
+            if d >= 0.18 and onsets:
+                lo = bisect.bisect_left(onsets, t + MINH)
+                best_k, bestd, k = None, 1e9, lo
+                while k < len(onsets) and onsets[k] <= cand + 0.6:
+                    if abs(onsets[k] - cand) < bestd:
+                        bestd, best_k = abs(onsets[k] - cand), onsets[k]
+                    k += 1
+                if best_k is None and lo < len(onsets):
+                    best_k = onsets[lo]
+                b = best_k if best_k is not None else cand
+            else:
+                b = cand
+            b = min(max(b, t + MINH), dur)
+            cuts.append(b)
+            t = b
+        prof = [kdens(x) for x in np.linspace(0, dur, 56)]
+        print("  kick density " + "".join(BLOCKS[min(7, int(p * 7))] for p in prof))
+        print(f"  {len(onsets)} kick onsets -> cutting kick-gated")
+    else:
+        # STRUCTURE-AWARE beat grid: beats-per-cut shrinks with loudness, reshaped per section
+        cuts = [0.0]
+        i = 0
+        while i < len(beats) - 1:
+            t = beats[i]
+            lvl = level_at(t)
+            base_bpc = int(max(1, min(8, round(8.5 - 0.78 * lvl))))
+            sec = section_at(sections, t)
+            span_u = section_span_progress(sec, t)
+            bpc, _ = section_grammar(sec.label, base_bpc, lvl, span_u)
+            j = min(i + bpc, len(beats) - 1)
+            cuts.append(beats[j])
+            i = j
     if cuts[-1] < dur - 0.5:
         cuts.append(dur)
 
@@ -678,6 +737,9 @@ def main() -> int:
     ap.add_argument("--pool-min-energy", type=int, default=None, help="cast only clips with sizzle overall_energy >= N (1-10)")
     ap.add_argument("--pool-tone-or-best-for", action="store_true", help="combine --pool-tone and --pool-best-for with OR (cinematic disjunction)")
     ap.add_argument("--label", default=None, help="suffix on the output basename (e.g. CAST -> RAV3RZ_CAST_*)")
+    ap.add_argument("--transient", action="store_true",
+                    help="lock cuts to the KICK (low-band onsets) where it's pumping, relax to "
+                         "free holds where it drops out (percussion-reactive editing)")
     args = ap.parse_args()
     if not args.score and not args.audio:
         ap.error("pass --score <curve|all> or --audio <track>")
@@ -701,7 +763,8 @@ def main() -> int:
             seed = (args.seed if args.seed is not None else 1) + i
             label = f"{base}_V{seed:02d}" if (n > 1 or args.seed is not None) else base
             print(f"--- {label} (seed {seed}) ---")
-            seq, sections = compose_audio(apath, clips, seed=seed, jitter=args.diversity)  # structure-aware
+            seq, sections = compose_audio(apath, clips, seed=seed, jitter=args.diversity,
+                                          transient=args.transient)
             render(label, seq, args.dry, audio=apath, sections=sections)
         return 0
     scores = list(CURVES) if args.score == "all" else [args.score]
