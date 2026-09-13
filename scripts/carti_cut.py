@@ -6,6 +6,7 @@ Beat-synced hard cuts, flash frames, stutter effects. No fades.
 """
 
 import argparse
+import json
 import random
 import subprocess
 import tempfile
@@ -119,7 +120,8 @@ def apply_cut_density(beat_times: list[float], density: float) -> list[float]:
     return result
 
 
-def detect_beats(music_path: Path, video_duration: float, density: float = 1.0) -> list[float]:
+def detect_beats(music_path: Path, video_duration: float,
+                 density: float = 1.0) -> tuple[list[float], float]:
     print(f"Loading music: {music_path.name}")
     y, sr = librosa.load(str(music_path))
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
@@ -134,21 +136,27 @@ def detect_beats(music_path: Path, video_duration: float, density: float = 1.0) 
 
     tempo_val = float(np.asarray(tempo).flatten()[0])
     print(f"Detected tempo: {tempo_val:.1f} BPM → {len(beat_times)} cut points (density {density})")
-    return beat_times
+    return beat_times, tempo_val
 
 
 # ─── STEP 2: BUILD CUT SCHEDULE ────────────────────────────────────────────────
 
-def build_cut_schedule(beat_times: list[float], clip_pool: list) -> list[dict]:
+def build_cut_schedule(beat_times: list[float], clip_pool: list,
+                       seed: int | None = None) -> list[dict]:
     """
     Assign each beat interval a clip from the pool.
     Returns list of dicts: {clip_id, start_offset, duration, flash_before, stutter, beat_time, effect, lip_sync}
 
     Clips with lip_sync=True are song-locked: start_offset = beat_time on every occurrence.
     Weighted selection activates when any clip has lip_sync=True or weight != 1.0.
+
+    ``seed`` makes the plan reproducible. Note the plan is only fully reproducible when the
+    clip pool was ALSO built from the same seed (see build_clip_pool) — B-roll start offsets
+    live in the pool, not here.
     """
-    seed = random.randint(0, 9999)
-    print(f"Random seed: {seed} (rerun with this to reproduce)")
+    if seed is None:
+        seed = random.randint(0, 9999)
+    print(f"Random seed: {seed} (rerun with --seed {seed} to reproduce)")
     rng = random.Random(seed)
     pool = list(clip_pool)
 
@@ -209,6 +217,53 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list) -> list[dict]:
         })
 
     return schedule
+
+
+# ─── STEP 2b: CLIP POOL ───────────────────────────────────────────────────────
+
+def build_clip_pool(
+    clip_files: list[Path],
+    lipsync_files: list[Path] | None,
+    lipsync_weight: float,
+    rng: random.Random,
+    probe=probe_duration,
+) -> tuple[list[dict], dict[str, Path]]:
+    """Build the scheduler's clip pool and a clip_id -> source path map.
+
+    B-roll clips get a random start offset within the first 75% of their duration, drawn from
+    ``rng`` so a seeded run reproduces the same offsets. Lip-sync clips are song-locked, so
+    their offset is ignored by the scheduler and stays 0. ``probe`` is injectable for tests.
+    """
+    clip_paths = {p.stem: p for p in clip_files}
+    pool = []
+    for p in clip_files:
+        dur = probe(p)
+        max_start = max(0, dur * 0.75)
+        pool.append({"clip_id": p.stem, "offset": rng.uniform(0, max_start), "name": p.name,
+                     "lip_sync": False, "weight": 1.0})
+    for lsp in lipsync_files or []:
+        clip_paths[lsp.stem] = lsp
+        pool.append({"clip_id": lsp.stem, "offset": 0.0, "name": lsp.name,
+                     "lip_sync": True, "weight": lipsync_weight})
+    return pool, clip_paths
+
+
+def write_sidecar(output: Path, seed: int, tempo: float, args: dict, schedule: list[dict]) -> Path:
+    """Write carti_cut_vNN.json next to the render: everything needed to reproduce or compare it."""
+    side = output.with_suffix(".json")
+    side.write_text(json.dumps({
+        "output": output.name,
+        "seed": seed,
+        "tempo_bpm": round(tempo, 2),
+        "cuts": len(schedule),
+        "flash": sum(1 for s in schedule if s["flash_before"]),
+        "stutter": sum(1 for s in schedule if s["stutter"]),
+        "shrink": sum(1 for s in schedule if s.get("effect") == "shrink"),
+        "zoom": sum(1 for s in schedule if s.get("effect") == "zoom"),
+        "lip_sync_cuts": sum(1 for s in schedule if s.get("lip_sync")),
+        "args": args,
+    }, indent=2))
+    return side
 
 
 # ─── STEP 3: GENERATE FLASH FRAMES ─────────────────────────────────────────────
@@ -324,6 +379,8 @@ def main():
     parser.add_argument("--compress", action="store_true", help="Create 1080p H.264 proxies for faster processing (cached)")
     parser.add_argument("--lipsync", nargs="+", type=Path, metavar="FILE", help="Lip-sync clip(s) — shot to playback, clip time = song time")
     parser.add_argument("--lipsync-weight", type=float, default=3.0, metavar="W", help="Weight for lip-sync clips vs B-roll (default: 3.0)")
+    parser.add_argument("--seed", type=int, metavar="N",
+                        help="Reproduce a previous cut (seed is printed and saved in the .json sidecar)")
     args = parser.parse_args()
 
     if not args.clips and not args.files:
@@ -363,22 +420,14 @@ def main():
         clip_files = ensure_proxies(clip_files)
         print(f"✓ All proxies ready at {PROXY_DIR}\n")
 
-    # Build clip pool with random start offsets within each clip
-    clip_paths = {p.stem: p for p in clip_files}
-    CLIP_POOL = []
-    for p in clip_files:
-        dur = probe_duration(p)
-        max_start = max(0, dur * 0.75)
-        offset = random.uniform(0, max_start)
-        CLIP_POOL.append({"clip_id": p.stem, "offset": offset, "name": p.name, "lip_sync": False, "weight": 1.0})
-
-    # Add lip-sync clips (song-locked — offset is overridden by beat_time at schedule time)
+    # One seed governs both the pool (B-roll start offsets) and the schedule
+    seed = args.seed if args.seed is not None else random.randint(0, 9999)
+    for lsp in args.lipsync or []:
+        if not lsp.exists():
+            raise FileNotFoundError(f"Lip-sync clip not found: {lsp}")
+    CLIP_POOL, clip_paths = build_clip_pool(clip_files, args.lipsync, args.lipsync_weight,
+                                            random.Random(seed))
     if args.lipsync:
-        for lsp in args.lipsync:
-            if not lsp.exists():
-                raise FileNotFoundError(f"Lip-sync clip not found: {lsp}")
-            clip_paths[lsp.stem] = lsp
-            CLIP_POOL.append({"clip_id": lsp.stem, "offset": 0.0, "name": lsp.name, "lip_sync": True, "weight": args.lipsync_weight})
         print(f"✓ {len(args.lipsync)} lip-sync clip(s) added (weight {args.lipsync_weight})\n")
 
     print(f"✓ {len(clip_files)} source clips found\n")
@@ -387,10 +436,10 @@ def main():
     video_duration = probe_duration(music_track)
 
     # Step 1: Beat detection
-    beat_times = detect_beats(music_track, video_duration, density=args.density)
+    beat_times, tempo = detect_beats(music_track, video_duration, density=args.density)
 
     # Step 2: Cut schedule
-    schedule = build_cut_schedule(beat_times, CLIP_POOL)
+    schedule = build_cut_schedule(beat_times, CLIP_POOL, seed=seed)
     flash_count = sum(1 for s in schedule if s["flash_before"])
     stutter_count = sum(1 for s in schedule if s["stutter"])
     shrink_count = sum(1 for s in schedule if s.get("effect") == "shrink")
@@ -464,6 +513,18 @@ def main():
         print("Assembling final video with music...")
         final_assemble(concat_file, music_track, OUTPUT, video_duration)
 
+    sidecar = write_sidecar(OUTPUT, seed, tempo, {
+        "music": str(music_track),
+        "clips": str(args.clips) if args.clips else None,
+        "files": [str(f) for f in args.files] if args.files else None,
+        "recursive": args.recursive,
+        "exclude": args.exclude,
+        "density": args.density,
+        "compress": args.compress,
+        "lipsync": [str(f) for f in args.lipsync] if args.lipsync else None,
+        "lipsync_weight": args.lipsync_weight,
+    }, schedule)
+
     # Report
     duration = probe_duration(OUTPUT)
     size_result = subprocess.run(["du", "-h", str(OUTPUT)], capture_output=True, text=True)
@@ -474,6 +535,8 @@ def main():
     print("│  DONE!                                     │")
     print("╰────────────────────────────────────────────╯")
     print(f"Output : {OUTPUT}")
+    print(f"Sidecar: {sidecar}")
+    print(f"Seed   : {seed}  (--seed {seed} to reproduce)")
     print(f"Duration: {duration:.1f}s")
     print(f"Size    : {size}\n")
 
