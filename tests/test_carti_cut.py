@@ -195,3 +195,71 @@ def test_reserve_output_claims_next_version_immediately(tmp_path):
     assert b.name == "carti_cut_v03.mp4"
     stub = json.loads(a.with_suffix(".json").read_text())
     assert stub["status"] == "rendering"
+
+
+# ─── look-driven scheduling ────────────────────────────────────────────────────
+
+from dataclasses import dataclass as _dc  # noqa: E402
+
+import looks as lk  # noqa: E402
+
+
+@_dc
+class _Sec:
+    start: float
+    end: float
+    label: str
+
+
+def _ctx(sections, onsets=(), density=0.95):
+    return lk.LookContext(lk.OPIUM, beat_times=BEATS, kick_onsets=list(onsets),
+                          kick_density=lambda t: density, sections=sections)
+
+
+def test_look_breakdown_holds_every_other_beat_and_disables_geometry():
+    pool = [_take("a", 0.0, 60.0), _take("b", 0.0, 60.0)]
+    ctx = _ctx([_Sec(0, 20, "breakdown"), _Sec(20, 60, "drop")])
+    sched = cc.build_cut_schedule(BEATS, pool, seed=4, look_ctx=ctx)
+    bd = [e for e in sched if e["beat_time"] < 20]
+    n_beats_bd = sum(1 for b in BEATS if b < 20)
+    assert abs(len(bd) - n_beats_bd / 2) <= 1
+    assert all(e["section"] == "breakdown" and e["passage_vf"] == "lagfun=decay=0.92" for e in bd)
+    assert all(e["effect"] == "normal" for e in bd)
+    assert any(e["passage_hold"] for e in bd)
+    # timeline stays continuous through the holds
+    for prev, nxt in zip(sched, sched[1:]):
+        assert abs(prev["beat_time"] + prev["duration"] - nxt["beat_time"]) < 1e-6
+
+
+def test_look_drop_opens_with_grid_when_two_takes_cover():
+    pool = [_take("a", 0.0, 60.0), _take("b", 0.0, 60.0)]
+    ctx = _ctx([_Sec(0, 20, "breakdown"), _Sec(20, 60, "drop")])
+    sched = cc.build_cut_schedule(BEATS, pool, seed=4, look_ctx=ctx)
+    drop = [e for e in sched if e["beat_time"] >= 20]
+    assert [e["grid"] for e in drop[:5]] == [True, True, True, True, False]
+    assert all(e["hit"] is None and e["effect"] == "normal" for e in drop[:4])
+
+
+def test_look_no_grid_when_only_one_take_covers():
+    pool = [_take("a", 0.0, 60.0), _take("b", 40.0, 60.0)]
+    ctx = _ctx([_Sec(0, 20, "breakdown"), _Sec(20, 60, "drop")])
+    sched = cc.build_cut_schedule(BEATS, pool, seed=4, look_ctx=ctx)
+    assert not any(e["grid"] for e in sched)
+
+
+def test_look_hits_only_on_kick_beats():
+    pool = [_take("a", 0.0, 60.0), _take("b", 0.0, 60.0)]
+    onsets = [BEATS[10] + 0.01, BEATS[11] - 0.02, BEATS[30] + 0.03]
+    ctx = _ctx([_Sec(0, 60, "drop")], onsets=onsets, density=0.95)
+    sched = cc.build_cut_schedule(BEATS, pool, seed=1, look_ctx=ctx)
+    hits = [e for e in sched if e["hit"]]
+    assert hits, "density 0.95 on kick beats should fire rgbsplit at least once"
+    for e in hits:
+        assert min(abs(o - e["beat_time"]) for o in onsets) <= lk.KICK_WINDOW
+        assert e["hit_vf"].startswith("rgbashift") or e["hit_vf"].startswith("crop=")
+
+
+def test_no_look_schedule_unchanged():
+    pool = _pool(4)
+    assert cc.build_cut_schedule(BEATS, pool, seed=9) == cc.build_cut_schedule(BEATS, pool, seed=9,
+                                                                               look_ctx=None)
