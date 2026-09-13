@@ -182,3 +182,16 @@ def test_lipsync_only_pool_uncovered_start_clamps_earliest_take():
     sched = cc.build_cut_schedule(BEATS, pool, seed=8)
     first = sched[0]
     assert first["clip_id"] == "late" and first["start_offset"] == 0.0 and first["clamped"]
+
+
+# ─── output versioning ─────────────────────────────────────────────────────────
+
+def test_reserve_output_claims_next_version_immediately(tmp_path):
+    (tmp_path / "carti_cut_v01.mp4").touch()
+    a = cc.reserve_output(tmp_path)
+    assert a.name == "carti_cut_v02.mp4"
+    # a second, concurrent run must NOT get the same number even though a's mp4 doesn't exist yet
+    b = cc.reserve_output(tmp_path)
+    assert b.name == "carti_cut_v03.mp4"
+    stub = json.loads(a.with_suffix(".json").read_text())
+    assert stub["status"] == "rendering"
