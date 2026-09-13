@@ -16,7 +16,9 @@ import tempfile
 from pathlib import Path
 
 import librosa
+import looks as lk
 import numpy as np
+from looks import LOOKS
 from media_utils import ffprobe_duration as probe_duration  # noqa: F401
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────────
@@ -145,7 +147,7 @@ def detect_beats(music_path: Path, video_duration: float,
 # ─── STEP 2: BUILD CUT SCHEDULE ────────────────────────────────────────────────
 
 def build_cut_schedule(beat_times: list[float], clip_pool: list,
-                       seed: int | None = None) -> list[dict]:
+                       seed: int | None = None, look_ctx: "lk.LookContext | None" = None) -> list[dict]:
     """
     Assign each beat interval a clip from the pool.
     Returns list of dicts: {clip_id, start_offset, duration, flash_before, stutter, beat_time, effect, lip_sync}
@@ -160,6 +162,11 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
     previous shot is held (its duration extended, ``held``=True) instead of cutting to
     out-of-sync footage; if that happens on the very first beat, the earliest-starting take is
     used clamped to its first frame (``clamped``=True).
+
+    With a ``look_ctx`` (see looks.py) the schedule also carries per-cut look decisions:
+    ``section`` / ``passage_vf`` (per-section filter), ``passage_hold`` (the section cuts on
+    every Nth beat only), ``grid`` (multi-take sync grid opening a section), ``hit``/``hit_vf``
+    (kick-fired effect). Without a look_ctx the plan is byte-identical to before.
 
     ``seed`` makes the plan reproducible. Note the plan is only fully reproducible when the
     clip pool was ALSO built from the same seed (see build_clip_pool) — B-roll start offsets
@@ -177,6 +184,8 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
 
     schedule = []
     pool_idx = 0
+    look = look_ctx.look if look_ctx else None
+    prev_label, sec_beat_idx, grid_left = None, 0, 0
 
     for i, beat_t in enumerate(beat_times):
         if i + 1 < len(beat_times):
@@ -187,12 +196,31 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
         if duration < FLASH_DURATION:
             continue
 
-        stutter = rng.random() < STUTTER_PROBABILITY
-
         def covers(c):
             return (not c.get("lip_sync", False)
                     or c.get("song_start", 0.0) <= beat_t
                     and beat_t + duration <= c.get("song_end", float("inf")))
+
+        # ── look: where are we in the song, and what does the passage want? ──
+        label = look_ctx.label_at(beat_t) if look_ctx else None
+        passage = look.passage(label) if look else None
+        n_cover = sum(1 for c in pool if c.get("lip_sync") and covers(c))
+        if look:
+            if label != prev_label:
+                sec_beat_idx = 0
+                grid_left = passage.grid_beats if n_cover >= 2 else 0
+            else:
+                sec_beat_idx += 1
+            prev_label = label
+        is_grid = bool(grid_left and n_cover >= 2)
+        if is_grid:
+            grid_left -= 1
+        elif passage and passage.hold_every > 1 and sec_beat_idx % passage.hold_every and schedule:
+            schedule[-1]["duration"] += duration
+            schedule[-1]["passage_hold"] = True
+            continue
+
+        stutter = rng.random() < STUTTER_PROBABILITY
 
         entry = None
         clamped = False
@@ -231,13 +259,22 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
 
         flash_before = rng.random() < FLASH_PROBABILITY
 
+        geo = (passage.shrink_zoom_scale if passage else 1.0) * (0.0 if is_grid else 1.0)
         roll = rng.random()
-        if roll < SHRINK_PROBABILITY:
+        if roll < SHRINK_PROBABILITY * geo:
             effect = "shrink"
-        elif roll < SHRINK_PROBABILITY + ZOOM_PROBABILITY:
+        elif roll < (SHRINK_PROBABILITY + ZOOM_PROBABILITY) * geo:
             effect = "zoom"
         else:
             effect = "normal"
+
+        hit = hit_vf = None
+        if look and not is_grid:
+            h = lk.choose_hit(look, look_ctx.kick_at(beat_t), rng)
+            if h:
+                hit, hit_vf = h.name, h.vf
+            elif label == "drop" and sec_beat_idx == 0:
+                hit, hit_vf = "freeze", lk.freeze_vf(duration)
 
         schedule.append({
             "clip_id": clip_id,
@@ -251,6 +288,12 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
             "held": False,
             "held_from": None,
             "clamped": clamped,
+            "section": label,
+            "passage_vf": passage.vf if passage else None,
+            "passage_hold": False,
+            "grid": is_grid,
+            "hit": hit,
+            "hit_vf": hit_vf,
         })
 
     return schedule
@@ -381,10 +424,12 @@ def reserve_output(output_dir: Path) -> Path:
     return output
 
 
-def write_sidecar(output: Path, seed: int, tempo: float, args: dict, schedule: list[dict]) -> Path:
+def write_sidecar(output: Path, seed: int, tempo: float, args: dict, schedule: list[dict],
+                  extra: dict | None = None) -> Path:
     """Write carti_cut_vNN.json next to the render: everything needed to reproduce or compare it."""
     side = output.with_suffix(".json")
     side.write_text(json.dumps({
+        **(extra or {}),
         "output": output.name,
         "status": "done",
         "seed": seed,
@@ -432,8 +477,10 @@ def extract_segment(
     output: Path,
     effect: str = "normal",
     rng: random.Random | None = None,
+    extras: list | None = None,
 ):
-    """Extract a video-only segment with optional in-frame effects."""
+    """Extract a video-only segment with optional in-frame effects. ``extras`` are look
+    filter fragments (hit, passage, grade) appended after fps normalisation."""
     if effect == "shrink":
         # Shrink to 40-70% and float inside black frame
         scale_pct = (rng.uniform(0.4, 0.7) if rng else 0.55)
@@ -446,8 +493,7 @@ def extract_segment(
         off_y = rng.randint(0, max_y) if rng else max_y // 2
         vf = (
             f"scale={inner_w}:{inner_h}:force_original_aspect_ratio=decrease,"
-            f"pad=1920:1080:{off_x}:{off_y}:black,"
-            f"fps={TARGET_FPS}"
+            f"pad=1920:1080:{off_x}:{off_y}:black"
         )
     elif effect == "zoom":
         # Zoom/crop into center 40-70% of frame
@@ -456,15 +502,14 @@ def extract_segment(
             f"scale={OUTPUT_SIZE}:force_original_aspect_ratio=decrease,"
             f"pad={OUTPUT_SIZE}:(ow-iw)/2:(oh-ih)/2,"
             f"crop=iw*{crop_pct:.2f}:ih*{crop_pct:.2f}:(iw-iw*{crop_pct:.2f})/2:(ih-ih*{crop_pct:.2f})/2,"
-            f"scale={OUTPUT_SIZE},"
-            f"fps={TARGET_FPS}"
+            f"scale={OUTPUT_SIZE}"
         )
     else:
         vf = (
             f"scale={OUTPUT_SIZE}:force_original_aspect_ratio=decrease,"
-            f"pad={OUTPUT_SIZE}:(ow-iw)/2:(oh-ih)/2,"
-            f"fps={TARGET_FPS}"
+            f"pad={OUTPUT_SIZE}:(ow-iw)/2:(oh-ih)/2"
         )
+    vf = lk.compose_vf(vf, *(extras or []))
 
     run([
         "ffmpeg", "-y",
@@ -477,6 +522,32 @@ def extract_segment(
         "-an",
         str(output)
     ])
+
+
+def extract_grid_segment(sources: list[tuple[Path, float]], duration: float, output: Path,
+                         grade: str | None = None):
+    """Render 2-4 song-locked takes side by side (all in sync) for one cut.
+    ``sources`` = [(path, start_in_clip), ...]."""
+    sources = sources[:4]
+    n = len(sources)
+    if n < 2:
+        raise ValueError("grid needs at least two covering takes")
+    cmd = ["ffmpeg", "-y"]
+    for path, start in sources:
+        cmd += ["-ss", f"{max(0.0, start):.4f}", "-accurate_seek", "-i", str(path)]
+    if n == 2:
+        cell, stack = ("960", "1080"), "hstack=inputs=2"
+    elif n == 3:
+        cell, stack = ("640", "1080"), "hstack=inputs=3"
+    else:
+        cell, stack = ("960", "540"), "xstack=inputs=4:layout=0_0|w0_0|0_h0|w0_h0"
+    w, h = cell
+    chains = [f"[{i}:v]scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h},"
+              f"fps={TARGET_FPS}[v{i}]" for i in range(n)]
+    tail = "".join(f"[v{i}]" for i in range(n)) + stack + (f",{grade}" if grade else "") + "[out]"
+    cmd += ["-t", f"{duration:.4f}", "-filter_complex", ";".join(chains + [tail]),
+            "-map", "[out]", "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-an", str(output)]
+    run(cmd)
 
 
 # ─── STEP 5: ASSEMBLE ──────────────────────────────────────────────────────────
@@ -518,6 +589,8 @@ def main():
     parser.add_argument("--lipsync-offset", nargs="+", type=float, metavar="SEC",
                         help="Song second at which each --lipsync take begins (same order; negative = "
                              "camera rolled first). Skips audio auto-alignment.")
+    parser.add_argument("--look", choices=sorted(LOOKS), metavar="NAME",
+                        help=f"Apply a named look (grade + kick hits + section passages): {', '.join(sorted(LOOKS))}")
     parser.add_argument("--seed", type=int, metavar="N",
                         help="Reproduce a previous cut (seed is printed and saved in the .json sidecar)")
     args = parser.parse_args()
@@ -588,8 +661,22 @@ def main():
     # Step 1: Beat detection
     beat_times, tempo = detect_beats(music_track, video_duration, density=args.density)
 
+    # Step 1b: Look context — song structure + kick map (reuses affect_score's detectors)
+    look_ctx = None
+    look = LOOKS[args.look] if args.look else None
+    if look:
+        import affect_score as af
+        print(f"Look '{look.name}': reading song structure + kicks...")
+        song_dur, _lvl_at, _b, _t, times, lvl_series = af.audio_curve(music_track)
+        sections = af.detect_sections(times, lvl_series, song_dur)
+        onsets, density = af.kick_track(music_track, song_dur)
+        look_ctx = lk.LookContext(look, beat_times, onsets, density, sections)
+        for sec in sections:
+            print(f"  {sec.label:10s} {sec.start:6.1f}s → {sec.end:6.1f}s")
+        print(f"  {len(onsets)} kick onsets\n")
+
     # Step 2: Cut schedule
-    schedule = build_cut_schedule(beat_times, CLIP_POOL, seed=seed)
+    schedule = build_cut_schedule(beat_times, CLIP_POOL, seed=seed, look_ctx=look_ctx)
     flash_count = sum(1 for s in schedule if s["flash_before"])
     stutter_count = sum(1 for s in schedule if s["stutter"])
     shrink_count = sum(1 for s in schedule if s.get("effect") == "shrink")
@@ -601,6 +688,11 @@ def main():
               f"(from {min(s['held_from'] for s in held):.1f}s)")
     if any(s["clamped"] for s in schedule):
         print("  ⚠ first cut clamped: no take covers the top of the song")
+    if look:
+        from collections import Counter
+        hits = Counter(s["hit"] for s in schedule if s["hit"])
+        print(f"  look: {sum(1 for s in schedule if s['grid'])} grid cuts, "
+              f"{sum(1 for s in schedule if s['passage_hold'])} passage holds, hits {dict(hits)}")
     print()
 
     # Versioned output filename — never overwrite, safe for concurrent renders
@@ -630,13 +722,23 @@ def main():
         for entry in schedule:
             clip_id = entry["clip_id"]
             source = clip_paths[clip_id]
-
-            if entry["flash_before"]:
-                ordered_segments.append(white_flash)
-
-            seg_path = segments_dir / f"seg_{seg_idx:05d}.mp4"
             duration = entry["duration"]
             src_duration = probe_duration(source)
+
+            if entry.get("grid"):
+                bt = entry["beat_time"]
+                srcs = [(clip_paths[c["clip_id"]], bt - c["song_start"]) for c in CLIP_POOL
+                        if c.get("lip_sync") and c["song_start"] <= bt
+                        and bt + duration <= c["song_end"]]
+                if entry["flash_before"]:
+                    ordered_segments.append(white_flash)
+                seg_path = segments_dir / f"seg_{seg_idx:05d}.mp4"
+                extract_grid_segment(srcs, duration, seg_path, grade=look.grade if look else None)
+                ordered_segments.append(seg_path)
+                seg_idx += 1
+                continue
+
+            seg_path = segments_dir / f"seg_{seg_idx:05d}.mp4"
 
             if entry.get("lip_sync", False):
                 start = entry["start_offset"]  # beat_time - song_start, window-checked by scheduler
@@ -649,9 +751,20 @@ def main():
                 if not entry["stutter"]:
                     clip_playhead[clip_id] = start + duration
 
+            if entry["flash_before"]:
+                if look and look.flash == "invert":
+                    # one inverted frame of the incoming shot instead of a white plate
+                    flash_seg = segments_dir / f"flash_{seg_idx:05d}.mp4"
+                    extract_segment(source, start, FLASH_DURATION, flash_seg,
+                                    extras=["negate", look.grade])
+                    ordered_segments.append(flash_seg)
+                else:
+                    ordered_segments.append(white_flash)
+
+            extras = [entry.get("hit_vf"), entry.get("passage_vf"), look.grade if look else None]
             extract_segment(source, start, duration, seg_path,
                             effect=entry.get("effect", "normal"),
-                            rng=random.Random(seg_idx))
+                            rng=random.Random(seg_idx), extras=extras)
             ordered_segments.append(seg_path)
 
             seg_idx += 1
@@ -679,7 +792,16 @@ def main():
         "lipsync": [str(f) for f in args.lipsync] if args.lipsync else None,
         "lipsync_weight": args.lipsync_weight,
         "lipsync_offsets": {str(t): a for t, a in zip(args.lipsync or [], lipsync_align)},
-    }, schedule)
+        "look": args.look,
+    }, schedule, extra={
+        "look": args.look,
+        "sections": [{"label": s.label, "start": round(s.start, 2), "end": round(s.end, 2)}
+                     for s in look_ctx.sections] if look_ctx else None,
+        "grid_cuts": sum(1 for s in schedule if s.get("grid")),
+        "passage_holds": sum(1 for s in schedule if s.get("passage_hold")),
+        "hits": {k: sum(1 for s in schedule if s.get("hit") == k)
+                 for k in sorted({s.get("hit") for s in schedule if s.get("hit")})},
+    })
 
     # Report
     duration = probe_duration(OUTPUT)
