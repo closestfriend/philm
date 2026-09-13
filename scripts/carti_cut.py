@@ -6,9 +6,12 @@ Beat-synced hard cuts, flash frames, stutter effects. No fades.
 """
 
 import argparse
+import hashlib
 import json
 import random
+import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -147,8 +150,11 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
     Assign each beat interval a clip from the pool.
     Returns list of dicts: {clip_id, start_offset, duration, flash_before, stutter, beat_time, effect, lip_sync}
 
-    Clips with lip_sync=True are song-locked: start_offset = beat_time on every occurrence.
-    Weighted selection activates when any clip has lip_sync=True or weight != 1.0.
+    Clips with lip_sync=True are song-locked: start_offset = beat_time - song_start on every
+    occurrence, and a take is only eligible for beats its footage actually covers
+    (song_start <= beat_time and beat_time + duration <= song_end). Outside that window the
+    beat falls back to B-roll. Weighted selection activates when any clip has lip_sync=True
+    or weight != 1.0.
 
     ``seed`` makes the plan reproducible. Note the plan is only fully reproducible when the
     clip pool was ALSO built from the same seed (see build_clip_pool) — B-roll start offsets
@@ -178,22 +184,33 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
 
         stutter = rng.random() < STUTTER_PROBABILITY
 
+        def covers(c):
+            return (not c.get("lip_sync", False)
+                    or c.get("song_start", 0.0) <= beat_t
+                    and beat_t + duration <= c.get("song_end", float("inf")))
+
+        entry = None
         if stutter and len(schedule) > 0:
             prev = schedule[-1]
-            prev_is_ls = prev.get("lip_sync", False)
-            clip_id = prev["clip_id"]
-            start_offset = beat_t if prev_is_ls else prev["start_offset"] + prev["duration"]
-            is_lip_sync = prev_is_ls
-        else:
+            prev_entry = next(c for c in pool if c["clip_id"] == prev["clip_id"])
+            if covers(prev_entry):
+                entry = prev_entry
+                start_offset = prev["start_offset"] + prev["duration"]
+            else:
+                stutter = False  # take ran out of song; fall through to a normal pick
+        if entry is None:
             if use_weights:
-                weights = [c.get("weight", 1.0) for c in pool]
-                entry = rng.choices(pool, weights=weights, k=1)[0]
+                eligible = [c for c in pool if covers(c)]
+                weights = [c.get("weight", 1.0) for c in eligible]
+                entry = rng.choices(eligible, weights=weights, k=1)[0]
             else:
                 entry = pool[pool_idx % len(pool)]
                 pool_idx += 1
-            clip_id = entry["clip_id"]
-            is_lip_sync = entry.get("lip_sync", False)
-            start_offset = beat_t if is_lip_sync else entry["offset"]
+            start_offset = entry["offset"]
+        clip_id = entry["clip_id"]
+        is_lip_sync = entry.get("lip_sync", False)
+        if is_lip_sync:
+            start_offset = beat_t - entry.get("song_start", 0.0)
 
         flash_before = rng.random() < FLASH_PROBABILITY
 
@@ -227,13 +244,23 @@ def build_clip_pool(
     lipsync_weight: float,
     rng: random.Random,
     probe=probe_duration,
+    lipsync_offsets: list[float] | None = None,
 ) -> tuple[list[dict], dict[str, Path]]:
     """Build the scheduler's clip pool and a clip_id -> source path map.
 
     B-roll clips get a random start offset within the first 75% of their duration, drawn from
-    ``rng`` so a seeded run reproduces the same offsets. Lip-sync clips are song-locked, so
-    their offset is ignored by the scheduler and stays 0. ``probe`` is injectable for tests.
+    ``rng`` so a seeded run reproduces the same offsets. Lip-sync takes carry the song window
+    their footage covers: ``song_start`` is the song second at which the take begins
+    (``lipsync_offsets``, one per take, negative if the camera rolled before the track) and
+    ``song_end`` = song_start + take duration. A take that also appears in ``clip_files`` is
+    cast once, as lip-sync only. ``probe`` is injectable for tests.
     """
+    lipsync_files = list(lipsync_files or [])
+    if lipsync_offsets is None:
+        lipsync_offsets = [0.0] * len(lipsync_files)
+    ls_resolved = {p.resolve() for p in lipsync_files}
+    clip_files = [p for p in clip_files if p.resolve() not in ls_resolved]
+
     clip_paths = {p.stem: p for p in clip_files}
     pool = []
     for p in clip_files:
@@ -241,11 +268,81 @@ def build_clip_pool(
         max_start = max(0, dur * 0.75)
         pool.append({"clip_id": p.stem, "offset": rng.uniform(0, max_start), "name": p.name,
                      "lip_sync": False, "weight": 1.0})
-    for lsp in lipsync_files or []:
+    for lsp, song_start in zip(lipsync_files, lipsync_offsets):
         clip_paths[lsp.stem] = lsp
         pool.append({"clip_id": lsp.stem, "offset": 0.0, "name": lsp.name,
-                     "lip_sync": True, "weight": lipsync_weight})
+                     "lip_sync": True, "weight": lipsync_weight,
+                     "song_start": song_start, "song_end": song_start + probe(lsp)})
     return pool, clip_paths
+
+
+# ─── STEP 2c: LIP-SYNC SONG ALIGNMENT ─────────────────────────────────────────
+#
+# A take shot to playback has the song bleeding into the camera mic, so where the take sits in
+# the song can be read off the audio. We shell out to the BBC's audio-offset-finder via uvx
+# rather than adding it as a dependency (it pins numpy<2). Confidence below MIN_ALIGN_SCORE is
+# treated as "not found" — pass --lipsync-offset by hand in that case.
+
+MIN_ALIGN_SCORE = 10.0
+ALIGN_TOOL = ["uvx", "--python", "3.12", "--from", "audio-offset-finder", "audio-offset-finder"]
+
+
+def detect_song_offset(take: Path, song: Path, tmp_dir: Path) -> tuple[float, float]:
+    """Return (offset, score): the take begins ``offset`` seconds into the song
+    (negative = camera rolled before the track). Raises RuntimeError if the tool fails."""
+    take_wav = tmp_dir / f"{take.stem}_align.wav"
+    run(["ffmpeg", "-y", "-i", str(take), "-vn", "-ac", "1", "-ar", "22050", str(take_wav)])
+    song_wav = tmp_dir / f"{song.stem}_align.wav"
+    if not song_wav.exists():
+        run(["ffmpeg", "-y", "-i", str(song), "-ac", "1", "-ar", "22050", str(song_wav)])
+    res = subprocess.run(ALIGN_TOOL + ["--find-offset-of", str(take_wav), "--within", str(song_wav)],
+                         capture_output=True, text=True)
+    if res.returncode != 0:
+        raise RuntimeError(f"audio-offset-finder failed on {take.name}:\n{res.stderr[-800:]}")
+    offset = score = None
+    for line in res.stdout.splitlines():
+        if line.startswith("Offset:"):
+            offset = float(line.split()[1])
+        elif line.startswith("Standard score:"):
+            score = float(line.split()[2])
+    if offset is None or score is None:
+        raise RuntimeError(f"could not parse audio-offset-finder output:\n{res.stdout}")
+    return offset, score
+
+
+def resolve_lipsync_offsets(takes: list[Path], song: Path, manual: list[float] | None,
+                            cache_dir: Path) -> list[dict]:
+    """One {offset, score, source} per take. ``manual`` (from --lipsync-offset) wins outright;
+    otherwise detect, caching per (take, song) pair so re-renders don't pay the detection cost."""
+    if manual is not None:
+        if len(manual) != len(takes):
+            sys.exit(f"--lipsync-offset needs one value per --lipsync take "
+                     f"({len(takes)} takes, {len(manual)} offsets given)")
+        return [{"offset": o, "score": None, "source": "manual"} for o in manual]
+
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_file = cache_dir / "song_offsets.json"
+    cache = json.loads(cache_file.read_text()) if cache_file.exists() else {}
+    out = []
+    with tempfile.TemporaryDirectory(prefix="carti_align_") as tmp:
+        for take in takes:
+            key = hashlib.sha1(f"{take.resolve()}|{take.stat().st_mtime_ns}|"
+                               f"{song.resolve()}|{song.stat().st_mtime_ns}".encode()).hexdigest()
+            if key in cache:
+                out.append({**cache[key], "source": "cache"})
+                continue
+            if shutil.which("uvx") is None:
+                sys.exit("uvx not found: install uv, or pass --lipsync-offset by hand")
+            print(f"  aligning {take.name} to {song.name}...", end=" ", flush=True)
+            offset, score = detect_song_offset(take, song, Path(tmp))
+            print(f"take starts at song {offset:+.3f}s (score {score:.1f})")
+            if score < MIN_ALIGN_SCORE:
+                sys.exit(f"Low-confidence alignment for {take.name} (score {score:.1f} < "
+                         f"{MIN_ALIGN_SCORE}). Was the song playing? Pass --lipsync-offset by hand.")
+            cache[key] = {"offset": offset, "score": score}
+            cache_file.write_text(json.dumps(cache, indent=2))
+            out.append({**cache[key], "source": "detected"})
+    return out
 
 
 def write_sidecar(output: Path, seed: int, tempo: float, args: dict, schedule: list[dict]) -> Path:
@@ -379,6 +476,9 @@ def main():
     parser.add_argument("--compress", action="store_true", help="Create 1080p H.264 proxies for faster processing (cached)")
     parser.add_argument("--lipsync", nargs="+", type=Path, metavar="FILE", help="Lip-sync clip(s) — shot to playback, clip time = song time")
     parser.add_argument("--lipsync-weight", type=float, default=3.0, metavar="W", help="Weight for lip-sync clips vs B-roll (default: 3.0)")
+    parser.add_argument("--lipsync-offset", nargs="+", type=float, metavar="SEC",
+                        help="Song second at which each --lipsync take begins (same order; negative = "
+                             "camera rolled first). Skips audio auto-alignment.")
     parser.add_argument("--seed", type=int, metavar="N",
                         help="Reproduce a previous cut (seed is printed and saved in the .json sidecar)")
     args = parser.parse_args()
@@ -425,10 +525,19 @@ def main():
     for lsp in args.lipsync or []:
         if not lsp.exists():
             raise FileNotFoundError(f"Lip-sync clip not found: {lsp}")
-    CLIP_POOL, clip_paths = build_clip_pool(clip_files, args.lipsync, args.lipsync_weight,
-                                            random.Random(seed))
+    lipsync_align = []
     if args.lipsync:
-        print(f"✓ {len(args.lipsync)} lip-sync clip(s) added (weight {args.lipsync_weight})\n")
+        print("Aligning lip-sync takes to the song...")
+        lipsync_align = resolve_lipsync_offsets(args.lipsync, music_track, args.lipsync_offset,
+                                                cache_dir=PROXY_DIR)
+    CLIP_POOL, clip_paths = build_clip_pool(clip_files, args.lipsync, args.lipsync_weight,
+                                            random.Random(seed),
+                                            lipsync_offsets=[a["offset"] for a in lipsync_align])
+    if args.lipsync:
+        for c in CLIP_POOL:
+            if c["lip_sync"]:
+                print(f"  {c['name']}: covers song {c['song_start']:.1f}s → {c['song_end']:.1f}s")
+        print(f"✓ {len(args.lipsync)} lip-sync take(s) added (weight {args.lipsync_weight})\n")
 
     print(f"✓ {len(clip_files)} source clips found\n")
 
@@ -484,7 +593,7 @@ def main():
             src_duration = probe_duration(source)
 
             if entry.get("lip_sync", False):
-                start = entry["beat_time"]
+                start = entry["start_offset"]  # beat_time - song_start, window-checked by scheduler
                 if start + duration > src_duration:
                     start = max(0.0, src_duration - duration - 0.1)
             else:
@@ -523,6 +632,7 @@ def main():
         "compress": args.compress,
         "lipsync": [str(f) for f in args.lipsync] if args.lipsync else None,
         "lipsync_weight": args.lipsync_weight,
+        "lipsync_offsets": {str(t): a for t, a in zip(args.lipsync or [], lipsync_align)},
     }, schedule)
 
     # Report

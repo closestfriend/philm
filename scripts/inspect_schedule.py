@@ -15,7 +15,7 @@ import carti_cut as cc
 
 
 def build_pool(clips_dir: Path, exclude: str, lipsync: Path | None, lipsync_weight: float,
-               seed: int):
+               seed: int, lipsync_offset: float):
     """Same pool carti_cut.main() builds for this seed (order, weights AND B-roll offsets)."""
     clip_files = sorted(
         p for p in clips_dir.rglob("*")
@@ -23,7 +23,8 @@ def build_pool(clips_dir: Path, exclude: str, lipsync: Path | None, lipsync_weig
         and (not exclude or exclude not in str(p))
     )
     pool, _ = cc.build_clip_pool(clip_files, [lipsync] if lipsync else None, lipsync_weight,
-                                 random.Random(seed))
+                                 random.Random(seed),
+                                 lipsync_offsets=[lipsync_offset] if lipsync else None)
     return pool, len(clip_files)
 
 
@@ -34,6 +35,8 @@ def main():
     ap.add_argument("--exclude", default="")
     ap.add_argument("--lipsync", type=Path)
     ap.add_argument("--lipsync-weight", type=float, default=3.0)
+    ap.add_argument("--lipsync-offset", type=float, default=0.0,
+                    help="Song second at which the take begins (from the render's .json sidecar)")
     ap.add_argument("--seed", required=True, type=int)
     args = ap.parse_args()
 
@@ -41,7 +44,7 @@ def main():
     beat_times, _tempo = cc.detect_beats(args.music, video_duration)
 
     pool, n_broll = build_pool(args.clips, args.exclude, args.lipsync, args.lipsync_weight,
-                               args.seed)
+                               args.seed, args.lipsync_offset)
     schedule = cc.build_cut_schedule(beat_times, pool, seed=args.seed)
 
     # ── Report ──────────────────────────────────────────────────────────────
