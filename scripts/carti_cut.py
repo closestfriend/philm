@@ -365,11 +365,28 @@ def resolve_lipsync_offsets(takes: list[Path], song: Path, manual: list[float] |
     return out
 
 
+def reserve_output(output_dir: Path) -> Path:
+    """Claim the next carti_cut_vNN.mp4 name. The mp4 only appears at the very end of a render,
+    so we count .json sidecars too and write a stub sidecar immediately — that way two renders
+    started minutes apart (or a render that dies mid-way) never collide on a version number."""
+    taken = set()
+    for f in output_dir.glob("carti_cut_v*"):
+        if f.suffix in (".mp4", ".json"):
+            taken.add(f.with_suffix("").name)
+    next_v = 1
+    while f"carti_cut_v{next_v:02d}" in taken:
+        next_v += 1
+    output = output_dir / f"carti_cut_v{next_v:02d}.mp4"
+    output.with_suffix(".json").write_text(json.dumps({"output": output.name, "status": "rendering"}))
+    return output
+
+
 def write_sidecar(output: Path, seed: int, tempo: float, args: dict, schedule: list[dict]) -> Path:
     """Write carti_cut_vNN.json next to the render: everything needed to reproduce or compare it."""
     side = output.with_suffix(".json")
     side.write_text(json.dumps({
         "output": output.name,
+        "status": "done",
         "seed": seed,
         "tempo_bpm": round(tempo, 2),
         "cuts": len(schedule),
@@ -586,10 +603,8 @@ def main():
         print("  ⚠ first cut clamped: no take covers the top of the song")
     print()
 
-    # Versioned output filename — never overwrite
-    existing = sorted(output_dir.glob("carti_cut_v*.mp4"))
-    next_v = len(existing) + 1
-    OUTPUT = output_dir / f"carti_cut_v{next_v:02d}.mp4"
+    # Versioned output filename — never overwrite, safe for concurrent renders
+    OUTPUT = reserve_output(output_dir)
     print(f"Output: {OUTPUT}\n")
 
     with tempfile.TemporaryDirectory(prefix="carti_cut_") as tmp:
