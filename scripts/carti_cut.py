@@ -156,6 +156,11 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
     beat falls back to B-roll. Weighted selection activates when any clip has lip_sync=True
     or weight != 1.0.
 
+    When NO clip covers a beat (performance-only pools past the last take's footage), the
+    previous shot is held (its duration extended, ``held``=True) instead of cutting to
+    out-of-sync footage; if that happens on the very first beat, the earliest-starting take is
+    used clamped to its first frame (``clamped``=True).
+
     ``seed`` makes the plan reproducible. Note the plan is only fully reproducible when the
     clip pool was ALSO built from the same seed (see build_clip_pool) — B-roll start offsets
     live in the pool, not here.
@@ -190,6 +195,7 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
                     and beat_t + duration <= c.get("song_end", float("inf")))
 
         entry = None
+        clamped = False
         if stutter and len(schedule) > 0:
             prev = schedule[-1]
             prev_entry = next(c for c in pool if c["clip_id"] == prev["clip_id"])
@@ -201,8 +207,18 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
         if entry is None:
             if use_weights:
                 eligible = [c for c in pool if covers(c)]
-                weights = [c.get("weight", 1.0) for c in eligible]
-                entry = rng.choices(eligible, weights=weights, k=1)[0]
+                if eligible:
+                    weights = [c.get("weight", 1.0) for c in eligible]
+                    entry = rng.choices(eligible, weights=weights, k=1)[0]
+                elif schedule:
+                    prev = schedule[-1]
+                    if not prev["held"]:
+                        prev["held"], prev["held_from"] = True, beat_t
+                    prev["duration"] += duration
+                    continue
+                else:
+                    entry = min(pool, key=lambda c: c.get("song_start", 0.0))
+                    clamped = True
             else:
                 entry = pool[pool_idx % len(pool)]
                 pool_idx += 1
@@ -210,7 +226,8 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
         clip_id = entry["clip_id"]
         is_lip_sync = entry.get("lip_sync", False)
         if is_lip_sync:
-            start_offset = beat_t - entry.get("song_start", 0.0)
+            start_offset = max(0.0, beat_t - entry.get("song_start", 0.0)) if clamped \
+                else beat_t - entry.get("song_start", 0.0)
 
         flash_before = rng.random() < FLASH_PROBABILITY
 
@@ -231,6 +248,9 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
             "beat_time": beat_t,
             "effect": effect,
             "lip_sync": is_lip_sync,
+            "held": False,
+            "held_from": None,
+            "clamped": clamped,
         })
 
     return schedule
@@ -358,6 +378,8 @@ def write_sidecar(output: Path, seed: int, tempo: float, args: dict, schedule: l
         "shrink": sum(1 for s in schedule if s.get("effect") == "shrink"),
         "zoom": sum(1 for s in schedule if s.get("effect") == "zoom"),
         "lip_sync_cuts": sum(1 for s in schedule if s.get("lip_sync")),
+        "held": sum(1 for s in schedule if s.get("held")),
+        "clamped": sum(1 for s in schedule if s.get("clamped")),
         "args": args,
     }, indent=2))
     return side
@@ -483,8 +505,8 @@ def main():
                         help="Reproduce a previous cut (seed is printed and saved in the .json sidecar)")
     args = parser.parse_args()
 
-    if not args.clips and not args.files:
-        parser.error("Provide either --clips (folder) or --files (individual files)")
+    if not args.clips and not args.files and not args.lipsync:
+        parser.error("Provide --clips (folder), --files (individual files), or --lipsync takes")
 
     music_track = args.music
     output_dir = args.output
@@ -504,14 +526,16 @@ def main():
             if not f.exists():
                 raise FileNotFoundError(f"Clip not found: {f}")
             clip_files.append(f)
-    else:
+    elif args.clips:
         scanner = args.clips.rglob("*") if args.recursive else args.clips.iterdir()
         clip_files = sorted(
             p for p in scanner
             if p.suffix.lower() in VIDEO_EXTS
             and (not args.exclude or args.exclude not in str(p))
         )
-    if not clip_files:
+    else:
+        clip_files = []  # performance-only: every cut comes from a lip-sync take
+    if not clip_files and not args.lipsync:
         raise FileNotFoundError("No video files found")
 
     # Optionally compress to proxies for faster processing
@@ -553,7 +577,14 @@ def main():
     stutter_count = sum(1 for s in schedule if s["stutter"])
     shrink_count = sum(1 for s in schedule if s.get("effect") == "shrink")
     zoom_count = sum(1 for s in schedule if s.get("effect") == "zoom")
-    print(f"✓ {len(schedule)} cuts planned ({flash_count} flash, {stutter_count} stutter, {shrink_count} shrink, {zoom_count} zoom)\n")
+    print(f"✓ {len(schedule)} cuts planned ({flash_count} flash, {stutter_count} stutter, {shrink_count} shrink, {zoom_count} zoom)")
+    held = [s for s in schedule if s["held"]]
+    if held:
+        print(f"  ⚠ {len(held)} shot(s) held where no take covers the song "
+              f"(from {min(s['held_from'] for s in held):.1f}s)")
+    if any(s["clamped"] for s in schedule):
+        print("  ⚠ first cut clamped: no take covers the top of the song")
+    print()
 
     # Versioned output filename — never overwrite
     existing = sorted(output_dir.glob("carti_cut_v*.mp4"))

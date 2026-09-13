@@ -160,3 +160,25 @@ def test_detect_song_offset_on_synthetic_take(tmp_path):
     res2 = cc.resolve_lipsync_offsets([tmp_path / "take.wav"], tmp_path / "song.wav",
                                       manual=None, cache_dir=tmp_path / "cache")
     assert res2[0]["source"] == "cache" and res2[0]["offset"] == res[0]["offset"]
+
+
+# ─── performance-only pools (no B-roll) ───────────────────────────────────────
+
+def test_lipsync_only_pool_holds_last_shot_when_nothing_covers_a_beat():
+    # song runs to ~55s; takes cover 0-40 and 5-48; beats 48-55 have no take
+    pool = [_take("a", 0.0, 40.0), _take("b", 5.0, 48.0)]
+    sched = cc.build_cut_schedule(BEATS, pool, seed=8)
+    assert all(e["lip_sync"] for e in sched)
+    assert all(e["beat_time"] + e["duration"] <= (40.0 if e["clip_id"] == "a" else 48.0)
+               or e["held"] for e in sched)
+    # the timeline is still continuous: last entry extends to the end of the beat grid
+    last = sched[-1]
+    assert last["held"] and abs(last["beat_time"] + last["duration"] - (BEATS[-1] + 0.5)) < 1e-6
+    assert last["beat_time"] + last["duration"] - last["held_from"] > 7.0  # covers 48→55.2
+
+
+def test_lipsync_only_pool_uncovered_start_clamps_earliest_take():
+    pool = [_take("late", 3.0, 60.0), _take("later", 10.0, 60.0)]
+    sched = cc.build_cut_schedule(BEATS, pool, seed=8)
+    first = sched[0]
+    assert first["clip_id"] == "late" and first["start_offset"] == 0.0 and first["clamped"]
