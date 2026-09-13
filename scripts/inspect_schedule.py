@@ -2,8 +2,8 @@
 """
 inspect_schedule.py — Reconstruct a carti_cut schedule deterministically from its seed.
 
-carti_cut.py doesn't persist its schedule, but build_cut_schedule is seeded, so given
-the same music + clip pool + seed we can re-derive the exact cut plan WITHOUT rendering.
+Given the same music + clip pool + seed (printed at render time and saved in the render's
+.json sidecar) we re-derive the exact cut plan WITHOUT rendering.
 Reports: beat reading, lip-sync placement, effect distribution, clip frequency.
 """
 
@@ -14,22 +14,16 @@ from pathlib import Path
 import carti_cut as cc
 
 
-def build_pool(clips_dir: Path, exclude: str, lipsync: Path | None, lipsync_weight: float):
-    """Replicate carti_cut.main()'s pool construction (order + weights), offsets stubbed to 0."""
+def build_pool(clips_dir: Path, exclude: str, lipsync: Path | None, lipsync_weight: float,
+               seed: int):
+    """Same pool carti_cut.main() builds for this seed (order, weights AND B-roll offsets)."""
     clip_files = sorted(
         p for p in clips_dir.rglob("*")
         if p.suffix.lower() in cc.VIDEO_EXTS
         and (not exclude or exclude not in str(p))
     )
-    pool = [
-        {"clip_id": p.stem, "offset": 0.0, "name": p.name, "lip_sync": False, "weight": 1.0}
-        for p in clip_files
-    ]
-    if lipsync:
-        pool.append({
-            "clip_id": lipsync.stem, "offset": 0.0, "name": lipsync.name,
-            "lip_sync": True, "weight": lipsync_weight,
-        })
+    pool, _ = cc.build_clip_pool(clip_files, [lipsync] if lipsync else None, lipsync_weight,
+                                 random.Random(seed))
     return pool, len(clip_files)
 
 
@@ -44,17 +38,11 @@ def main():
     args = ap.parse_args()
 
     video_duration = cc.probe_duration(args.music)
-    beat_times = cc.detect_beats(args.music, video_duration)
+    beat_times, _tempo = cc.detect_beats(args.music, video_duration)
 
-    pool, n_broll = build_pool(args.clips, args.exclude, args.lipsync, args.lipsync_weight)
-
-    # Re-derive the schedule with the exact same seed (monkeypatch the seed roll)
-    _orig_randint = random.randint
-    random.randint = lambda a, b: args.seed
-    try:
-        schedule = cc.build_cut_schedule(beat_times, pool)
-    finally:
-        random.randint = _orig_randint
+    pool, n_broll = build_pool(args.clips, args.exclude, args.lipsync, args.lipsync_weight,
+                               args.seed)
+    schedule = cc.build_cut_schedule(beat_times, pool, seed=args.seed)
 
     # ── Report ──────────────────────────────────────────────────────────────
     ls_id = args.lipsync.stem if args.lipsync else None
@@ -92,7 +80,7 @@ def main():
         if runs:
             print(f"  Consecutive runs: {sorted(runs, reverse=True)[:8]} (beats in a row)")
 
-    print(f"\nTOP 10 MOST-USED CLIPS:")
+    print("\nTOP 10 MOST-USED CLIPS:")
     for cid, n in freq.most_common(10):
         tag = "  ← LIP-SYNC" if cid == ls_id else ""
         print(f"  {n:3d}×  {cid}{tag}")
