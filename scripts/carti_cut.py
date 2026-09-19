@@ -151,7 +151,8 @@ def detect_beats(music_path: Path, video_duration: float,
 # ─── STEP 2: BUILD CUT SCHEDULE ────────────────────────────────────────────────
 
 def build_cut_schedule(beat_times: list[float], clip_pool: list,
-                       seed: int | None = None, look_ctx: "lk.LookContext | None" = None) -> list[dict]:
+                       seed: int | None = None, look_ctx: "lk.LookContext | None" = None,
+                       end_time: float | None = None) -> list[dict]:
     """
     Assign each beat interval a clip from the pool.
     Returns list of dicts: {clip_id, start_offset, duration, flash_before, stutter, beat_time, effect, lip_sync}
@@ -178,6 +179,9 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
     time (start frame / TARGET_FPS); lip-sync seeks use ``time`` so picture and song agree at
     the frame the cut actually lands on.
 
+    ``end_time`` (the song's length) makes the last cut run to the end of the song instead of
+    a fixed half second, so the picture never stops before the music does.
+
     ``seed`` makes the plan reproducible. Note the plan is only fully reproducible when the
     clip pool was ALSO built from the same seed (see build_clip_pool) — B-roll start offsets
     live in the pool, not here.
@@ -202,6 +206,8 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
         start_frame = round(raw_beat * fps)
         if i + 1 < len(beat_times):
             frames = round(beat_times[i + 1] * fps) - start_frame
+        elif end_time is not None:
+            frames = round(end_time * fps) - start_frame
         else:
             frames = round(0.5 * fps)
         if frames < 1:
@@ -710,7 +716,8 @@ def main():
         print(f"  {len(onsets)} kick onsets\n")
 
     # Step 2: Cut schedule
-    schedule = build_cut_schedule(beat_times, CLIP_POOL, seed=seed, look_ctx=look_ctx)
+    schedule = build_cut_schedule(beat_times, CLIP_POOL, seed=seed, look_ctx=look_ctx,
+                                  end_time=video_duration)
     flash_count = sum(1 for s in schedule if s["flash_before"])
     stutter_count = sum(1 for s in schedule if s["stutter"])
     shrink_count = sum(1 for s in schedule if s.get("effect") == "shrink")

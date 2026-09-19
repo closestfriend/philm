@@ -45,7 +45,7 @@ def main():
 
     pool, n_broll = build_pool(args.clips, args.exclude, args.lipsync, args.lipsync_weight,
                                args.seed, args.lipsync_offset)
-    schedule = cc.build_cut_schedule(beat_times, pool, seed=args.seed)
+    schedule = cc.build_cut_schedule(beat_times, pool, seed=args.seed, end_time=video_duration)
 
     # ── Report ──────────────────────────────────────────────────────────────
     ls_id = args.lipsync.stem if args.lipsync else None
