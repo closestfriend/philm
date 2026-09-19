@@ -173,7 +173,7 @@ def test_lipsync_only_pool_holds_last_shot_when_nothing_covers_a_beat():
                or e["held"] for e in sched)
     # the timeline is still continuous: last entry extends to the end of the beat grid
     last = sched[-1]
-    assert last["held"] and abs(last["beat_time"] + last["duration"] - (BEATS[-1] + 0.5)) < 1e-6
+    assert last["held"] and last["frame"] + last["frames"] == round(BEATS[-1] * 30) + 15
     assert last["beat_time"] + last["duration"] - last["held_from"] > 7.0  # covers 48→55.2
 
 
@@ -228,7 +228,7 @@ def test_look_breakdown_holds_every_other_beat_and_disables_geometry():
     assert any(e["passage_hold"] for e in bd)
     # timeline stays continuous through the holds
     for prev, nxt in zip(sched, sched[1:]):
-        assert abs(prev["beat_time"] + prev["duration"] - nxt["beat_time"]) < 1e-6
+        assert prev["frame"] + prev["frames"] == nxt["frame"]
 
 
 def test_look_drop_opens_with_grid_when_two_takes_cover():
@@ -263,3 +263,14 @@ def test_no_look_schedule_unchanged():
     pool = _pool(4)
     assert cc.build_cut_schedule(BEATS, pool, seed=9) == cc.build_cut_schedule(BEATS, pool, seed=9,
                                                                                look_ctx=None)
+
+
+def test_schedule_is_frame_exact_and_gapless():
+    sched = cc.build_cut_schedule(BEATS, _pool(3), seed=2)
+    assert sched[0]["frame"] == round(BEATS[0] * 30)
+    for prev, nxt in zip(sched, sched[1:]):
+        assert prev["frame"] + prev["frames"] == nxt["frame"]
+        assert abs(prev["duration"] - prev["frames"] / 30) < 1e-9
+    # lip-sync seeks use the placed time, not the raw beat time
+    ls = cc.build_cut_schedule(BEATS, [_take("a", 0.0, 99.0)], seed=2)
+    assert all(abs(e["start_offset"] - e["time"]) < 1e-9 for e in ls)

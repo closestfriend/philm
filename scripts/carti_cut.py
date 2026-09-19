@@ -134,6 +134,10 @@ def detect_beats(music_path: Path, video_duration: float,
 
     # Filter to track duration, apply divisor for slower cuts
     beat_times = [t for t in beat_times if t < video_duration]
+    # The render timeline starts at song second 0, so the schedule must too — otherwise the
+    # first beat's footage lands at frame 0 and the whole cut runs early by one beat.
+    if beat_times and beat_times[0] > 0.0:
+        beat_times = [0.0] + beat_times
     if BEAT_DIVISOR > 1:
         beat_times = beat_times[::BEAT_DIVISOR]
 
@@ -168,6 +172,12 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
     every Nth beat only), ``grid`` (multi-take sync grid opening a section), ``hit``/``hit_vf``
     (kick-fired effect). Without a look_ctx the plan is byte-identical to before.
 
+    Timing is frame-exact: each cut starts at frame round(beat_time * TARGET_FPS) and runs
+    ``frames`` = (next cut's start frame - its own), so quantisation error never accumulates
+    across the render. ``duration`` is frames / TARGET_FPS and ``time`` is the cut's placed
+    time (start frame / TARGET_FPS); lip-sync seeks use ``time`` so picture and song agree at
+    the frame the cut actually lands on.
+
     ``seed`` makes the plan reproducible. Note the plan is only fully reproducible when the
     clip pool was ALSO built from the same seed (see build_clip_pool) — B-roll start offsets
     live in the pool, not here.
@@ -187,14 +197,17 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
     look = look_ctx.look if look_ctx else None
     prev_label, sec_beat_idx, grid_left = None, 0, 0
 
-    for i, beat_t in enumerate(beat_times):
+    fps = TARGET_FPS
+    for i, raw_beat in enumerate(beat_times):
+        start_frame = round(raw_beat * fps)
         if i + 1 < len(beat_times):
-            duration = beat_times[i + 1] - beat_t
+            frames = round(beat_times[i + 1] * fps) - start_frame
         else:
-            duration = 0.5
-
-        if duration < FLASH_DURATION:
-            continue
+            frames = round(0.5 * fps)
+        if frames < 1:
+            continue  # two beats inside one frame: this one is absorbed by the next
+        beat_t = start_frame / fps          # where the cut is actually placed
+        duration = frames / fps
 
         def covers(c):
             return (not c.get("lip_sync", False)
@@ -216,7 +229,8 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
         if is_grid:
             grid_left -= 1
         elif passage and passage.hold_every > 1 and sec_beat_idx % passage.hold_every and schedule:
-            schedule[-1]["duration"] += duration
+            schedule[-1]["frames"] += frames
+            schedule[-1]["duration"] = schedule[-1]["frames"] / fps
             schedule[-1]["passage_hold"] = True
             continue
 
@@ -242,7 +256,8 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
                     prev = schedule[-1]
                     if not prev["held"]:
                         prev["held"], prev["held_from"] = True, beat_t
-                    prev["duration"] += duration
+                    prev["frames"] += frames
+                    prev["duration"] = prev["frames"] / fps
                     continue
                 else:
                     entry = min(pool, key=lambda c: c.get("song_start", 0.0))
@@ -280,6 +295,9 @@ def build_cut_schedule(beat_times: list[float], clip_pool: list,
             "clip_id": clip_id,
             "start_offset": start_offset,
             "duration": duration,
+            "frames": frames,
+            "frame": start_frame,
+            "time": beat_t,
             "flash_before": flash_before,
             "stutter": stutter,
             "beat_time": beat_t,
@@ -453,22 +471,25 @@ def generate_flash_frames(tmp_dir: Path) -> tuple[Path, Path]:
     white = tmp_dir / "white_flash.mp4"
     black = tmp_dir / "black_flash.mp4"
 
-    run([
-        "ffmpeg", "-y", "-f", "lavfi",
-        "-i", f"color=white:s={OUTPUT_SIZE_LAVFI}:d={FLASH_DURATION:.4f}",
-        "-c:v", "libx264", "-preset", "fast", "-crf", "18",
-        "-r", str(TARGET_FPS), str(white)
-    ])
-    run([
-        "ffmpeg", "-y", "-f", "lavfi",
-        "-i", f"color=black:s={OUTPUT_SIZE_LAVFI}:d={FLASH_DURATION:.4f}",
-        "-c:v", "libx264", "-preset", "fast", "-crf", "18",
-        "-r", str(TARGET_FPS), str(black)
-    ])
+    for colour, path in (("white", white), ("black", black)):
+        run([
+            "ffmpeg", "-y", "-f", "lavfi",
+            "-i", f"color={colour}:s={OUTPUT_SIZE_LAVFI}:r={TARGET_FPS}",
+            "-frames:v", "1",
+            "-c:v", "libx264", "-preset", "fast", "-crf", "18", str(path)
+        ])
     return white, black
 
 
 # ─── STEP 4: EXTRACT CLIP SEGMENTS ─────────────────────────────────────────────
+
+def seek_time(start: float) -> str:
+    """Seek target for ``-ss -accurate_seek``: half an output frame EARLY, full precision.
+    accurate_seek drops every frame whose pts is below the target, so a target rounded up
+    past the wanted frame's pts (0.466667 -> "0.4667") silently starts one frame late — a
+    constant lip-sync error. Aiming half a frame early lands on the nearest frame instead."""
+    return f"{max(0.0, start - 0.5 / TARGET_FPS):.6f}"
+
 
 def extract_segment(
     source: Path,
@@ -478,9 +499,16 @@ def extract_segment(
     effect: str = "normal",
     rng: random.Random | None = None,
     extras: list | None = None,
+    frames: int | None = None,
 ):
     """Extract a video-only segment with optional in-frame effects. ``extras`` are look
-    filter fragments (hit, passage, grade) appended after fps normalisation."""
+    filter fragments (hit, passage, grade) appended after fps normalisation.
+
+    Output length is an exact frame count (``frames``, default round(duration * fps)): ffmpeg
+    would otherwise truncate a fractional-frame ``-t`` and the loss accumulates across hundreds
+    of cuts. A source that runs out early is padded by cloning its last frame."""
+    if frames is None:
+        frames = max(1, round(duration * TARGET_FPS))
     if effect == "shrink":
         # Shrink to 40-70% and float inside black frame
         scale_pct = (rng.uniform(0.4, 0.7) if rng else 0.55)
@@ -509,15 +537,16 @@ def extract_segment(
             f"scale={OUTPUT_SIZE}:force_original_aspect_ratio=decrease,"
             f"pad={OUTPUT_SIZE}:(ow-iw)/2:(oh-ih)/2"
         )
-    vf = lk.compose_vf(vf, *(extras or []))
+    vf = lk.compose_vf(vf, *(extras or [])) + ",tpad=stop_mode=clone:stop_duration=2"
 
     run([
         "ffmpeg", "-y",
-        "-ss", f"{start:.4f}",
+        "-ss", seek_time(start),
         "-accurate_seek",
         "-i", str(source),
-        "-t", f"{duration:.4f}",
+        "-t", f"{frames / TARGET_FPS + 0.5:.4f}",
         "-vf", vf,
+        "-frames:v", str(frames),
         "-c:v", "libx264", "-preset", "fast", "-crf", "18",
         "-an",
         str(output)
@@ -525,16 +554,18 @@ def extract_segment(
 
 
 def extract_grid_segment(sources: list[tuple[Path, float]], duration: float, output: Path,
-                         grade: str | None = None):
+                         grade: str | None = None, frames: int | None = None):
     """Render 2-4 song-locked takes side by side (all in sync) for one cut.
-    ``sources`` = [(path, start_in_clip), ...]."""
+    ``sources`` = [(path, start_in_clip), ...]. Exact frame count, like extract_segment."""
+    if frames is None:
+        frames = max(1, round(duration * TARGET_FPS))
     sources = sources[:4]
     n = len(sources)
     if n < 2:
         raise ValueError("grid needs at least two covering takes")
     cmd = ["ffmpeg", "-y"]
     for path, start in sources:
-        cmd += ["-ss", f"{max(0.0, start):.4f}", "-accurate_seek", "-i", str(path)]
+        cmd += ["-ss", seek_time(start), "-accurate_seek", "-i", str(path)]
     if n == 2:
         cell, stack = ("960", "1080"), "hstack=inputs=2"
     elif n == 3:
@@ -544,9 +575,11 @@ def extract_grid_segment(sources: list[tuple[Path, float]], duration: float, out
     w, h = cell
     chains = [f"[{i}:v]scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h},"
               f"fps={TARGET_FPS}[v{i}]" for i in range(n)]
-    tail = "".join(f"[v{i}]" for i in range(n)) + stack + (f",{grade}" if grade else "") + "[out]"
-    cmd += ["-t", f"{duration:.4f}", "-filter_complex", ";".join(chains + [tail]),
-            "-map", "[out]", "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-an", str(output)]
+    tail = ("".join(f"[v{i}]" for i in range(n)) + stack + (f",{grade}" if grade else "")
+            + ",tpad=stop_mode=clone:stop_duration=2[out]")
+    cmd += ["-filter_complex", ";".join(chains + [tail]), "-map", "[out]",
+            "-frames:v", str(frames),
+            "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-an", str(output)]
     run(cmd)
 
 
@@ -564,6 +597,7 @@ def final_assemble(concat_file: Path, music: Path, output: Path, video_duration:
         "-f", "concat", "-safe", "0", "-i", str(concat_file),
         "-i", str(music),
         "-map", "0:v", "-map", "1:a",
+        "-fps_mode", "cfr", "-r", str(TARGET_FPS),
         "-c:v", "libx264", "-preset", "slow", "-crf", "18",
         "-c:a", "aac", "-b:a", "192k",
         "-t", str(video_duration),
@@ -719,21 +753,29 @@ def main():
             c["clip_id"]: c["offset"] for c in CLIP_POOL if not c.get("lip_sync", False)
         }
 
+        frame_len = 1.0 / TARGET_FPS
         for entry in schedule:
             clip_id = entry["clip_id"]
             source = clip_paths[clip_id]
             duration = entry["duration"]
+            frames = entry["frames"]
             src_duration = probe_duration(source)
+            # A flash is ONE frame carved out of the beat, never added on top of it — adding
+            # would push every later cut late by a frame.
+            flash = entry["flash_before"] and frames >= 2
+            body_frames = frames - 1 if flash else frames
 
             if entry.get("grid"):
-                bt = entry["beat_time"]
+                bt = entry["time"]
                 srcs = [(clip_paths[c["clip_id"]], bt - c["song_start"]) for c in CLIP_POOL
                         if c.get("lip_sync") and c["song_start"] <= bt
                         and bt + duration <= c["song_end"]]
-                if entry["flash_before"]:
+                if flash:
                     ordered_segments.append(white_flash)
+                    srcs = [(p_, st + frame_len) for p_, st in srcs]
                 seg_path = segments_dir / f"seg_{seg_idx:05d}.mp4"
-                extract_grid_segment(srcs, duration, seg_path, grade=look.grade if look else None)
+                extract_grid_segment(srcs, duration, seg_path, grade=look.grade if look else None,
+                                     frames=body_frames)
                 ordered_segments.append(seg_path)
                 seg_idx += 1
                 continue
@@ -751,20 +793,21 @@ def main():
                 if not entry["stutter"]:
                     clip_playhead[clip_id] = start + duration
 
-            if entry["flash_before"]:
+            if flash:
                 if look and look.flash == "invert":
                     # one inverted frame of the incoming shot instead of a white plate
                     flash_seg = segments_dir / f"flash_{seg_idx:05d}.mp4"
-                    extract_segment(source, start, FLASH_DURATION, flash_seg,
-                                    extras=["negate", look.grade])
+                    extract_segment(source, start, frame_len, flash_seg,
+                                    extras=["negate", look.grade], frames=1)
                     ordered_segments.append(flash_seg)
                 else:
                     ordered_segments.append(white_flash)
+                start += frame_len  # the body resumes on the frame after the flash
 
             extras = [entry.get("hit_vf"), entry.get("passage_vf"), look.grade if look else None]
             extract_segment(source, start, duration, seg_path,
                             effect=entry.get("effect", "normal"),
-                            rng=random.Random(seg_idx), extras=extras)
+                            rng=random.Random(seg_idx), extras=extras, frames=body_frames)
             ordered_segments.append(seg_path)
 
             seg_idx += 1
