@@ -274,3 +274,13 @@ def test_schedule_is_frame_exact_and_gapless():
     # lip-sync seeks use the placed time, not the raw beat time
     ls = cc.build_cut_schedule(BEATS, [_take("a", 0.0, 99.0)], seed=2)
     assert all(abs(e["start_offset"] - e["time"]) < 1e-9 for e in ls)
+
+
+def test_last_cut_runs_to_end_of_song():
+    pool = [_take("a", 0.0, 99.0)]
+    sched = cc.build_cut_schedule(BEATS, pool, seed=2, end_time=60.0)
+    last = sched[-1]
+    assert last["frame"] + last["frames"] == round(60.0 * 30)
+    # without end_time the legacy half-second tail still applies
+    legacy = cc.build_cut_schedule(BEATS, pool, seed=2)
+    assert legacy[-1]["frame"] + legacy[-1]["frames"] == round(BEATS[-1] * 30) + 15
