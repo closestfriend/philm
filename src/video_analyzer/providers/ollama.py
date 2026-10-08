@@ -36,6 +36,7 @@ class OllamaProvider:
             ollama_url=self.config.ollama_url,
             schema=mode.result_model.model_json_schema(),
             timeout=self.config.timeout,
+            num_ctx=self.config.num_ctx,
         )
         return mode.result_model.model_validate_json(raw)
 
