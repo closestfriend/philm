@@ -14,6 +14,11 @@ re-wrapped in ~6 user interfaces. None of the duplication is dangerous to clean 
 the bulk of the disk cost is regenerable venvs and media, and the abandoned copies are
 empty `.git` shells.
 
+> **Since 2026-06 the idea has a fifth, most-evolved descendant** — `scripts/affect_score.py`,
+> an *affect engine* fed by a cloud-catalogued archive. See **[the 2026-06 build](#2026-06--the-archive-became-an-instrument-cloud-catalogue--affect-engine)**
+> below. The deliverables it produces live OUTSIDE both repos, in
+> `~/Projects/karman-video-art/` (internal drive).
+
 ---
 
 ## Consolidation status — updated 2026-06-02
@@ -58,11 +63,68 @@ Design: `docs/superpowers/specs/2026-06-01-video-praxis-consolidation-design.md`
 
 ---
 
+## 2026-06 — the archive became an instrument (cloud catalogue + affect engine)
+
+A whole new track of work, mostly **additive** to philm (new module + new scripts), that turns the
+decade of footage into a *queryable, composable instrument*. This is the evolved end of the montage
+lineage — and the thing actually being used day-to-day now. The hand-cut **SINGLE_SOURCE** edit
+(intensity-curve by eye) grew a nervous system.
+
+### New code (all in `philm` / video-analyzer-v2)
+- **`src/video_analyzer/batch_cloud.py`** (756 lines) — the **cloud catalogue** pipeline. Analyzes the
+  *entire* archive (~3,380 unique clips) for **sizzle + affect + a rotating theory lens**
+  (žižek→hauntology→sontag) via the **Gemini Flash-Lite Batch API** at the 50% async discount —
+  **~$8 for the whole archive.** Two hard-won gotchas baked in: (a) it transcodes to **360p/0.4Mbps
+  proxies first** (327 GB → ~10.6 GB) so the archive fits the File API 20 GB cap, since the model only
+  consumes `media_resolution=LOW` anyway; (b) it aligns responses by `metadata["key"]`, NOT zip
+  position — **the Batch API returns results out of submission order**, a bug that first looked like
+  54% failure and was really 99.9% success mis-indexed.
+- **`scripts/affect_score.py`** (778 lines) — **THE affect engine** (lineage stage 5; see strobe table
+  below). Generalizes SINGLE_SOURCE's hand-placed intensity curve into an algorithm: it **fits clips
+  to an affect curve** using three levers — *intensity* (1–10), *vector* (the **direction** of affect:
+  rising / falling / held — editing on the derivative of feeling), and *atmosphere*. Curve sources:
+  synthetic shapes (`swell` / `heartbeat` / `flatline_spike` / `double_climax`), **a music track's
+  loudness envelope** (`--audio` → feeling-sync, not just beat-sync), **structure-aware** section
+  grammar (breakdown / build / drop / outro), and **transient mapping** (`--transient` → scipy
+  lowpass ≈150 Hz + librosa onset = kick onsets; cuts snap to kicks when kick-density is high and hold
+  free when it thins). Pool is filterable by the facets below (`--pool-min-intensity`, `--pool-tone`, …).
+- **`scripts/segment_long_clips.py`** — slices the 52 long takes (>5 min, which hold ~22% of the
+  footage and produce *hallucinated* timecodes) into ~2.5-min chunks → **318 chunks** with reliable
+  timecodes; flags originals `segmented` so the engine skips them.
+- **`scripts/recollect_from_jobs.py`** — **$0 repair**: rebuilds a run from still-alive batch jobs
+  (jobs persist ~48 h) via metadata alignment. This is what fixed the out-of-order bug for free.
+- **`scripts/backfill_facets.py`** — re-derives the facet columns onto existing DB rows.
+- **`src/video_analyzer/archive.py` + `archive_cli.py`** — **structured facet search.** The `videos`
+  table gained `overall_energy / dominant_tone / best_for / peak_intensity / mean_intensity /
+  dominant_atmosphere` columns + a `search_facets()` method + CLI flags (`--min-intensity`, `--tone`,
+  `--best-for`, `--min-energy`, `--atmosphere`). So "energy 7, dramatic, best_for hook/climax, peak
+  intensity 9" is now a query, not a vibe.
+
+### Where the data lives (media drive, NOT in git)
+- **`…/Photography + Video/_proxies/`** — persistent 360p low-res mirror (~10.6 GB), reusable.
+- **`…/Photography + Video/_cloud_catalog/`** — per-clip JSON catalogue (sizzle/affect/theory + facets)
+  the engine reads. ~$8 of analysis lives here; back it up before any archive reorg.
+
+### Deliverables — OUTSIDE both repos
+**`~/Projects/karman-video-art/`** (internal drive, git-versioned, heavy media gitignored): README +
+`docs/` (METHOD / FINDINGS / PIPELINE / ESSAY-DRAFT), six concept films (`concepts/`), the affect-curve
+& music-video renders (`affect_scores/`, incl. the `--transient`+`--pool-min-intensity 8` *KICKCAST*
+cut), and the **anthology** *THE MODERN SUBJECT* (`anthology/`) — six films re-sequenced by their own
+collective affect signature (a recursive affect-score, one octave up).
+
+### One finding worth flagging
+Running the **same track mastered vs. pre-master** through the engine (same seed, same archive) yields
+a **>80% different cut** and a different cut-*rate* — mastering flattens the dynamics the engine reads
+as its score. *The mastering chain is also a picture-editing chain.* (Detail in `docs/FINDINGS.md`.)
+
+---
+
 ## The two active repos
 
 ### 1. `philm` / video-analyzer-v2
 - **Path:** `/Volumes/2025_exSSD_2tb/video-analyzer-v2`
-- **Remotes:** `origin` → `closestfriend/philm`, `memetica` → `Memetica-Corporation/philm`
+- **Remotes:** `origin` → `closestfriend/philm` only. *(The `memetica` → `Memetica-Corporation/philm`
+  remote was removed 2026-06-15 — Hunter has left Memetica; never re-add it.)*
 - **Real product:** `src/video_analyzer/` — philosophical video analysis CLI (`vanalyze`/`philm`),
   Gemini + Ollama backends, SQLite archive, FastAPI/Jinja web UI, sizzle production mode.
 - **The montage code lives in `scripts/`** as a *second-generation* rewrite of av-pair's engine:
@@ -71,7 +133,8 @@ Design: `docs/superpowers/specs/2026-06-01-video-praxis-consolidation-design.md`
 
 ### 2. `av-pair`
 - **Path:** `/Volumes/2025_exSSD_2tb/💻 Development & Code/Development/av-pair`
-- **Remotes:** `origin` → `closestfriend/av-pair`, `memetica` → `Memetica-Corporation/av-pair`
+- **Remotes:** `origin` → `closestfriend/av-pair` only. *(The `memetica` remote is also gone — verified
+  2026-06-23; never re-add it.)*
 - **What it is:** the *original* beat-synced montage generator. FFmpeg + LibROSA core,
   optional Replicate AI integration, two MCP servers, deployed to HuggingFace Spaces.
 - **Engine lives in** `src/av_pair/`: `create_composition.py`, `drift_composition.py`,
@@ -138,8 +201,13 @@ defining leap here is **MoviePy → raw FFmpeg** and **manual BPM → real beat 
 | 2 (av-pair) | `beat_strobe.py` | MoviePy | **manual `--bpm`** (no detection) | `--drift`, `--beat-influence` |
 | 3 (philm) | `carti_cut.py` | **raw FFmpeg** | **real `librosa.beat_track`** | flash/stutter/zoom/shrink, proxies, lip-sync, versioned output, CLI |
 | 4 (philm) | `ez_mv_core.py` | **raw FFmpeg** | librosa + `apply_cut_density` | pure fn + `progress_callback`; reads philm affect/sizzle JSON to cut on peak-intensity moments |
+| 5 (philm) | `affect_score.py` | **raw FFmpeg** | librosa envelope/beats **+ transient (kick) gating** | **the affect engine** — fits clips to an *affect curve* (intensity × vector × atmosphere) from a synthetic shape, a music track, or kick onsets; reads the cloud catalogue + facet pool filters. See the [2026-06 section](#2026-06--the-archive-became-an-instrument-cloud-catalogue--affect-engine). |
 
-**Most-evolved beat-sync engine:** `ez_mv_core.py` + CLI from `carti_cut.py`.
+**Most-evolved beat-sync engine:** `affect_score.py` (stage 5). It descends directly from
+`ez_mv_core.py` — stage 4 already cut on peak-intensity *moments*; stage 5 generalizes that into
+fitting a whole *curve*, adds the affect **vector** (direction) and music/transient drive, and pulls
+from the cloud catalogue rather than per-clip JSON. `ez_mv_core.py` + `carti_cut.py`'s CLI remain the
+canonical *pure beat-sync* pair when you don't want affect-curve fitting.
 
 ⚠️ **The av-pair pair are NOT disposable (corrected 2026-05-31).** Earlier framing called
 `random_montage.py` / `beat_strobe.py` "obsolete prototypes — strictly superseded." That was

@@ -63,3 +63,8 @@ documentary/output/
 .venv-mir/
 
 .worktrees/
+
+# render output + session input media (regenerable)
+carti_cuts/
+input/
+*.asd
