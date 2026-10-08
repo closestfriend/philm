@@ -5,20 +5,28 @@ Extracts frames from video and analyzes them with local vision models.
 """
 
 import base64
+import os
 import subprocess
 import tempfile
 import requests
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
 class LocalConfig:
     """Configuration for local analysis."""
     model: str = "qwen3-vl:4b"
-    ollama_url: str = "http://localhost:11434"
+    # Honor OLLAMA_HOST so the same code can target a remote Ollama (e.g. a RunPod pod)
+    # without any other change; defaults to the local daemon.
+    ollama_url: str = field(
+        default_factory=lambda: os.getenv("OLLAMA_HOST", "http://localhost:11434"))
     num_frames: int = 4
-    timeout: int = 180
+    # Per-request timeout; the long modes (sizzle) on a big model can exceed the old 180s.
+    timeout: int = field(default_factory=lambda: int(os.getenv("OLLAMA_TIMEOUT", "180")))
+    # 0 = use Ollama's model default (4096). Vision tokens are large, so raise this when
+    # sending many frames + long prompts (OLLAMA_NUM_CTX). See _chat_json.
+    num_ctx: int = field(default_factory=lambda: int(os.getenv("OLLAMA_NUM_CTX", "0")))
 
 
 def extract_frames(video_path: Path, num_frames: int = 4, output_dir: Path = None) -> list[Path]:
@@ -247,23 +255,33 @@ def check_ollama_available(config: LocalConfig = None) -> tuple[bool, str]:
 
 
 def _chat_json(model: str, prompt: str, image_paths, ollama_url: str,
-               schema: dict, timeout: int = 180) -> str:
+               schema: dict, timeout: int = 180, num_ctx: int = 0) -> str:
     """POST a vision chat request to Ollama with JSON-schema-constrained output.
 
     Returns the raw JSON string from the model's message content.
+
+    ``num_ctx`` (>0) raises the context window via Ollama ``options`` — necessary because
+    vision tokens are large: at the default 4096 ctx, more than ~6 frames (plus a long
+    mode prompt and the generated output) overflows and Ollama returns a 400.
     """
     import base64 as _b64
 
     images = [_b64.b64encode(Path(p).read_bytes()).decode("ascii") for p in image_paths]
-    resp = requests.post(
-        f"{ollama_url}/api/chat",
-        json={
-            "model": model,
-            "stream": False,
-            "format": schema,  # Ollama accepts a JSON schema object for structured output
-            "messages": [{"role": "user", "content": prompt, "images": images}],
-        },
-        timeout=timeout,
-    )
-    resp.raise_for_status()
+    body = {
+        "model": model,
+        "stream": False,
+        "format": schema,  # Ollama accepts a JSON schema object for structured output
+        "messages": [{"role": "user", "content": prompt, "images": images}],
+    }
+    if num_ctx and num_ctx > 0:
+        body["options"] = {"num_ctx": num_ctx}
+    # OLLAMA_BEARER lets us hit a token-gated endpoint (e.g. an HF Jobs exposed port,
+    # reachable at https://<job_id>--<port>.hf.jobs with an HF token). Local use leaves it unset.
+    headers = {}
+    _bearer = os.getenv("OLLAMA_BEARER")
+    if _bearer:
+        headers["Authorization"] = f"Bearer {_bearer}"
+    resp = requests.post(f"{ollama_url}/api/chat", json=body, timeout=timeout, headers=headers)
+    if not resp.ok:  # surface Ollama's actual reason (raise_for_status hides the body)
+        raise requests.HTTPError(f"{resp.status_code} from {ollama_url}/api/chat: {resp.text[:300]}")
     return resp.json()["message"]["content"]
