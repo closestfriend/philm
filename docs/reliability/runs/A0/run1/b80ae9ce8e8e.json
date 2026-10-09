@@ -1,0 +1,85 @@
+{
+ "clip_id": "b80ae9ce8e8e",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "Two hands, one dark-skinned and one light-skinned, adorned with colorful wristbands, clasp in a handshake against a blurred natural background.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 2,
+    "atmosphere": "anticipation",
+    "vector": "approaching",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 4,
+    "atmosphere": "connection",
+    "vector": "converging",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 6,
+    "atmosphere": "solidarity",
+    "vector": "entwined",
+    "captures": true
+   },
+   {
+    "time": "00:03",
+    "intensity": 6,
+    "atmosphere": "solidarity",
+    "vector": "entwined",
+    "captures": true
+   },
+   {
+    "time": "00:04",
+    "intensity": 6,
+    "atmosphere": "solidarity",
+    "vector": "entwined",
+    "captures": true
+   },
+   {
+    "time": "00:05",
+    "intensity": 6,
+    "atmosphere": "solidarity",
+    "vector": "entwined",
+    "captures": true
+   },
+   {
+    "time": "00:06",
+    "intensity": 6,
+    "atmosphere": "solidarity",
+    "vector": "entwined",
+    "captures": true
+   },
+   {
+    "time": "00:07",
+    "intensity": 6,
+    "atmosphere": "solidarity",
+    "vector": "entwined",
+    "captures": true
+   },
+   {
+    "time": "00:08",
+    "intensity": 6,
+    "atmosphere": "solidarity",
+    "vector": "entwined",
+    "captures": true
+   },
+   {
+    "time": "00:09",
+    "intensity": 6,
+    "atmosphere": "solidarity",
+    "vector": "entwined",
+    "captures": true
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

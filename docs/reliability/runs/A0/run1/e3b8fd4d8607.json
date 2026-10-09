@@ -1,0 +1,120 @@
+{
+ "clip_id": "e3b8fd4d8607",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "This video displays a laptop screen showing a coding assessment platform. The platform outlines the assessment's structure, time commitment, and instructions for users. It also includes a section for users to select their primary field of experience and programming languages they are comfortable with, followed by a coding problem description.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "anticipatory",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 4,
+    "atmosphere": "informative",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 4,
+    "atmosphere": "informative",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 4,
+    "atmosphere": "informative",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 5,
+    "atmosphere": "challenging",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 5,
+    "atmosphere": "challenging",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 6,
+    "atmosphere": "complex",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 6,
+    "atmosphere": "complex",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 7,
+    "atmosphere": "technical",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 7,
+    "atmosphere": "technical",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 8,
+    "atmosphere": "problematic",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 8,
+    "atmosphere": "problematic",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 7,
+    "atmosphere": "evaluative",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 7,
+    "atmosphere": "evaluative",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 7,
+    "atmosphere": "evaluative",
+    "vector": "forward",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

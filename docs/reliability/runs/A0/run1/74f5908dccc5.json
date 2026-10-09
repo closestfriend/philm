@@ -1,0 +1,43 @@
+{
+ "clip_id": "74f5908dccc5",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A panning shot of a waterfront park with people strolling, buildings in the background, and trees in the foreground.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "calm, open, slightly anticipatory",
+    "vector": "expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 4,
+    "atmosphere": "bright, airy, a sense of movement",
+    "vector": "forward, expanding",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 5,
+    "atmosphere": "lively, social, a gentle pull towards activity",
+    "vector": "toward the park activities",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 6,
+    "atmosphere": "expansive, serene, a feeling of connection to the environment",
+    "vector": "outward, encompassing",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

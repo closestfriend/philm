@@ -1,0 +1,120 @@
+{
+ "clip_id": "c20294b1e4d1",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "This video appears to be a black screen with subtle, almost imperceptible light shifts and occasional faint white wisps or artifacts. It's difficult to discern any specific content or narrative.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 2,
+    "atmosphere": "Subtle unease, a faint stirring in the darkness.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 3,
+    "atmosphere": "A gentle diffusion, a sense of something beginning to form, yet indistinct.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 4,
+    "atmosphere": "A soft luminescence, a quiet wonder, a feeling of being on the verge of revelation.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:30",
+    "intensity": 3,
+    "atmosphere": "A slight withdrawal, a return to shadow, a hint of melancholy.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:40",
+    "intensity": 2,
+    "atmosphere": "A fading presence, a quietude that is almost absent.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:50",
+    "intensity": 3,
+    "atmosphere": "A subtle re-emergence, a gentle pulse in the dark.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "01:00",
+    "intensity": 4,
+    "atmosphere": "A soft glow, a sense of calm observation, a quiet presence.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "01:10",
+    "intensity": 3,
+    "atmosphere": "A diffusion of light, a softening of edges, a gentle flow.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "01:20",
+    "intensity": 2,
+    "atmosphere": "A receding light, a return to deeper shadow, a sense of quietude.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "01:30",
+    "intensity": 3,
+    "atmosphere": "A faint stirring, a hint of movement in the darkness.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "01:40",
+    "intensity": 4,
+    "atmosphere": "A soft illumination, a feeling of gentle unfolding, a quiet mystery.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "01:50",
+    "intensity": 3,
+    "atmosphere": "A fading light, a return to the subtle depths of the dark.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "02:00",
+    "intensity": 2,
+    "atmosphere": "A deep quietude, a sense of absence and stillness.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "02:10",
+    "intensity": 3,
+    "atmosphere": "A subtle presence, a faint luminescence appearing in the dark.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "02:20",
+    "intensity": 4,
+    "atmosphere": "A gentle diffusion of light, a sense of quiet emergence and possibility.",
+    "vector": "expanding",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

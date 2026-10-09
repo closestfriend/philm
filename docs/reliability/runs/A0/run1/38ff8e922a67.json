@@ -1,0 +1,134 @@
+{
+ "clip_id": "38ff8e922a67",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A dark, foggy drive through a palm-lined street at night, with the red taillights of a car ahead being the only discernible feature.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 5,
+    "atmosphere": "ominous stillness",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 6,
+    "atmosphere": "gathering unease",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 7,
+    "atmosphere": "approaching dread",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 6,
+    "atmosphere": "lingering tension",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 7,
+    "atmosphere": "heightened anticipation",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 6,
+    "atmosphere": "fading suspense",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 7,
+    "atmosphere": "renewed unease",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 8,
+    "atmosphere": "imminent threat",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 7,
+    "atmosphere": "pervasive gloom",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 6,
+    "atmosphere": "melancholy diffusion",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 5,
+    "atmosphere": "quiet resignation",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 6,
+    "atmosphere": "faint disturbance",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 7,
+    "atmosphere": "returning tension",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 8,
+    "atmosphere": "focused apprehension",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 7,
+    "atmosphere": "lingering caution",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 6,
+    "atmosphere": "fading unease",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 5,
+    "atmosphere": "ambient stillness",
+    "vector": "neutral",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

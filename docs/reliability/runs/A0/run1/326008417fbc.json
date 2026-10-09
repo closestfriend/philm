@@ -1,0 +1,113 @@
+{
+ "clip_id": "326008417fbc",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A dimly lit room with multiple computer monitors displaying code and music production software. The lighting shifts slightly, revealing a keyboard and a microphone. The scene suggests a creative or technical workspace.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "Subdued, neutral, a low hum of potential activity.",
+    "vector": "Contracting, inward.",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 3,
+    "atmosphere": "Stable, uneventful, a quiet waiting.",
+    "vector": "Neutral, static.",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 3,
+    "atmosphere": "Consistent, a background presence of the digital environment.",
+    "vector": "Static.",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 3,
+    "atmosphere": "Unchanged, the ambient digital quiet persists.",
+    "vector": "Static.",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 3,
+    "atmosphere": "A steady, low-level engagement with the visual data on screen.",
+    "vector": "Slightly outward, observational.",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 3,
+    "atmosphere": "The visual field is stable, affect remains diffuse.",
+    "vector": "Static.",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 3,
+    "atmosphere": "A sense of quiet focus, the digital interface as a backdrop.",
+    "vector": "Inward, observational.",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 3,
+    "atmosphere": "The scene is consistent, affect is not yet qualified.",
+    "vector": "Static.",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 4,
+    "atmosphere": "A subtle shift in light, a slight increase in visual presence.",
+    "vector": "Slightly expanding, emergent.",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 4,
+    "atmosphere": "The increased light brings a mild sense of awareness, but no specific emotion.",
+    "vector": "Outward, responsive.",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 4,
+    "atmosphere": "The visual field is more defined, affect is still pre-cognitive.",
+    "vector": "Stable, observational.",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 3,
+    "atmosphere": "The light recedes, returning to a more subdued state.",
+    "vector": "Contracting, returning.",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 3,
+    "atmosphere": "Back to the initial quietude, affect is unformed.",
+    "vector": "Static.",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 3,
+    "atmosphere": "The scene settles into its baseline, affect remains potential.",
+    "vector": "Static.",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

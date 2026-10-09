@@ -1,0 +1,57 @@
+{
+ "clip_id": "2adcc19e2001",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A close-up of what appears to be a discarded electronic device with blinking red and blue lights, possibly a broken toy or piece of consumer technology, seen through a translucent plastic bag. The lights pulse erratically.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 7,
+    "atmosphere": "A sudden, sharp prickle of alarm, a jolt of the unexpected.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 6,
+    "atmosphere": "A cool, inquisitive hum, a sense of digital inquiry.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 6,
+    "atmosphere": "The cool inquiry persists, a steady, almost clinical observation.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 7,
+    "atmosphere": "The sharp prickle returns, a brief surge of urgent, unidentifiable warning.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 7,
+    "atmosphere": "The urgent warning intensifies, a visceral sense of immediate, unknown threat.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 7,
+    "atmosphere": "A sustained, high-intensity alert, the feeling of being on the precipice of something significant and potentially dangerous.",
+    "vector": "contracting",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

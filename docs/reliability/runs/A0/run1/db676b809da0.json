@@ -1,0 +1,106 @@
+{
+ "clip_id": "db676b809da0",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A close-up video shows two individuals, one wearing a beanie and scarf covering their face, leaning towards each other. The person in front is holding a thin object near their face, possibly a pen or a cigarette, while the other person looks on.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 5,
+    "atmosphere": "Anticipatory tension",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 6,
+    "atmosphere": "Charged proximity",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 7,
+    "atmosphere": "Intense focus",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 6,
+    "atmosphere": "Lingering connection",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 5,
+    "atmosphere": "Subtle shift",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 4,
+    "atmosphere": "Fleeting uncertainty",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 3,
+    "atmosphere": "Momentary pause",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 4,
+    "atmosphere": "Subtle withdrawal",
+    "vector": "away",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 5,
+    "atmosphere": "Re-engagement",
+    "vector": "toward",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 6,
+    "atmosphere": "Resuming intensity",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 7,
+    "atmosphere": "Heightened connection",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 6,
+    "atmosphere": "Sustained focus",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 7,
+    "atmosphere": "Intense proximity",
+    "vector": "contracting",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

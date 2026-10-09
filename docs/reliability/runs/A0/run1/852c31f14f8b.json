@@ -1,0 +1,120 @@
+{
+ "clip_id": "852c31f14f8b",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A series of very dark, abstract shots featuring flickering lights and occasional glimpses of hands holding a lighter. The overall impression is one of unease and obscurity.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "anticipation",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 7,
+    "atmosphere": "sudden ignition",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 5,
+    "atmosphere": "flickering warmth",
+    "vector": "oscillating",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 4,
+    "atmosphere": "shadow play",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 3,
+    "atmosphere": "deepening darkness",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 6,
+    "atmosphere": "re-emergence of light",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 8,
+    "atmosphere": "intense flame",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 5,
+    "atmosphere": "fleeting heat",
+    "vector": "oscillating",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 4,
+    "atmosphere": "receding glow",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 7,
+    "atmosphere": "figure in red light",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 6,
+    "atmosphere": "ambient red",
+    "vector": "surrounding",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 5,
+    "atmosphere": "shadowed form",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 7,
+    "atmosphere": "footsteps in red",
+    "vector": "moving towards",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 4,
+    "atmosphere": "fading red",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 3,
+    "atmosphere": "return to dark",
+    "vector": "contracting",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

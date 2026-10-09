@@ -130,6 +130,19 @@ arms use per-clip differences, not two marginal summaries.
 The null reader's α is printed beside every α. By construction it is ≈ 0 for intensity and
 undefined or ≈ 0 for vector; if it is not, the alignment or the statistic is wrong.
 
+**Permutation floor.** Beside every α the scorer also prints the mean and sd of α between
+a run and 50 clip-permuted copies of itself (no clip keeps its own id). This is what
+unrelated clips score, and at this sample size it is not a point: on A0's 40 clips the
+intensity floor is 0.08 ± 0.11, so a single permutation can land at 0.3 by chance. Any α
+is read as its distance above that floor in floor-sds, not only against the 0.67/0.80 rule.
+
+**Unit weighting.** α weights (clip, bin) units equally, so a 150 s chunk with 30 bins
+counts thirty times a 9 s clip with one. The clip-level Spearman and MAD weight clips
+equally and are the counterweight; both are reported, and a large gap between them is
+itself a finding (the long takes agree or disagree differently from the short ones).
+Shifting a clip's own bins circularly, i.e. same clip wrong time, scores about 0.42 on
+A0: roughly half of within-clip agreement is temporal alignment, half is the clip's level.
+
 Pre-registered expectations, written so the result cannot be read either way after the fact:
 test–retest α on intensity will land between 0.5 and 0.8; cross-model α will be lower than
 within-model; arm M will correlate with the human slider at ρ ≈ 0.3–0.5. A model that does
@@ -145,9 +158,15 @@ The scorer is checked with degenerate inputs before a single API call is paid fo
   not silently scored;
 - a run where one clip's JSON failed to parse must show as a missing clip in that run, not
   as a zero intensity;
-- shuffling clip ids between two runs must drive α to ≈ 0.
+- the MEAN α over 50 clip-permutations of a run against itself must be ≤ 0.15 (a single
+  permutation is not a check; see the permutation floor in §5).
 
 Any of these passing the wrong way is a scorer bug, fixed before the study.
+**Run 2026-10-09 on A0 (40 clips, 303 bins): all five pass.** copy = 1.000 on every
+field; null = 0.001 intensity, −0.359 vector; permutation floor 0.075 ± 0.110 intensity,
+−0.003 ± 0.056 vector; a dropped clip shows as missing=1 with α unchanged; a run with
+every moment at 00:00 is flagged `all_same_time` and scored. A0 also carries 16 clips
+with at least one unmappable vector string. `uv run python -m scripts.reliability.redteam`.
 
 ## 7. Cost and runtime
 

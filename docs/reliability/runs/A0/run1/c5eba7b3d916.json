@@ -1,0 +1,176 @@
+{
+ "clip_id": "c5eba7b3d916",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A night-time drive through a city, characterized by blurry traffic lights and occasional headlights, creating a dreamlike and slightly disorienting visual experience.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 2,
+    "atmosphere": "emptiness",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 3,
+    "atmosphere": "anticipation",
+    "vector": "approaching",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 4,
+    "atmosphere": "glimmering",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 5,
+    "atmosphere": "disorientation",
+    "vector": "swirling",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 5,
+    "atmosphere": "alertness",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 5,
+    "atmosphere": "alertness",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 5,
+    "atmosphere": "alertness",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 6,
+    "atmosphere": "vibrancy",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 7,
+    "atmosphere": "intensity",
+    "vector": "approaching",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 7,
+    "atmosphere": "intensity",
+    "vector": "approaching",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 8,
+    "atmosphere": "saturation",
+    "vector": "overwhelming",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 9,
+    "atmosphere": "radiance",
+    "vector": "blinding",
+    "captures": true
+   },
+   {
+    "time": "00:12",
+    "intensity": 3,
+    "atmosphere": "calm",
+    "vector": "receding",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 2,
+    "atmosphere": "stillness",
+    "vector": "static",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 2,
+    "atmosphere": "stillness",
+    "vector": "static",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 3,
+    "atmosphere": "ambiguity",
+    "vector": "approaching",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 4,
+    "atmosphere": "recognition",
+    "vector": "forward",
+    "captures": true
+   },
+   {
+    "time": "00:17",
+    "intensity": 5,
+    "atmosphere": "brightness",
+    "vector": "approaching",
+    "captures": false
+   },
+   {
+    "time": "00:18",
+    "intensity": 3,
+    "atmosphere": "emptiness",
+    "vector": "receding",
+    "captures": false
+   },
+   {
+    "time": "00:19",
+    "intensity": 4,
+    "atmosphere": "warning",
+    "vector": "approaching",
+    "captures": true
+   },
+   {
+    "time": "00:20",
+    "intensity": 4,
+    "atmosphere": "warning",
+    "vector": "approaching",
+    "captures": true
+   },
+   {
+    "time": "00:21",
+    "intensity": 5,
+    "atmosphere": "transition",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:22",
+    "intensity": 5,
+    "atmosphere": "transition",
+    "vector": "forward",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

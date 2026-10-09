@@ -1,0 +1,204 @@
+{
+ "clip_id": "4332b964783b",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A time-lapse of a sky filled with smoke and fire, transitioning from a bright, hazy day to a dark, ominous scene with fiery clouds, interspersed with shots of palm trees and buildings, and concluding with a close-up of debris in water.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 2,
+    "atmosphere": "Bright, hazy, slightly unsettling",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 3,
+    "atmosphere": "Increasingly hazy, a sense of unease",
+    "vector": "approaching",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 5,
+    "atmosphere": "Ominous, foreboding, charged",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 6,
+    "atmosphere": "Heavy, oppressive, tense",
+    "vector": "downward",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 8,
+    "atmosphere": "Alarming, chaotic, overwhelming",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 9,
+    "atmosphere": "Threatening, urgent, palpable danger",
+    "vector": "surrounding",
+    "captures": true
+   },
+   {
+    "time": "00:30",
+    "intensity": 10,
+    "atmosphere": "Devastating, all-consuming, primal fear",
+    "vector": "overwhelming",
+    "captures": true
+   },
+   {
+    "time": "00:35",
+    "intensity": 8,
+    "atmosphere": "Turbulent, disorienting, intense",
+    "vector": "chaotic",
+    "captures": false
+   },
+   {
+    "time": "00:40",
+    "intensity": 7,
+    "atmosphere": "Dark, obscured, sense of loss",
+    "vector": "receding",
+    "captures": false
+   },
+   {
+    "time": "00:45",
+    "intensity": 6,
+    "atmosphere": "Gloomy, uncertain, residual tension",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:50",
+    "intensity": 5,
+    "atmosphere": "Muted, hazy, distant threat",
+    "vector": "away",
+    "captures": false
+   },
+   {
+    "time": "00:55",
+    "intensity": 7,
+    "atmosphere": "Resurfacing unease, encroaching darkness",
+    "vector": "approaching",
+    "captures": false
+   },
+   {
+    "time": "01:00",
+    "intensity": 8,
+    "atmosphere": "Intensifying dread, oppressive presence",
+    "vector": "downward",
+    "captures": false
+   },
+   {
+    "time": "01:05",
+    "intensity": 9,
+    "atmosphere": "Violent, chaotic, overwhelming force",
+    "vector": "surrounding",
+    "captures": true
+   },
+   {
+    "time": "01:10",
+    "intensity": 10,
+    "atmosphere": "Catastrophic, primal, absolute",
+    "vector": "all-encompassing",
+    "captures": true
+   },
+   {
+    "time": "01:15",
+    "intensity": 4,
+    "atmosphere": "Submerged, still, debris-filled calm",
+    "vector": "static",
+    "captures": false
+   },
+   {
+    "time": "01:20",
+    "intensity": 5,
+    "atmosphere": "Murky, stagnant, unsettling stillness",
+    "vector": "static",
+    "captures": false
+   },
+   {
+    "time": "01:25",
+    "intensity": 3,
+    "atmosphere": "Fading, residual disturbance",
+    "vector": "receding",
+    "captures": false
+   },
+   {
+    "time": "01:30",
+    "intensity": 2,
+    "atmosphere": "Quiet, settled, a sense of aftermath",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "01:35",
+    "intensity": 3,
+    "atmosphere": "Returning normalcy, but with lingering haze",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "01:40",
+    "intensity": 5,
+    "atmosphere": "Hazy, obscured, a sense of unease returning",
+    "vector": "approaching",
+    "captures": false
+   },
+   {
+    "time": "01:45",
+    "intensity": 7,
+    "atmosphere": "Ominous, charged, foreboding sky",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "01:50",
+    "intensity": 8,
+    "atmosphere": "Intense, threatening, palpable danger",
+    "vector": "downward",
+    "captures": false
+   },
+   {
+    "time": "01:55",
+    "intensity": 9,
+    "atmosphere": "Alarming, chaotic, overwhelming",
+    "vector": "surrounding",
+    "captures": true
+   },
+   {
+    "time": "02:00",
+    "intensity": 10,
+    "atmosphere": "Devastating, all-consuming, primal fear",
+    "vector": "overwhelming",
+    "captures": true
+   },
+   {
+    "time": "02:05",
+    "intensity": 8,
+    "atmosphere": "Turbulent, disorienting, intense",
+    "vector": "chaotic",
+    "captures": false
+   },
+   {
+    "time": "02:10",
+    "intensity": 9,
+    "atmosphere": "Violent, chaotic, overwhelming force",
+    "vector": "surrounding",
+    "captures": true
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

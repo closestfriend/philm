@@ -1,0 +1,148 @@
+{
+ "clip_id": "3c7095570482",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A dark video showing abstract light patterns transitioning to a dimly lit, ornate structure illuminated by purple light.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 2,
+    "atmosphere": "faint disturbance",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 3,
+    "atmosphere": "flickering presence",
+    "vector": "oscillating",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 4,
+    "atmosphere": "growing unease",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 5,
+    "atmosphere": "unsettling focus",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 6,
+    "atmosphere": "pulsating anomaly",
+    "vector": "pulsing",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 7,
+    "atmosphere": "intense visual distortion",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 6,
+    "atmosphere": "receding disturbance",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 5,
+    "atmosphere": "lingering strangeness",
+    "vector": "static",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 4,
+    "atmosphere": "fading oddity",
+    "vector": "dissipating",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 3,
+    "atmosphere": "return to darkness",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 2,
+    "atmosphere": "residual trace",
+    "vector": "static",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 3,
+    "atmosphere": "hint of form",
+    "vector": "emerging",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 5,
+    "atmosphere": "unfamiliar glow",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 7,
+    "atmosphere": "eerie illumination",
+    "vector": "intensifying",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 8,
+    "atmosphere": "stark architectural presence",
+    "vector": "revealing",
+    "captures": true
+   },
+   {
+    "time": "00:15",
+    "intensity": 7,
+    "atmosphere": "haunting monumentality",
+    "vector": "stabilizing",
+    "captures": true
+   },
+   {
+    "time": "00:16",
+    "intensity": 6,
+    "atmosphere": "formal strangeness",
+    "vector": "static",
+    "captures": true
+   },
+   {
+    "time": "00:17",
+    "intensity": 5,
+    "atmosphere": "receding luminescence",
+    "vector": "contracting",
+    "captures": true
+   },
+   {
+    "time": "00:18",
+    "intensity": 4,
+    "atmosphere": "shadows returning",
+    "vector": "receding",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

@@ -1,0 +1,162 @@
+{
+ "clip_id": "2ab1a016ff37",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "This video displays a series of clips from a video game, featuring characters with exaggerated features and movements. The initial frames show a digital keyboard interface, followed by scenes of characters in a stylized, low-polygon environment. The characters exhibit distinct visual designs, including vibrant hair colors and elaborate outfits, engaging in what appears to be combat or dramatic poses.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 2,
+    "atmosphere": "neutrality",
+    "vector": "none",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 2,
+    "atmosphere": "neutrality",
+    "vector": "none",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 3,
+    "atmosphere": "anticipation",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 4,
+    "atmosphere": "curiosity",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 5,
+    "atmosphere": "engagement",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 6,
+    "atmosphere": "tension",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 7,
+    "atmosphere": "confrontation",
+    "vector": "diverging",
+    "captures": true
+   },
+   {
+    "time": "00:07",
+    "intensity": 7,
+    "atmosphere": "confrontation",
+    "vector": "diverging",
+    "captures": true
+   },
+   {
+    "time": "00:08",
+    "intensity": 6,
+    "atmosphere": "alertness",
+    "vector": "inward",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 5,
+    "atmosphere": "vigilance",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 4,
+    "atmosphere": "contemplation",
+    "vector": "inward",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 3,
+    "atmosphere": "calmness",
+    "vector": "none",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 3,
+    "atmosphere": "calmness",
+    "vector": "none",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 4,
+    "atmosphere": "readiness",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 5,
+    "atmosphere": "assessment",
+    "vector": "outward",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 5,
+    "atmosphere": "assessment",
+    "vector": "outward",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 6,
+    "atmosphere": "anticipation",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:17",
+    "intensity": 7,
+    "atmosphere": "potentiality",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:18",
+    "intensity": 8,
+    "atmosphere": "confrontation",
+    "vector": "diverging",
+    "captures": true
+   },
+   {
+    "time": "00:19",
+    "intensity": 8,
+    "atmosphere": "confrontation",
+    "vector": "diverging",
+    "captures": true
+   },
+   {
+    "time": "00:20",
+    "intensity": 7,
+    "atmosphere": "standoff",
+    "vector": "none",
+    "captures": true
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

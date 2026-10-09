@@ -1,0 +1,71 @@
+{
+ "clip_id": "09cc562d0f2c",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A blurry, abstract video showing lights reflected on a wet surface, possibly a window or a car windshield at night. The lights appear as bokeh or out-of-focus orbs, creating a dreamlike or melancholic atmosphere.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "a diffuse, low-level hum",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 5,
+    "atmosphere": "a subtle shimmer or vibration",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 6,
+    "atmosphere": "a pulsing, almost electric feeling",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 7,
+    "atmosphere": "a sudden bright flash, a jolt",
+    "vector": "upward",
+    "captures": true
+   },
+   {
+    "time": "00:20",
+    "intensity": 4,
+    "atmosphere": "a lingering echo, a trace of the previous intensity",
+    "vector": "dissipating",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 8,
+    "atmosphere": "a powerful, overwhelming surge of light and energy",
+    "vector": "forward",
+    "captures": true
+   },
+   {
+    "time": "00:30",
+    "intensity": 5,
+    "atmosphere": "a return to a more diffused, less intense state",
+    "vector": "receding",
+    "captures": false
+   },
+   {
+    "time": "00:35",
+    "intensity": 6,
+    "atmosphere": "a sense of distant illumination, a faint glow",
+    "vector": "outward",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

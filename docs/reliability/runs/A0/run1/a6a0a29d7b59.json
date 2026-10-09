@@ -1,0 +1,183 @@
+{
+ "clip_id": "a6a0a29d7b59",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "The video shows a car driving through a dimly lit, possibly wet, environment with bright lights from street lamps or headlights creating lens flares. The overall atmosphere is somewhat hazy and disorienting.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 8,
+    "atmosphere": "Overwhelming brightness, a piercing light",
+    "vector": "Expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 8,
+    "atmosphere": "Intense, almost blinding solar glare",
+    "vector": "Expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 7,
+    "atmosphere": "Sharp, radiant light piercing through foliage",
+    "vector": "Radiating",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 6,
+    "atmosphere": "Glimmering reflections on a dark surface, hint of movement",
+    "vector": "Flickering",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 5,
+    "atmosphere": "Muted light on a wet, textured ground, subtle atmospheric haze",
+    "vector": "Settling",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 6,
+    "atmosphere": "Sparkling particles in the air, diffused light",
+    "vector": "Suspended",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 6,
+    "atmosphere": "Shimmering light on a textured surface, a sense of being enveloped",
+    "vector": "Enveloping",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 5,
+    "atmosphere": "Fine particles catching the light, a soft diffusion",
+    "vector": "Diffusing",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 5,
+    "atmosphere": "Distant lights, a sense of depth and atmosphere",
+    "vector": "Receding",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 7,
+    "atmosphere": "Bright sun flare through leaves, strong visual impact",
+    "vector": "Piercing",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 8,
+    "atmosphere": "Intense light source, almost overwhelming",
+    "vector": "Overwhelming",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 7,
+    "atmosphere": "Sharp, bright light against dark foliage",
+    "vector": "Contrasting",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 5,
+    "atmosphere": "Hazy light, reflections on a wet surface, distant vehicles",
+    "vector": "Muted",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 4,
+    "atmosphere": "Soft glow from taillights, atmospheric haze",
+    "vector": "Fading",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 4,
+    "atmosphere": "Blurred lights, diffused atmosphere",
+    "vector": "Softening",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 4,
+    "atmosphere": "Low light, reflections on wet ground, sense of enclosure",
+    "vector": "Enclosing",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 7,
+    "atmosphere": "Sudden burst of bright light, sharp contrast",
+    "vector": "Explosive",
+    "captures": false
+   },
+   {
+    "time": "00:17",
+    "intensity": 7,
+    "atmosphere": "Intense light flare, almost blinding",
+    "vector": "Intensifying",
+    "captures": false
+   },
+   {
+    "time": "00:18",
+    "intensity": 7,
+    "atmosphere": "Bright light cutting through darkness and foliage",
+    "vector": "Penetrating",
+    "captures": false
+   },
+   {
+    "time": "00:19",
+    "intensity": 6,
+    "atmosphere": "Reflected light on car surface, a sense of wetness and glare",
+    "vector": "Glaring",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 6,
+    "atmosphere": "Intense reflections, atmospheric particles catching light",
+    "vector": "Sparkling",
+    "captures": false
+   },
+   {
+    "time": "00:21",
+    "intensity": 3,
+    "atmosphere": "Sudden darkness, a brief void",
+    "vector": "Contracting",
+    "captures": false
+   },
+   {
+    "time": "00:22",
+    "intensity": 2,
+    "atmosphere": "Deep shadow, absence of light",
+    "vector": "Absorbing",
+    "captures": false
+   },
+   {
+    "time": "00:23",
+    "intensity": 5,
+    "atmosphere": "Faint, diffused light, hints of color and reflection",
+    "vector": "Emerging",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

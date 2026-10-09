@@ -1,0 +1,330 @@
+{
+ "clip_id": "f34a6b9af8ed",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "The video shows a series of hazy, dreamlike images of palm trees and foliage, transitioning to dark, abstract shots with graffiti, and finally ending in blackness. The overall effect is one of obscured reality and a sense of unease.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 7,
+    "atmosphere": "Uncertainty, muffled presence",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 7,
+    "atmosphere": "Veiled potential, indistinctness",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 6,
+    "atmosphere": "Fading clarity, ambient haze",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 5,
+    "atmosphere": "Subdued presence, diffused light",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 6,
+    "atmosphere": "Emerging form, atmospheric pressure",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 7,
+    "atmosphere": "Dense atmosphere, obscured visibility",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 7,
+    "atmosphere": "Thickening presence, heavy air",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 6,
+    "atmosphere": "Shifting forms, dampness",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 6,
+    "atmosphere": "Subtle definition, diffuse light",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 6,
+    "atmosphere": "Gradual emergence, soft edges",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 5,
+    "atmosphere": "Muted tones, ambient softness",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 5,
+    "atmosphere": "Bright diffusion, fading detail",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 4,
+    "atmosphere": "Washed out, ethereal",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 4,
+    "atmosphere": "Faint outlines, atmospheric blur",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 6,
+    "atmosphere": "Re-emerging form, dense mist",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 6,
+    "atmosphere": "Thickening atmosphere, obscured ground",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 5,
+    "atmosphere": "Darkening forms, atmospheric dampness",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:17",
+    "intensity": 4,
+    "atmosphere": "Bright background, soft silhouettes",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:18",
+    "intensity": 4,
+    "atmosphere": "Fading light, hazy shapes",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:19",
+    "intensity": 3,
+    "atmosphere": "Minimal detail, pervasive blur",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 3,
+    "atmosphere": "Complete diffusion, absence of form",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:21",
+    "intensity": 5,
+    "atmosphere": "Emerging darkness, dense foliage",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:22",
+    "intensity": 5,
+    "atmosphere": "Shadowy forms, filtered light",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:23",
+    "intensity": 5,
+    "atmosphere": "Deepening shadows, atmospheric density",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:24",
+    "intensity": 6,
+    "atmosphere": "Intensifying darkness, obscured shapes",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 8,
+    "atmosphere": "Abrupt darkness, void",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:26",
+    "intensity": 7,
+    "atmosphere": "Deepening void, faint light",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:27",
+    "intensity": 5,
+    "atmosphere": "Returning light, emerging forms",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:28",
+    "intensity": 5,
+    "atmosphere": "Softened edges, atmospheric haze",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:29",
+    "intensity": 4,
+    "atmosphere": "Diffuse brightness, indistinct shapes",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:30",
+    "intensity": 4,
+    "atmosphere": "Fading light, subtle outlines",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:31",
+    "intensity": 4,
+    "atmosphere": "Ethereal glow, soft diffusion",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:32",
+    "intensity": 4,
+    "atmosphere": "Bright haze, indistinct forms",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:33",
+    "intensity": 5,
+    "atmosphere": "Deepening shadows, filtered light",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:34",
+    "intensity": 6,
+    "atmosphere": "Intensifying darkness, sharp contrasts",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:35",
+    "intensity": 8,
+    "atmosphere": "Sudden darkness, solid presence",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:36",
+    "intensity": 9,
+    "atmosphere": "Absolute darkness, void",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:37",
+    "intensity": 9,
+    "atmosphere": "Complete blackness, absence of sensation",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:38",
+    "intensity": 6,
+    "atmosphere": "Faint light, emerging shapes",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:39",
+    "intensity": 5,
+    "atmosphere": "Blurred forms, indistinct markings",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:40",
+    "intensity": 5,
+    "atmosphere": "Graffiti emerges, stark white on dark",
+    "vector": "expanding",
+    "captures": true
+   },
+   {
+    "time": "00:41",
+    "intensity": 5,
+    "atmosphere": "Graffiti symbols, visual texture",
+    "vector": "stable",
+    "captures": true
+   },
+   {
+    "time": "00:42",
+    "intensity": 5,
+    "atmosphere": "Graffiti details, rough surface",
+    "vector": "stable",
+    "captures": true
+   },
+   {
+    "time": "00:43",
+    "intensity": 4,
+    "atmosphere": "Ground details, debris",
+    "vector": "stable",
+    "captures": true
+   },
+   {
+    "time": "00:44",
+    "intensity": 5,
+    "atmosphere": "Graffiti focus, sharp lines",
+    "vector": "stable",
+    "captures": true
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

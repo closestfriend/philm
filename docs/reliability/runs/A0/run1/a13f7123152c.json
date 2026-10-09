@@ -1,0 +1,162 @@
+{
+ "clip_id": "a13f7123152c",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A dimly lit room with a window showing autumn leaves, transitioning to a person in pajamas.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "Dormant, expectant",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 4,
+    "atmosphere": "Subtle anticipation",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 5,
+    "atmosphere": "Emerging vibrancy",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 6,
+    "atmosphere": "Warm, inviting",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 7,
+    "atmosphere": "Rich, textured",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 7,
+    "atmosphere": "Visually stimulating",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 6,
+    "atmosphere": "Blurred richness",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 5,
+    "atmosphere": "Fading detail",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 5,
+    "atmosphere": "Geometric pattern dominant",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 5,
+    "atmosphere": "Re-emerging color",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 6,
+    "atmosphere": "Warmth returns",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 6,
+    "atmosphere": "Fuller view",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 5,
+    "atmosphere": "Receding vibrancy",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 4,
+    "atmosphere": "Quietude, enclosure",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 3,
+    "atmosphere": "Stillness, potential",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 4,
+    "atmosphere": "Subtle presence",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 5,
+    "atmosphere": "Emerging form",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:17",
+    "intensity": 6,
+    "atmosphere": "Gentle movement",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:18",
+    "intensity": 5,
+    "atmosphere": "Broadening space",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:19",
+    "intensity": 5,
+    "atmosphere": "Room's character revealed",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 4,
+    "atmosphere": "Calm observation",
+    "vector": "contracting",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

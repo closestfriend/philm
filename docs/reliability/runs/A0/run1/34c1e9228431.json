@@ -1,0 +1,78 @@
+{
+ "clip_id": "34c1e9228431",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A nighttime car chase through a tunnel, featuring multiple sports cars with bright headlights and taillights.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 7,
+    "atmosphere": "Urgency, a sense of being on the edge of something.",
+    "vector": "forward, expanding",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 8,
+    "atmosphere": "Heightened alertness, a thrumming anticipation.",
+    "vector": "forward, accelerating",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 7,
+    "atmosphere": "Sudden awareness, a jolt of presence.",
+    "vector": "sideways, then forward",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 6,
+    "atmosphere": "A brief moment of observation, a pause in the momentum.",
+    "vector": "observational, then forward",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 8,
+    "atmosphere": "Immersion in speed, a tunnel of light and motion.",
+    "vector": "forward, enveloping",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 9,
+    "atmosphere": "Intense focus, a blurring of boundaries.",
+    "vector": "forward, overwhelming",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 8,
+    "atmosphere": "The brilliance of the lights, a sensory overload.",
+    "vector": "forward, dazzling",
+    "captures": false
+   },
+   {
+    "time": "00:19",
+    "intensity": 7,
+    "atmosphere": "A sense of being carried by the flow, yet maintaining individual trajectory.",
+    "vector": "forward, parallel",
+    "captures": false
+   },
+   {
+    "time": "00:22",
+    "intensity": 6,
+    "atmosphere": "A receding intensity, the tunnel's end approaching.",
+    "vector": "forward, diminishing",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}
