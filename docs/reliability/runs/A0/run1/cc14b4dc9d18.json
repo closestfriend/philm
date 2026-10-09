@@ -1,0 +1,113 @@
+{
+ "clip_id": "cc14b4dc9d18",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A video montage featuring abstract, flickering orange and red lights against a dark background, evoking a sense of fire or intense energy.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 7,
+    "atmosphere": "Flickering, pulsing warmth",
+    "vector": "Expanding and contracting",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 6,
+    "atmosphere": "Distant glow, subtle unease",
+    "vector": "Slightly contracting",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 8,
+    "atmosphere": "Intensifying warmth, almost urgent",
+    "vector": "Pulsing outward",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 5,
+    "atmosphere": "Fading embers, lingering warmth",
+    "vector": "Contracting slowly",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 7,
+    "atmosphere": "Resurfacing glow, gentle movement",
+    "vector": "Expanding and contracting",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 6,
+    "atmosphere": "Steady, soft light",
+    "vector": "Slightly expanding",
+    "captures": false
+   },
+   {
+    "time": "00:30",
+    "intensity": 8,
+    "atmosphere": "Vibrant, energetic pulse",
+    "vector": "Rapidly expanding and contracting",
+    "captures": false
+   },
+   {
+    "time": "00:35",
+    "intensity": 4,
+    "atmosphere": "Dimming, a sense of fading",
+    "vector": "Contracting",
+    "captures": false
+   },
+   {
+    "time": "00:40",
+    "intensity": 7,
+    "atmosphere": "Re-emerging warmth, a subtle dance",
+    "vector": "Gentle pulsing",
+    "captures": false
+   },
+   {
+    "time": "00:45",
+    "intensity": 6,
+    "atmosphere": "Consistent glow, serene presence",
+    "vector": "Slightly expanding",
+    "captures": false
+   },
+   {
+    "time": "00:50",
+    "intensity": 8,
+    "atmosphere": "Active, lively flicker",
+    "vector": "Expanding and contracting with vigor",
+    "captures": false
+   },
+   {
+    "time": "00:55",
+    "intensity": 7,
+    "atmosphere": "Warmth recedes slightly, a soft hum",
+    "vector": "Contracting slowly",
+    "captures": false
+   },
+   {
+    "time": "01:00",
+    "intensity": 5,
+    "atmosphere": "Faint glow, a sense of quietude",
+    "vector": "Contracting",
+    "captures": false
+   },
+   {
+    "time": "01:02",
+    "intensity": 6,
+    "atmosphere": "Lingering warmth, subtle diffusion",
+    "vector": "Expanding gently",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

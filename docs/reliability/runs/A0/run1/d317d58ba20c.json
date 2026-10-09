@@ -1,0 +1,141 @@
+{
+ "clip_id": "d317d58ba20c",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A close-up, low-angle shot follows a person walking through puddles and fallen leaves, with the camera focusing on their shoes and the reflections in the water. The scene transitions to a focus on wet foliage, with soft, out-of-focus greenery and branches.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 4,
+    "atmosphere": "unsettling, disorienting",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 3,
+    "atmosphere": "damp, murky",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 5,
+    "atmosphere": "ominous, approaching",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 6,
+    "atmosphere": "visceral, sinking",
+    "vector": "downward",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 7,
+    "atmosphere": "impactful, wet",
+    "vector": "downward",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 5,
+    "atmosphere": "resilient, pushing through",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:30",
+    "intensity": 4,
+    "atmosphere": "transitional, fluid",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:35",
+    "intensity": 5,
+    "atmosphere": "percussive, splashing",
+    "vector": "downward",
+    "captures": false
+   },
+   {
+    "time": "00:40",
+    "intensity": 6,
+    "atmosphere": "immersive, enveloping",
+    "vector": "around",
+    "captures": false
+   },
+   {
+    "time": "00:45",
+    "intensity": 5,
+    "atmosphere": "grounded, contact",
+    "vector": "downward",
+    "captures": false
+   },
+   {
+    "time": "00:50",
+    "intensity": 4,
+    "atmosphere": "scattered, disturbed",
+    "vector": "outward",
+    "captures": false
+   },
+   {
+    "time": "00:55",
+    "intensity": 3,
+    "atmosphere": "natural, organic",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "01:00",
+    "intensity": 2,
+    "atmosphere": "calm, verdant",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "01:05",
+    "intensity": 3,
+    "atmosphere": "growing, vibrant",
+    "vector": "upward",
+    "captures": false
+   },
+   {
+    "time": "01:10",
+    "intensity": 4,
+    "atmosphere": "detailed, textured",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "01:15",
+    "intensity": 5,
+    "atmosphere": "lush, dense",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "01:20",
+    "intensity": 4,
+    "atmosphere": "entangled, complex",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "01:25",
+    "intensity": 3,
+    "atmosphere": "soft, diffused",
+    "vector": "neutral",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

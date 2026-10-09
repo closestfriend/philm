@@ -1,0 +1,57 @@
+{
+ "clip_id": "a031e300db71",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "The video begins with complete darkness, gradually revealing abstract, hazy forms illuminated by warm, shifting light. The visuals are indistinct and atmospheric, creating a sense of mystery and ambiguity.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 1,
+    "atmosphere": "void, absence",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 2,
+    "atmosphere": "nascent presence, faint stirring",
+    "vector": "emerging",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 4,
+    "atmosphere": "warmth, haziness",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 7,
+    "atmosphere": "radiant, enveloping",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 8,
+    "atmosphere": "intense glow, luminous",
+    "vector": "pulsing",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 6,
+    "atmosphere": "diffuse warmth, fading intensity",
+    "vector": "contracting",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

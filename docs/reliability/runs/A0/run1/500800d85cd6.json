@@ -1,0 +1,211 @@
+{
+ "clip_id": "500800d85cd6",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A blurry, low-resolution video showing train tracks and a dilapidated platform, with occasional glimpses of greenery and debris. The overall aesthetic is one of decay and neglect.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "a low hum of disquiet, a sense of grimy stillness",
+    "vector": "neutral, slightly contracting",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 3,
+    "atmosphere": "the same low hum, a feeling of industrial decay",
+    "vector": "neutral, slightly contracting",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 4,
+    "atmosphere": "a subtle shift towards unease, a feeling of neglect",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 4,
+    "atmosphere": "the unease persists, a sense of overlooked decay",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 4,
+    "atmosphere": "a slight quickening, a feeling of the mundane becoming noticeable",
+    "vector": "neutral, slight expansion",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 4,
+    "atmosphere": "the mundane feeling continues, a sense of the overlooked",
+    "vector": "neutral, slight expansion",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 5,
+    "atmosphere": "a flicker of surprise, a slight jolt at the unexpected detail",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 3,
+    "atmosphere": "return to a low-level disquiet, the jolt subsides",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 3,
+    "atmosphere": "a dull sense of the industrial landscape",
+    "vector": "neutral, contracting",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 3,
+    "atmosphere": "the dullness continues, a feeling of weathered surfaces",
+    "vector": "neutral, contracting",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 4,
+    "atmosphere": "a subtle shift towards a more organic presence, a hint of life",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 5,
+    "atmosphere": "a gentle emergence, a feeling of resilience in the decay",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 5,
+    "atmosphere": "the resilience becomes more apparent, a quiet persistence",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 5,
+    "atmosphere": "the persistence of life against the odds, a subtle hope",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 5,
+    "atmosphere": "the contrast between life and decay is highlighted",
+    "vector": "neutral, expanding",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 5,
+    "atmosphere": "the quiet persistence continues, a steady presence",
+    "vector": "neutral, expanding",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 5,
+    "atmosphere": "the feeling of resilience is sustained",
+    "vector": "neutral, expanding",
+    "captures": false
+   },
+   {
+    "time": "00:17",
+    "intensity": 4,
+    "atmosphere": "a slight receding of the focus on life, back to the environment",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:18",
+    "intensity": 2,
+    "atmosphere": "a blankness, a void of sensory input",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:19",
+    "intensity": 1,
+    "atmosphere": "complete darkness, absence of affect",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 2,
+    "atmosphere": "a return of faint light, a sense of emerging from nothing",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:21",
+    "intensity": 3,
+    "atmosphere": "a low-level hum of the industrial setting returns",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:22",
+    "intensity": 4,
+    "atmosphere": "a subtle shift towards the platform, a sense of arrival or waiting",
+    "vector": "neutral, slight expansion",
+    "captures": false
+   },
+   {
+    "time": "00:23",
+    "intensity": 4,
+    "atmosphere": "the feeling of the platform solidifies, a sense of place",
+    "vector": "neutral, slight expansion",
+    "captures": false
+   },
+   {
+    "time": "00:24",
+    "intensity": 5,
+    "atmosphere": "a sense of anticipation, the potential of movement or interaction",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 5,
+    "atmosphere": "the anticipation builds, a feeling of potential energy",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:26",
+    "intensity": 4,
+    "atmosphere": "a slight receding from the platform, back to the tracks",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:27",
+    "intensity": 3,
+    "atmosphere": "a return to the low-level disquiet of the tracks",
+    "vector": "contracting",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

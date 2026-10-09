@@ -1,0 +1,176 @@
+{
+ "clip_id": "96448de6c49e",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A dark aerial view of city lights at night, with some areas appearing more densely lit than others, and a hazy glow obscuring parts of the landscape.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "Distant hum, a faint glow on the horizon.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 4,
+    "atmosphere": "The glow sharpens slightly, a subtle warmth.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 3,
+    "atmosphere": "A return to the diffuse, distant quality.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 5,
+    "atmosphere": "A brighter flare of orange light appears, a momentary intensity.",
+    "vector": "expanding",
+    "captures": true
+   },
+   {
+    "time": "00:04",
+    "intensity": 4,
+    "atmosphere": "The flare subsides, leaving a trace of warmth.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 4,
+    "atmosphere": "A subtle shimmer, like heat haze, begins to form.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 5,
+    "atmosphere": "The haze thickens, obscuring the lights, a sense of veiled presence.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 6,
+    "atmosphere": "A more pronounced atmospheric disturbance, a swirling effect.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 5,
+    "atmosphere": "The disturbance begins to dissipate, the lights re-emerging.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 7,
+    "atmosphere": "A strong pulse of orange light, a fleeting intensity that feels significant.",
+    "vector": "expanding",
+    "captures": true
+   },
+   {
+    "time": "00:10",
+    "intensity": 5,
+    "atmosphere": "The intensity recedes, leaving a lingering warmth and a sense of wonder.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 4,
+    "atmosphere": "The city lights appear more scattered, a diffuse pattern.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 4,
+    "atmosphere": "A faint glow on the right edge, a subtle pull.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 3,
+    "atmosphere": "The overall light level decreases, a sense of receding.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 2,
+    "atmosphere": "Deepening darkness, a quietude.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 3,
+    "atmosphere": "A few isolated lights become visible, a sparse presence.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 3,
+    "atmosphere": "A steady, low-level luminescence.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:17",
+    "intensity": 4,
+    "atmosphere": "A slight increase in the density of lights, a subtle gathering.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:18",
+    "intensity": 4,
+    "atmosphere": "A diffuse glow, a sense of being enveloped.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:19",
+    "intensity": 5,
+    "atmosphere": "A subtle shift in the atmospheric haze, a transient disturbance.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 4,
+    "atmosphere": "The haze begins to thin, the lights become clearer.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:21",
+    "intensity": 5,
+    "atmosphere": "A return of the hazy atmospheric effect, a soft diffusion.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:22",
+    "intensity": 4,
+    "atmosphere": "The haze is present but less intense, a gentle veil.",
+    "vector": "contracting",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

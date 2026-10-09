@@ -1,0 +1,120 @@
+{
+ "clip_id": "e3050cac1ff6",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A video of the moon at night, with lens flares and light pollution creating a surreal and distorted visual experience.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 2,
+    "atmosphere": "calm, still, expectant",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 3,
+    "atmosphere": "faint glimmer, distant presence",
+    "vector": "approaching",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 4,
+    "atmosphere": "sharp point of light, growing clarity",
+    "vector": "approaching",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 5,
+    "atmosphere": "defined disc, subtle texture",
+    "vector": "stable",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 6,
+    "atmosphere": "luminous, ethereal, slightly hazy",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 7,
+    "atmosphere": "radiant, glowing, soft focus",
+    "vector": "emanating",
+    "captures": false
+   },
+   {
+    "time": "00:30",
+    "intensity": 8,
+    "atmosphere": "intense luminescence, lens flare effects",
+    "vector": "intensifying",
+    "captures": false
+   },
+   {
+    "time": "00:35",
+    "intensity": 9,
+    "atmosphere": "overwhelming brightness, almost blinding",
+    "vector": "overwhelming",
+    "captures": false
+   },
+   {
+    "time": "00:40",
+    "intensity": 8,
+    "atmosphere": "receding brightness, diffused light",
+    "vector": "receding",
+    "captures": false
+   },
+   {
+    "time": "00:45",
+    "intensity": 7,
+    "atmosphere": "soft glow, veiled light",
+    "vector": "softening",
+    "captures": false
+   },
+   {
+    "time": "00:50",
+    "intensity": 6,
+    "atmosphere": "gentle luminosity, diffused presence",
+    "vector": "calming",
+    "captures": false
+   },
+   {
+    "time": "00:55",
+    "intensity": 5,
+    "atmosphere": "palpable presence, clear outline",
+    "vector": "stabilizing",
+    "captures": false
+   },
+   {
+    "time": "01:00",
+    "intensity": 4,
+    "atmosphere": "clear, distinct, quiet",
+    "vector": "settling",
+    "captures": false
+   },
+   {
+    "time": "01:05",
+    "intensity": 3,
+    "atmosphere": "fading light, returning to distance",
+    "vector": "departing",
+    "captures": false
+   },
+   {
+    "time": "01:10",
+    "intensity": 2,
+    "atmosphere": "barely perceptible, returning to darkness",
+    "vector": "receding",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

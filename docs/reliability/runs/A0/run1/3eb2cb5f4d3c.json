@@ -1,0 +1,99 @@
+{
+ "clip_id": "3eb2cb5f4d3c",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "The video displays a close-up of a computer screen showing multiple-choice questions, likely from an online quiz or test. The questions pertain to logic and philosophy, specifically discussing sentience and suffering in machines. The user's cursor is visible, indicating interaction with the interface, and a blue checkmark highlights a selected answer.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 2,
+    "atmosphere": "neutral, observational",
+    "vector": "stable",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 3,
+    "atmosphere": "mild curiosity, analytical",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 4,
+    "atmosphere": "focused inquiry, slight tension",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 5,
+    "atmosphere": "heightened focus, critical evaluation",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 6,
+    "atmosphere": "decision point, mild pressure",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 7,
+    "atmosphere": "commitment, slight relief",
+    "vector": "downward",
+    "captures": true
+   },
+   {
+    "time": "00:06",
+    "intensity": 6,
+    "atmosphere": "confirmation, settling",
+    "vector": "stable",
+    "captures": true
+   },
+   {
+    "time": "00:07",
+    "intensity": 5,
+    "atmosphere": "residue of decision, mild clarity",
+    "vector": "stable",
+    "captures": true
+   },
+   {
+    "time": "00:08",
+    "intensity": 4,
+    "atmosphere": "fading engagement, observation",
+    "vector": "stable",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 5,
+    "atmosphere": "re-engagement, analytical",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 6,
+    "atmosphere": "renewed focus, consideration",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 7,
+    "atmosphere": "decision made, certainty",
+    "vector": "downward",
+    "captures": true
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

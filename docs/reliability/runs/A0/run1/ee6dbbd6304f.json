@@ -1,0 +1,85 @@
+{
+ "clip_id": "ee6dbbd6304f",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A first-person perspective video of a motorcycle rider navigating a highway at night, passing other vehicles and underpasses. The video captures the road, streetlights, and the dashboard of the motorcycle.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 5,
+    "atmosphere": "anticipation",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 6,
+    "atmosphere": "alertness",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 7,
+    "atmosphere": "momentum",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:30",
+    "intensity": 8,
+    "atmosphere": "exhilaration",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:40",
+    "intensity": 9,
+    "atmosphere": "intensity",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:50",
+    "intensity": 8,
+    "atmosphere": "focus",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "01:00",
+    "intensity": 7,
+    "atmosphere": "flow",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "01:10",
+    "intensity": 6,
+    "atmosphere": "steadiness",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "01:20",
+    "intensity": 5,
+    "atmosphere": "calm",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "01:30",
+    "intensity": 4,
+    "atmosphere": "ease",
+    "vector": "forward",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

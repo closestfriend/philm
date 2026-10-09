@@ -1,0 +1,162 @@
+{
+ "clip_id": "99ded657c0dd",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "The video shows a view from an airplane window, looking out at clouds and a landscape below. The wing of the plane is visible, and the footage is somewhat shaky.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "Anticipation, slight unease",
+    "vector": "forward, downward",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 4,
+    "atmosphere": "Vulnerability, exposure",
+    "vector": "downward, expanding",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 5,
+    "atmosphere": "Envelopment, slight claustrophobia",
+    "vector": "enveloping, contracting",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 6,
+    "atmosphere": "Immersion, loss of clear perspective",
+    "vector": "inward, dissolving",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 5,
+    "atmosphere": "Re-emergence, slight relief",
+    "vector": "outward, emerging",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 4,
+    "atmosphere": "Openness, continued movement",
+    "vector": "forward, steady",
+    "captures": false
+   },
+   {
+    "time": "00:30",
+    "intensity": 5,
+    "atmosphere": "Neutrality, passage",
+    "vector": "forward, consistent",
+    "captures": false
+   },
+   {
+    "time": "00:35",
+    "intensity": 6,
+    "atmosphere": "Increased density, slight somberness",
+    "vector": "enveloping, deepening",
+    "captures": false
+   },
+   {
+    "time": "00:40",
+    "intensity": 7,
+    "atmosphere": "Weightiness, muted apprehension",
+    "vector": "downward pressure, thickening",
+    "captures": false
+   },
+   {
+    "time": "00:45",
+    "intensity": 6,
+    "atmosphere": "Resignation, a sense of being carried",
+    "vector": "passive, onward",
+    "captures": false
+   },
+   {
+    "time": "00:50",
+    "intensity": 5,
+    "atmosphere": "Fading clarity, gentle drift",
+    "vector": "dissolving, receding",
+    "captures": false
+   },
+   {
+    "time": "00:55",
+    "intensity": 4,
+    "atmosphere": "Calm, steady descent",
+    "vector": "downward, smooth",
+    "captures": false
+   },
+   {
+    "time": "01:00",
+    "intensity": 3,
+    "atmosphere": "Quiet observation, detachment",
+    "vector": "observational, steady",
+    "captures": false
+   },
+   {
+    "time": "01:05",
+    "intensity": 4,
+    "atmosphere": "Subtle shift, a hint of change",
+    "vector": "slight tilt, forward",
+    "captures": false
+   },
+   {
+    "time": "01:10",
+    "intensity": 5,
+    "atmosphere": "Increased visual texture, subtle unease",
+    "vector": "expanding visual field, contracting inner space",
+    "captures": false
+   },
+   {
+    "time": "01:15",
+    "intensity": 6,
+    "atmosphere": "Overwhelming sameness, a sense of being lost",
+    "vector": "enveloping, static",
+    "captures": false
+   },
+   {
+    "time": "01:20",
+    "intensity": 5,
+    "atmosphere": "Return of form, a slight lifting",
+    "vector": "emerging, upward potential",
+    "captures": false
+   },
+   {
+    "time": "01:25",
+    "intensity": 4,
+    "atmosphere": "Familiarity, continued passage",
+    "vector": "forward, stable",
+    "captures": false
+   },
+   {
+    "time": "01:30",
+    "intensity": 3,
+    "atmosphere": "Acceptance, gentle glide",
+    "vector": "smooth, downward",
+    "captures": false
+   },
+   {
+    "time": "01:35",
+    "intensity": 2,
+    "atmosphere": "Quietude, nearing destination",
+    "vector": "approaching, settling",
+    "captures": false
+   },
+   {
+    "time": "01:38",
+    "intensity": 1,
+    "atmosphere": "Stillness, resolution",
+    "vector": "final, grounded",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

@@ -1,0 +1,99 @@
+{
+ "clip_id": "15b4d353f59a",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A first-person perspective video walking down a city street at night, passing by shops with illuminated signs and graffiti.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 5,
+    "atmosphere": "a general sense of urban movement and ambient light",
+    "vector": "forward, neutral",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 4,
+    "atmosphere": "the texture of the pavement underfoot, a grounding sensation",
+    "vector": "downward, neutral",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 6,
+    "atmosphere": "a slight quickening with the appearance of distant lights",
+    "vector": "forward, approaching",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 7,
+    "atmosphere": "a sharper focus on the immediate self (footstep), a sense of progression",
+    "vector": "forward, self-oriented",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 8,
+    "atmosphere": "the vibrant, almost overwhelming glow of shop windows, a sensory immersion",
+    "vector": "outward, expansive",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 6,
+    "atmosphere": "a shift to a more shadowed, perhaps slightly mysterious alleyway",
+    "vector": "inward, contracting",
+    "captures": false
+   },
+   {
+    "time": "00:19",
+    "intensity": 5,
+    "atmosphere": "a return to the feeling of walking, the rhythm of movement",
+    "vector": "forward, neutral",
+    "captures": false
+   },
+   {
+    "time": "00:23",
+    "intensity": 7,
+    "atmosphere": "the hypnotic quality of continuous light streaks, a sense of speed",
+    "vector": "forward, accelerating",
+    "captures": false
+   },
+   {
+    "time": "00:27",
+    "intensity": 6,
+    "atmosphere": "a subtle grounding again, the feel of the pavement, but with the lingering visual hum",
+    "vector": "downward, neutral with lingering forward",
+    "captures": false
+   },
+   {
+    "time": "00:31",
+    "intensity": 8,
+    "atmosphere": "a sudden, intense immersion in bright, artificial blue light, a luminous wash",
+    "vector": "upward, enveloping",
+    "captures": false
+   },
+   {
+    "time": "00:35",
+    "intensity": 9,
+    "atmosphere": "the pure intensity of the blue light, a near-blinding luminescence, a threshold of perception",
+    "vector": "upward, overwhelming",
+    "captures": true
+   },
+   {
+    "time": "00:41",
+    "intensity": 7,
+    "atmosphere": "a slight disorientation as the intense light recedes, a return to a more normal visual field",
+    "vector": "outward, receding",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

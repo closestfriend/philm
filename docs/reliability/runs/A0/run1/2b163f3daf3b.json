@@ -1,0 +1,211 @@
+{
+ "clip_id": "2b163f3daf3b",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A serene garden scene featuring blooming tulips and a koi pond, with a robotic cleaner operating in the water.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 7,
+    "atmosphere": "Vibrant, lush, blooming",
+    "vector": "Expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 7,
+    "atmosphere": "Gentle sway, soft light",
+    "vector": "Slightly contracting and expanding",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 6,
+    "atmosphere": "Stillness, delicate petals",
+    "vector": "Neutral, contained",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 7,
+    "atmosphere": "Warmth, gentle breeze",
+    "vector": "Expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 6,
+    "atmosphere": "Shifting focus, dappled light",
+    "vector": "Slightly contracting",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 5,
+    "atmosphere": "Submerged, watery, muted",
+    "vector": "Contracting inward",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 6,
+    "atmosphere": "Flowing movement, calm depths",
+    "vector": "Flowing, horizontal",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 5,
+    "atmosphere": "Drifting, quiet currents",
+    "vector": "Slightly expanding",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 7,
+    "atmosphere": "Bright, almost ethereal light",
+    "vector": "Expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 7,
+    "atmosphere": "Soft focus, luminous petals",
+    "vector": "Expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 7,
+    "atmosphere": "Gentle undulation, soft colors",
+    "vector": "Slightly contracting and expanding",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 6,
+    "atmosphere": "Dark background, illuminated flowers",
+    "vector": "Neutral, contained",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 4,
+    "atmosphere": "Structured, architectural, shadowed",
+    "vector": "Contracting inward",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 3,
+    "atmosphere": "Stillness, man-made elements",
+    "vector": "Neutral, contained",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 4,
+    "atmosphere": "Geometric patterns, subtle light",
+    "vector": "Slightly contracting",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 5,
+    "atmosphere": "Natural textures, organic forms",
+    "vector": "Expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 6,
+    "atmosphere": "Return to softer focus, floral",
+    "vector": "Expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:17",
+    "intensity": 6,
+    "atmosphere": "Gentle movement, water surface",
+    "vector": "Slightly contracting and expanding",
+    "captures": false
+   },
+   {
+    "time": "00:18",
+    "intensity": 5,
+    "atmosphere": "Submerged life, flowing",
+    "vector": "Flowing, horizontal",
+    "captures": false
+   },
+   {
+    "time": "00:19",
+    "intensity": 6,
+    "atmosphere": "Active movement within water",
+    "vector": "Flowing, dynamic",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 7,
+    "atmosphere": "Intriguing object, water disturbance",
+    "vector": "Expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:21",
+    "intensity": 6,
+    "atmosphere": "Fish schooling, fluid motion",
+    "vector": "Flowing, collective",
+    "captures": false
+   },
+   {
+    "time": "00:22",
+    "intensity": 5,
+    "atmosphere": "Subtle ripples, light refraction",
+    "vector": "Slightly contracting",
+    "captures": false
+   },
+   {
+    "time": "00:23",
+    "intensity": 4,
+    "atmosphere": "Calm, clear water, fish movement",
+    "vector": "Flowing, gentle",
+    "captures": false
+   },
+   {
+    "time": "00:24",
+    "intensity": 7,
+    "atmosphere": "Intense light, bright bloom",
+    "vector": "Expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 7,
+    "atmosphere": "Luminous petals, soft edges",
+    "vector": "Expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:26",
+    "intensity": 6,
+    "atmosphere": "Delicate form, soft focus",
+    "vector": "Slightly contracting",
+    "captures": false
+   },
+   {
+    "time": "00:27",
+    "intensity": 6,
+    "atmosphere": "Gentle sway, dark background",
+    "vector": "Slightly contracting and expanding",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

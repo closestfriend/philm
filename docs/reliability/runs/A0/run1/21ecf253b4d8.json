@@ -1,0 +1,85 @@
+{
+ "clip_id": "21ecf253b4d8",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A first-person perspective video of driving a car at night through a city, with a focus on the dashboard and the road ahead. The dashboard lights and the car's infotainment system are prominently displayed.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "Low hum, steady rhythm",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 4,
+    "atmosphere": "Gentle forward momentum, ambient city glow",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 5,
+    "atmosphere": "Slight quickening, anticipation of movement",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 6,
+    "atmosphere": "Steady drive, awareness of surroundings",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 5,
+    "atmosphere": "Calm control, rhythmic passing of lights",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 6,
+    "atmosphere": "Smooth progress, subtle shifts in light",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:30",
+    "intensity": 7,
+    "atmosphere": "Sustained motion, a sense of journey",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:35",
+    "intensity": 6,
+    "atmosphere": "Consistent speed, urban environment unfolding",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:40",
+    "intensity": 5,
+    "atmosphere": "Maintaining pace, visual flow",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:45",
+    "intensity": 6,
+    "atmosphere": "Steady onward movement, ambient city ambiance",
+    "vector": "forward",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

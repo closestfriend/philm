@@ -1,0 +1,106 @@
+{
+ "clip_id": "3344f7e95f55",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A blurry, dark video showing car headlights and streetlights at night, possibly through a rain-streaked window.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "A low hum of ambient light, a sense of being in motion.",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 4,
+    "atmosphere": "A brighter, more focused light appears, creating a slight jolt.",
+    "vector": "toward",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 3,
+    "atmosphere": "The intensity subsides, returning to a more diffused sense of movement.",
+    "vector": "away",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 5,
+    "atmosphere": "A sudden, strong burst of light, almost overwhelming.",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 4,
+    "atmosphere": "The light recedes, leaving a lingering brightness.",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 3,
+    "atmosphere": "A return to a more consistent, low-level ambient light.",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 2,
+    "atmosphere": "A subtle shift, a hint of distant lights.",
+    "vector": "subtle-movement",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 3,
+    "atmosphere": "The darkness deepens, with only faint glimmers.",
+    "vector": "receding",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 4,
+    "atmosphere": "A cluster of lights appears, suggesting proximity.",
+    "vector": "approaching",
+    "captures": false
+   },
+   {
+    "time": "00:18",
+    "intensity": 3,
+    "atmosphere": "The lights become more diffuse, losing their sharp definition.",
+    "vector": "diffusing",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 2,
+    "atmosphere": "A sense of fading, the lights becoming less distinct.",
+    "vector": "fading",
+    "captures": false
+   },
+   {
+    "time": "00:22",
+    "intensity": 1,
+    "atmosphere": "Near complete darkness, a sense of stillness.",
+    "vector": "stillness",
+    "captures": false
+   },
+   {
+    "time": "00:24",
+    "intensity": 3,
+    "atmosphere": "A faint resurgence of light, a hint of form in the darkness.",
+    "vector": "emerging",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

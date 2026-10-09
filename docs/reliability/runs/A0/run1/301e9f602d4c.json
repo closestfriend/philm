@@ -1,0 +1,99 @@
+{
+ "clip_id": "301e9f602d4c",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A video showing people walking on a city street with tall buildings in the background. The camera focuses on the feet of the walkers and then pans up to the cityscape.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "Neutral, observational, a sense of moving through space.",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 4,
+    "atmosphere": "Slightly intriguing, a hint of the urban bustle.",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 5,
+    "atmosphere": "Rhythmic, grounded, the steady pace of walking.",
+    "vector": "downward-forward",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 4,
+    "atmosphere": "Awareness of surroundings, a slight increase in sensory input.",
+    "vector": "outward",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 5,
+    "atmosphere": "Flowing, unimpeded movement through the urban landscape.",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:18",
+    "intensity": 6,
+    "atmosphere": "Sudden visual interest, a shift in focus to an object on the ground.",
+    "vector": "downward",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 5,
+    "atmosphere": "Transitioning back to forward motion, re-engaging with the path.",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:22",
+    "intensity": 6,
+    "atmosphere": "Broadening perspective, taking in the scale of the city.",
+    "vector": "upward-outward",
+    "captures": false
+   },
+   {
+    "time": "00:26",
+    "intensity": 7,
+    "atmosphere": "Awe-inspiring, the imposing presence of tall buildings.",
+    "vector": "upward",
+    "captures": false
+   },
+   {
+    "time": "00:30",
+    "intensity": 6,
+    "atmosphere": "Sense of being within a grand structure, the city as a monumental entity.",
+    "vector": "enveloping",
+    "captures": false
+   },
+   {
+    "time": "00:35",
+    "intensity": 5,
+    "atmosphere": "Return to immediate surroundings, a slight sensory overload from reflections.",
+    "vector": "outward",
+    "captures": false
+   },
+   {
+    "time": "00:38",
+    "intensity": 4,
+    "atmosphere": "Concluding movement, a sense of arrival or continuation.",
+    "vector": "forward",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

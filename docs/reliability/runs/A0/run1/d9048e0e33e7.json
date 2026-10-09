@@ -1,0 +1,57 @@
+{
+ "clip_id": "d9048e0e33e7",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A series of shots capturing a sunset over an urban landscape, with cars visible on a road.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 4,
+    "atmosphere": "anticipatory quiet",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 5,
+    "atmosphere": "gathering stillness",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 6,
+    "atmosphere": "hush of twilight",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 7,
+    "atmosphere": "deepening calm",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 8,
+    "atmosphere": "expansive peace",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 9,
+    "atmosphere": "serene immersion",
+    "vector": "expanding",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

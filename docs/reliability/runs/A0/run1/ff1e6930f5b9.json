@@ -1,0 +1,106 @@
+{
+ "clip_id": "ff1e6930f5b9",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A video showing dust motes floating in the air, transitioning between abstract light patterns and glimpses of an interior space with wooden flooring and furniture. The latter part of the video shows a patterned rug and a person's feet walking on it.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "diffuse, shimmering, uncertain",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 4,
+    "atmosphere": "wavering, indistinct, potential",
+    "vector": "fluctuating",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 2,
+    "atmosphere": "calm, steady, ambient",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 5,
+    "atmosphere": "sparkling, active, granular",
+    "vector": "rising",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 6,
+    "atmosphere": "vibrant, energetic, suspended",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 5,
+    "atmosphere": "fading, settling, airy",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:30",
+    "intensity": 4,
+    "atmosphere": "geometric, structured, cool",
+    "vector": "stabilizing",
+    "captures": false
+   },
+   {
+    "time": "00:35",
+    "intensity": 3,
+    "atmosphere": "muddied, textured, hazy",
+    "vector": "drifting",
+    "captures": false
+   },
+   {
+    "time": "00:40",
+    "intensity": 2,
+    "atmosphere": "soft, muted, diffused",
+    "vector": "receding",
+    "captures": false
+   },
+   {
+    "time": "00:45",
+    "intensity": 1,
+    "atmosphere": "dark, still, quiescent",
+    "vector": "dormant",
+    "captures": false
+   },
+   {
+    "time": "00:50",
+    "intensity": 3,
+    "atmosphere": "revealing, grounded, tangible",
+    "vector": "emerging",
+    "captures": false
+   },
+   {
+    "time": "00:55",
+    "intensity": 4,
+    "atmosphere": "patterned, layered, warm",
+    "vector": "grounding",
+    "captures": false
+   },
+   {
+    "time": "01:00",
+    "intensity": 3,
+    "atmosphere": "domestic, lived-in, familiar",
+    "vector": "settling",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

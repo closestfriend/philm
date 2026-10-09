@@ -1,0 +1,71 @@
+{
+ "clip_id": "b5774afee25c",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A nighttime drive through Beverly Hills, capturing iconic signage and speed limit displays.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 2,
+    "atmosphere": "anticipation",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 3,
+    "atmosphere": "curiosity",
+    "vector": "forward",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 4,
+    "atmosphere": "recognition",
+    "vector": "forward",
+    "captures": true
+   },
+   {
+    "time": "00:15",
+    "intensity": 5,
+    "atmosphere": "caution",
+    "vector": "contracting",
+    "captures": true
+   },
+   {
+    "time": "00:18",
+    "intensity": 7,
+    "atmosphere": "disorientation",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 6,
+    "atmosphere": "alertness",
+    "vector": "forward",
+    "captures": true
+   },
+   {
+    "time": "00:27",
+    "intensity": 5,
+    "atmosphere": "compliance",
+    "vector": "contracting",
+    "captures": true
+   },
+   {
+    "time": "00:30",
+    "intensity": 4,
+    "atmosphere": "calm",
+    "vector": "neutral",
+    "captures": true
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

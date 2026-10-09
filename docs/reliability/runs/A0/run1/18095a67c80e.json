@@ -1,0 +1,246 @@
+{
+ "clip_id": "18095a67c80e",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A slow pan across a sun-drenched suburban landscape, revealing overgrown greenery, tiled rooftops, and palm trees against a bright blue sky.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 3,
+    "atmosphere": "gentle stirring",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:01",
+    "intensity": 4,
+    "atmosphere": "vibrant rustling",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:02",
+    "intensity": 3,
+    "atmosphere": "calm stillness",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:03",
+    "intensity": 5,
+    "atmosphere": "open exposure",
+    "vector": "away",
+    "captures": false
+   },
+   {
+    "time": "00:04",
+    "intensity": 6,
+    "atmosphere": "stark observation",
+    "vector": "toward",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 7,
+    "atmosphere": "bright expanse",
+    "vector": "upward",
+    "captures": false
+   },
+   {
+    "time": "00:06",
+    "intensity": 6,
+    "atmosphere": "mechanical presence",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:07",
+    "intensity": 7,
+    "atmosphere": "towering stillness",
+    "vector": "upward",
+    "captures": false
+   },
+   {
+    "time": "00:08",
+    "intensity": 8,
+    "atmosphere": "vastness",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:09",
+    "intensity": 8,
+    "atmosphere": "open potential",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 7,
+    "atmosphere": "clear sky",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:11",
+    "intensity": 9,
+    "atmosphere": "blinding light",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:12",
+    "intensity": 8,
+    "atmosphere": "deepening shadow",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:13",
+    "intensity": 5,
+    "atmosphere": "leafy enclosure",
+    "vector": "toward",
+    "captures": false
+   },
+   {
+    "time": "00:14",
+    "intensity": 4,
+    "atmosphere": "gentle breeze",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 4,
+    "atmosphere": "verdant presence",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:16",
+    "intensity": 5,
+    "atmosphere": "sunlit leaves",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:17",
+    "intensity": 9,
+    "atmosphere": "intense solar flare",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:18",
+    "intensity": 7,
+    "atmosphere": "skyward gaze",
+    "vector": "upward",
+    "captures": false
+   },
+   {
+    "time": "00:19",
+    "intensity": 6,
+    "atmosphere": "architectural frame",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 5,
+    "atmosphere": "overgrown structure",
+    "vector": "toward",
+    "captures": false
+   },
+   {
+    "time": "00:21",
+    "intensity": 4,
+    "atmosphere": "peeling paint",
+    "vector": "away",
+    "captures": false
+   },
+   {
+    "time": "00:22",
+    "intensity": 3,
+    "atmosphere": "soft green",
+    "vector": "contracting",
+    "captures": false
+   },
+   {
+    "time": "00:23",
+    "intensity": 6,
+    "atmosphere": "distant houses",
+    "vector": "away",
+    "captures": false
+   },
+   {
+    "time": "00:24",
+    "intensity": 7,
+    "atmosphere": "sun-drenched tiles",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 6,
+    "atmosphere": "warm texture",
+    "vector": "toward",
+    "captures": false
+   },
+   {
+    "time": "00:26",
+    "intensity": 5,
+    "atmosphere": "patterned roof",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:27",
+    "intensity": 6,
+    "atmosphere": "open vista",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:28",
+    "intensity": 7,
+    "atmosphere": "skyline silhouettes",
+    "vector": "upward",
+    "captures": false
+   },
+   {
+    "time": "00:29",
+    "intensity": 8,
+    "atmosphere": "palm frond dance",
+    "vector": "expanding",
+    "captures": false
+   },
+   {
+    "time": "00:30",
+    "intensity": 7,
+    "atmosphere": "azure expanse",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:31",
+    "intensity": 6,
+    "atmosphere": "skyward reach",
+    "vector": "upward",
+    "captures": false
+   },
+   {
+    "time": "00:32",
+    "intensity": 6,
+    "atmosphere": "tall forms",
+    "vector": "neutral",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}

@@ -1,0 +1,71 @@
+{
+ "clip_id": "9e54cf83958d",
+ "arm": "A0",
+ "run": "run1",
+ "model": "gemini-2.5-flash-lite (native batch API, media_resolution=LOW, 2026-06)",
+ "temperature": 0.5,
+ "parsed": true,
+ "result": {
+  "video_description": "A nighttime video capturing a street scene with a bright spotlight illuminating falling snow and bare trees, with houses and parked cars visible in the background. The scene transitions from dark and atmospheric to slightly more illuminated, revealing details like Christmas lights on a house.",
+  "timecodes": [
+   {
+    "time": "00:00",
+    "intensity": 5,
+    "atmosphere": "a sense of piercing clarity in the dark",
+    "vector": "expanding outward",
+    "captures": false
+   },
+   {
+    "time": "00:05",
+    "intensity": 6,
+    "atmosphere": "a feeling of being exposed or illuminated",
+    "vector": "upward and outward",
+    "captures": false
+   },
+   {
+    "time": "00:10",
+    "intensity": 7,
+    "atmosphere": "a heightened awareness of the unseen particles in the light",
+    "vector": "contracting inward towards the source",
+    "captures": false
+   },
+   {
+    "time": "00:15",
+    "intensity": 8,
+    "atmosphere": "a feeling of overwhelming presence, almost a spotlight",
+    "vector": "expanding intensely",
+    "captures": false
+   },
+   {
+    "time": "00:20",
+    "intensity": 4,
+    "atmosphere": "a sudden dimming, a sense of receding or fading",
+    "vector": "contracting inward",
+    "captures": false
+   },
+   {
+    "time": "00:25",
+    "intensity": 3,
+    "atmosphere": "a muted, still quality, like a pause",
+    "vector": "neutral",
+    "captures": false
+   },
+   {
+    "time": "00:30",
+    "intensity": 6,
+    "atmosphere": "a re-emergence of the piercing light, a return of focus",
+    "vector": "upward and outward",
+    "captures": false
+   },
+   {
+    "time": "00:35",
+    "intensity": 5,
+    "atmosphere": "a blend of the stark light and the soft glow of distant lights",
+    "vector": "expanding",
+    "captures": false
+   }
+  ]
+ },
+ "raw": "",
+ "usage": {}
+}
