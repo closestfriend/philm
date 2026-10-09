@@ -38,12 +38,15 @@ vector str, captures bool}`. Two facts about the current schema shape the design
    contribute only to clip-level statistics.
 2. **`vector` is a free string.** The archive holds 20+ spellings for a vocabulary of about
    ten ("Upward"/"upward", "forward, expanding", "inward pull"). Agreement on a free string
-   is not measurable. **Before any run, `vector` becomes an enum** with the ten values the
-   site already documents: `expanding, forward, toward, upward, contracting, receding, away,
-   inward, static, stable`, plus `neutral` because it is the modal value in the archive. The
-   prompt gets the list verbatim. This is a protocol change and is reported as one; the
-   existing archive readings are mapped onto the enum by a lower-casing, first-token rule
-   for the comparison in §4 arm A0 only.
+   is not measurable (7,817 distinct strings in the archive). **Before any run, `vector`
+   becomes an enum** of twelve values, balanced five rising, five falling, two flat:
+   `expanding, outward, forward, toward, upward` / `contracting, inward, receding, away,
+   downward` / `static, neutral`. The prompt gets the list verbatim. This is a protocol
+   change and is reported as one. The existing archive readings are mapped onto the enum
+   for arm A0 only, by the rule in `scripts/reliability/vectors.py`: lower-case, split into
+   words, first word with a synonym entry wins. That maps 87.9% of archive moments; the
+   rest (`sideways`, `oscillating`, `pulsing`, and a run of workplace phrases from a
+   mis-prompted batch) are counted as unmappable, not binned. Done 2026-10-09.
 
 The `captures` boolean is kept and scored as nominal. `atmosphere` stays free text.
 
@@ -52,15 +55,18 @@ The `captures` boolean is kept and scored as nominal. `atmosphere` stays free te
 **n = 100 clips** from the catalogued archive (3,923 clips with affect readings, all
 silent 360p proxies). Composition:
 
-- **60 = the label-set clips** already defined in `label_set.json` (the iPhone clips with a
-  written catalogue description). These are the only clips with human labels, so the human
-  arm runs on exactly these.
+- **60 = the label-set clips** already defined in `label_set.json` (iPhone found footage,
+  2016–2019). These are the only clips with human labels, so the human arm runs on exactly
+  these. **None of them has a reading in `archive.db`**, so arm A0 covers only the 40
+  archive clips; every other arm reads all 100.
 - **40 = stratified from the rest**, by camera prefix as an era proxy (`MVI_` Canon,
   `M2U0` Sony, `P10x` Lumix, `IMG_` iPhone; the archive's `date_recorded` and
   `duration_sec` columns are empty, so the sampler runs `ffprobe` for duration and reads
   the year from the folder name) and by catalogue `mean_intensity` tercile, so that calm,
   middling and intense clips are all present. Long-take chunks (≤ ~150 s) are eligible;
-  nothing over 150 s.
+  nothing over 150 s. The 191 archive rows catalogued from outside the media root (5%)
+  are excluded because their proxy paths are not derivable; the manifest records the count.
+  Drawn 2026-10-09 with seed 20261009: 15 cells, 40 clips, all proxies present.
 
 The sampler writes `results/sample_manifest.json`: clip id, path, duration, camera, year,
 stratum, and the canary line below. The clip ids are stable across every arm.
