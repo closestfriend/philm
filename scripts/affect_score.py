@@ -46,6 +46,11 @@ SCRATCH = Path("/Volumes/Vault_Σ/_render_scratch/affect_score")  # per-render s
 # while sparse-region peaks keep their charge. Overridable per-run via --fit-tol. 0 -> pure best-fit.
 FIT_TOL = 0.6
 
+# Per-segment normalize filter. A module constant so other composers (embed_cut.py) can swap it
+# (e.g. stretch-to-fill for portrait phone footage) without forking the render path.
+SEG_VF = ("scale=854:480:force_original_aspect_ratio=decrease,"
+          "pad=854:480:(ow-iw)/2:(oh-ih)/2,setsar=1,format=yuv420p")
+
 RISE = {"expanding", "forward", "toward", "outward", "upward", "approaching", "rising", "ascending"}
 FALL = {"contracting", "receding", "away", "inward", "withdrawing", "downward", "falling", "descending"}
 FLAT = {"static", "stable", "neutral", "steady", "still"}
@@ -839,8 +844,7 @@ def render(score: str, seq: list, dry: bool, audio: Path | None = None,
         s["frames"] = nf
         cmd = ["ffmpeg", "-nostdin", "-y", "-loglevel", "error", "-ss", str(s["seek"]),
                "-i", str(s["clip"].proxy), "-frames:v", str(nf),
-               "-vf", "scale=854:480:force_original_aspect_ratio=decrease,"
-                      "pad=854:480:(ow-iw)/2:(oh-ih)/2,setsar=1,format=yuv420p",
+               "-vf", SEG_VF,
                "-r", "24", "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", str(seg)]
         subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, timeout=120)
         if seg.exists() and seg.stat().st_size > 1000 and ffdur(seg) > 0.3:
