@@ -119,8 +119,10 @@ affect theory framework. For each significant moment, map:
 
 - The raw pre-cognitive intensity (1-10 scale)
 - The qualitative atmosphere (the felt sense before cognition captures it)
-- The vector of movement (direction the affect is pulling - toward/away, up/down, 
-  expanding/contracting)
+- The vector of movement, one word from this list and nothing else:
+  rising: expanding, outward, forward, toward, upward
+  falling: contracting, inward, receding, away, downward
+  flat: static (held, unmoving), neutral (no discernible pull)
 - Whether this moment "captures" or "qualifies" the affect (does it freeze the 
   intensity into recognizable emotion, or does it remain pure potential?)
 

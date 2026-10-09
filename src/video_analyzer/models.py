@@ -64,13 +64,32 @@ class LevinasianMoment(BaseModel):
 # ============================================================================
 
 
+class AffectVector(str, Enum):
+    """Direction of affective movement. A closed vocabulary since 2026-10-09: the free
+    string it replaced produced 7,817 distinct spellings across the archive, which made
+    agreement between readings unmeasurable. Five rising, five falling, two flat."""
+
+    EXPANDING = "expanding"
+    OUTWARD = "outward"
+    FORWARD = "forward"
+    TOWARD = "toward"
+    UPWARD = "upward"
+    CONTRACTING = "contracting"
+    INWARD = "inward"
+    RECEDING = "receding"
+    AWAY = "away"
+    DOWNWARD = "downward"
+    STATIC = "static"
+    NEUTRAL = "neutral"
+
+
 class AffectMoment(BaseModel):
     """Affective intensity mapping using Massumi's framework."""
 
     time: str
     intensity: int = Field(..., ge=1, le=10, description="Raw pre-cognitive affective charge")
     atmosphere: str = Field(..., description="Qualitative felt sense before cognition")
-    vector: str = Field(..., description="Direction of affective movement")
+    vector: AffectVector = Field(..., description="Direction of affective movement")
     captures: bool = Field(..., description="Does affect freeze into recognizable emotion?")
 
 
