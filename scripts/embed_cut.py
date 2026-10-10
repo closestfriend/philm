@@ -87,6 +87,19 @@ class Index:
         self.wdur = np.array([b - a for a, b in self.wtimes], dtype=float)
         self.n_clips = len(self.rows)
         self.root = E.DEFAULT_ROOT
+        # capture dates per clip, written by the exiftool harvest (dates.json); None if absent
+        dj = out / "dates.json"
+        dates = json.load(open(dj)) if dj.exists() else {}
+        self.date = [dates.get(r["key"], {}).get("date") for r in self.rows]
+
+    def date_mask(self, start: str | None, end: str | None) -> np.ndarray | None:
+        """Window mask for clips captured in [start, end] (YYYY-MM-DD or YYYY). Undated clips drop out."""
+        if not start and not end:
+            return None
+        lo = (start or "0000") + ("-01-01" if start and len(start) == 4 else "")
+        hi = (end or "9999") + ("-12-31" if end and len(end) == 4 else "")
+        keep = np.array([d is not None and lo <= d <= hi for d in self.date])
+        return keep[self.owner]
 
     def clip_vec(self, substr: str) -> tuple[int, np.ndarray]:
         hits = [i for i, r in enumerate(self.rows) if substr in r["rel"]]
@@ -208,7 +221,7 @@ def cast(idx: Index, picks: list[dict], segs: list[tuple[float, float]], rnd: ra
         hold = t1 - t0
         seek = a + rnd.uniform(0, max(0.0, (b - a) - hold)) if (b - a) > hold else a
         seq.append({**p, "t0": t0, "t1": t1, "hold": hold, "seek": seek, "rel": idx.rel(w),
-                    "win": (a, b)})
+                    "win": (a, b), "date": idx.date[idx.owner[w]]})
     return seq
 
 
@@ -283,11 +296,11 @@ def sheet(name: str, mode: str, seq: list[dict], track: Path | None, bpm: float 
              + (f", {bpm:.0f} bpm" if bpm else "") + ".", "",
              "**Recipe:** `" + " ".join(a if " " not in a else repr(a) for a in sys.argv[1:]) + "`", ""]
     lines += [f"- {n}" for n in notes] + ["",
-              "| # | t | hold | step | sim | clip | window |", "|--:|--:|--:|:--|--:|:--|:--|"]
+              "| # | t | hold | step | sim | shot | clip | window |", "|--:|--:|--:|:--|--:|:--|:--|:--|"]
     for i, s in enumerate(seq, 1):
         a, b = s["win"]
         lines.append(f"| {i} | {s['t0']:.2f}s | {s['hold']:.2f}s | {s.get('step', '')} | {s.get('sim', 0):.3f} | "
-                     f"`{s['rel']}` | {a:.0f}-{b:.0f}s @ {s['seek']:.1f}s |")
+                     f"{s.get('date') or ''} | `{s['rel']}` | {a:.0f}-{b:.0f}s @ {s['seek']:.1f}s |")
     p = OUT_DIR / f"{name}_cut.md"
     p.write_text("\n".join(lines) + "\n")
     return p
@@ -323,8 +336,11 @@ def run_chain_mode(a, mode: str, pattern: str):
     if getattr(a, "plane", None):
         plane = axis_scores(idx, a.plane)
         notes.append(f"plane: `{a.plane}` axis, pairs stay within ±{a.plane_tol} z of each other (Ernst)")
+    pool = idx.date_mask(a.date_from, a.date_to)
+    if pool is not None:
+        notes.append(f"pool: clips captured {a.date_from or '…'} to {a.date_to or '…'} ({int(pool.sum())} windows)")
     picks = chain(idx, start, len(segs), pattern, rnd, momentum=a.momentum, toward=toward,
-                  toward_w=toward_w or 0.0, plane=plane, plane_tol=a.plane_tol, topk=a.topk)
+                  toward_w=toward_w or 0.0, plane=plane, plane_tol=a.plane_tol, topk=a.topk, pool=pool)
     seq = cast(idx, picks, segs, rnd)
     finish(a, mode, idx, seq, track, bpm, notes)
 
@@ -338,6 +354,10 @@ def run_prompts(a):
     bounds = [round(n * k / len(a.prompt)) for k in range(len(a.prompt) + 1)]
     seq, notes = [], [f"{len(a.prompt)} prompt sections, pattern `{a.pattern}` inside each"]
     taken = np.zeros(len(idx.mat), dtype=bool)
+    dm = idx.date_mask(a.date_from, a.date_to)
+    if dm is not None:
+        taken |= ~dm
+        notes.append(f"pool: clips captured {a.date_from or '…'} to {a.date_to or '…'} ({int(dm.sum())} windows)")
     for k, text in enumerate(a.prompt):
         count = bounds[k + 1] - bounds[k]
         if count <= 0:
@@ -435,6 +455,8 @@ def main():
         p.add_argument("--dry", action="store_true", help="cut sheet only")
         p.add_argument("--fit", choices=["stretch", "pad"], default="stretch")
         p.add_argument("--canvas", type=int, nargs=2, default=[360, 640], metavar=("W", "H"))
+        p.add_argument("--date-from", default=None, metavar="YYYY[-MM-DD]", help="only clips captured on/after (needs dates.json)")
+        p.add_argument("--date-to", default=None, metavar="YYYY[-MM-DD]", help="only clips captured on/before")
 
     def chain_args(p, default_pattern):
         g = p.add_mutually_exclusive_group()

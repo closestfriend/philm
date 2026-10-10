@@ -39,7 +39,12 @@ PROXY_ROOT = ROOT / "_proxies"                              # pipeline data, sta
 CATALOG = ROOT / "_cloud_catalog"                          # per-clip analysis JSONs (source of truth)
 OUT = Path.home() / "Projects" / "Ecosystems" / "Karman" / "karman-video-art" / "affect_scores"  # deliverables -> project
 USAGE_MANIFEST = OUT / "usage_manifest.jsonl"  # persistent telemetry: every clip placement, every render
-SCRATCH = Path("/Volumes/Vault_Σ/_render_scratch/affect_score")  # per-render segment dirs (2026-09-23: was /tmp; internal disk is full)
+# Per-render segment dirs (2026-09-23: was /tmp; internal disk is full). Vault first, but ONLY when it
+# is really mounted: writing under /Volumes/<unmounted> creates a plain folder on the boot drive and
+# the real drive then mounts as "Vault_Σ 1" (2026-10-09). Falls back to the SSD.
+_VAULT = Path("/Volumes/Vault_Σ")
+SCRATCH = (_VAULT / "_render_scratch" / "affect_score") if os.path.ismount(_VAULT) \
+    else Path("/Volumes/2025_exSSD_2tb/_render_scratch/affect_score")
 
 # Opportunity-cost band (see pick_clip): diversity penalties may only reorder clips whose raw fit is
 # within FIT_TOL cost-units of the best candidate. ~0.6 is the tradeoff knee — strong corpus spread
