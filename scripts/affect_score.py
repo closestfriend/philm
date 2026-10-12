@@ -378,7 +378,7 @@ def pick_clip(clips, used, level, tslope, last_atmo, rnd, jitter=0.5, section_la
                 + jitter * rnd.random())
         pen = 0.0
         if rarity_w and usage:
-            n = usage.get(c.proxy.stem, 0)
+            n = usage.get(c.vid, 0)
             if n:
                 pen += rarity_w * c.salience * math.sqrt(n)
         if content_w and used_content:
@@ -749,8 +749,9 @@ def spark(vals: list[float]) -> str:
 
 
 def load_usage_counts():
-    """Tally how often each clip (by proxy stem) was placed across PRIOR renders, from the usage
-    manifest. Returns a Counter (empty if none yet). Feeds the --rarity bias."""
+    """Tally how often each clip (by unique id) was placed across PRIOR renders, from the usage
+    manifest. Older rows with no ``uid`` fall back to their ``clip`` stem. Returns a Counter
+    (empty if none yet). Feeds the --rarity bias."""
     counts: Counter = Counter()
     if USAGE_MANIFEST.exists():
         for line in open(USAGE_MANIFEST):
@@ -758,9 +759,10 @@ def load_usage_counts():
             if not line:
                 continue
             try:
-                stem = json.loads(line).get("clip")
-                if stem:
-                    counts[stem] += 1
+                row = json.loads(line)
+                key = row.get("uid") or row.get("clip")
+                if key:
+                    counts[key] += 1
             except Exception:
                 continue
     return counts
@@ -821,11 +823,11 @@ def render(score: str, seq: list, dry: bool, audio: Path | None = None,
               "achieved " + spark(ach),
               "```",
               "",
-              "| # | section | clip | seek | hold | tgt | got | slope | vector | atmosphere |",
-              "|--:|---------|------|-----:|-----:|:---:|:---:|:-----:|--------|------------|"]
+              "| # | section | clip | uid | seek | hold | tgt | got | slope | vector | atmosphere |",
+              "|--:|---------|------|-----|-----:|-----:|:---:|:---:|:-----:|--------|------------|"]
     for i, s in enumerate(seq, 1):
         sl = {1: "↑", -1: "↓", 0: "→"}[s["tslope"]]
-        lines.append(f"| {i} | {s.get('section','-')} | `{s['clip'].proxy.stem}` | {s['seek']}s | {s['hold']}s | "
+        lines.append(f"| {i} | {s.get('section','-')} | `{s['clip'].proxy.stem}` | `{s['clip'].vid}` | {s['seek']}s | {s['hold']}s | "
                      f"{s['target']} | {s['achieved']} | {sl} | {s['vector']} | {s['atmo'][:34]} |")
     (OUT / f"{name}_cut.md").write_text("\n".join(lines))
     print(f"[{score}] {len(seq)} clips, ~{total/60:.1f}min, fit={fit:.2f} -> {OUT / (name+'_cut.md')}")
@@ -960,7 +962,7 @@ def main() -> int:
                                           target_map=args.target_map)
             render(label, seq, args.dry, audio=apath, sections=sections)
             if usage is not None:                       # accumulate within this run (rarity)
-                usage.update(s["clip"].proxy.stem for s in seq)
+                usage.update(s["clip"].vid for s in seq)
             if not args.dry:                            # persist real renders only
                 append_usage(label, seq)
         return 0
@@ -971,7 +973,7 @@ def main() -> int:
         name = f"{sc}_{args.label.upper()}" if args.label else sc
         render(name, seq, args.dry)
         if usage is not None:
-            usage.update(s["clip"].proxy.stem for s in seq)
+            usage.update(s["clip"].vid for s in seq)
         if not args.dry:
             append_usage(name, seq)
     return 0
