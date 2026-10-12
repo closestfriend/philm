@@ -274,7 +274,7 @@ def render(name: str, idx: Index, seq: list[dict], track: Path | None, fit: str,
                            stdin=subprocess.DEVNULL, capture_output=True, timeout=120)
             got = ffdur(seg)
             planned = nf / FPS
-            if got < planned - 0.1:              # short window: freeze the last frame to length
+            if got < planned - 0.5 / FPS:        # clip ran out, even by one frame: freeze the last frame to length
                 padded = segdir / f"seg_{i:04d}p.mp4"
                 subprocess.run(["ffmpeg", "-nostdin", "-y", "-loglevel", "error", "-i", str(seg), "-vf",
                                 f"tpad=stop_mode=clone:stop_duration={max(0.04, planned - max(got, 0)):.3f}",

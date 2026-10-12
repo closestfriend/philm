@@ -1,12 +1,15 @@
 # tests/test_embed_cut.py — the exact cut file (JSON sidecar) that lets a proxy cut be rebuilt
-# from the originals.
+# from the originals, and a render that comes out exactly as long as that file says.
 import argparse
 import json
 import random
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 import embed_cut as ec  # noqa: E402
@@ -93,3 +96,27 @@ def test_dry_run_writes_the_sidecar_beside_the_sheet(tmp_path, monkeypatch):
     doc = json.loads((tmp_path / "cuts" / "T_v01_cut.json").read_text())
     assert (doc["name"], doc["fit"], doc["canvas"]) == ("T_v01", "stretch", [360, 640])
     assert doc["cuts"][0]["orig"] == "IMG_9413.MOV"
+
+
+def _frame_count(video: Path) -> int:
+    r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-count_packets",
+                        "-show_entries", "stream=nb_read_packets", "-of", "csv=p=0", str(video)],
+                       capture_output=True, text=True, check=True)
+    return int(r.stdout.strip())
+
+
+@pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="ffmpeg not on PATH")
+def test_render_holds_a_clip_that_ends_just_short_of_its_cut(tmp_path, monkeypatch):
+    # a 26-frame 30fps clip (0.87s) has to fill a 1.00s cut, 24 frames on the grid. ffmpeg gets 22
+    # frames out of it; the rough must still be 24, or every later cut lands ahead of the music.
+    monkeypatch.setattr(ec, "OUT_DIR", tmp_path / "cuts")
+    monkeypatch.setattr(ec, "SCRATCH", tmp_path / "scratch")
+    (tmp_path / "cuts").mkdir()
+    idx = _index(tmp_path)
+    idx.root = tmp_path / "proxies"
+    idx.root.mkdir()
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", "testsrc=size=202x360:rate=30",
+                    "-frames:v", "26", "-pix_fmt", "yuv420p", str(idx.root / "IMG_9413.mp4")], check=True)
+    rough = ec.render("T_v01", idx, [_cut(w=2, t0=0.0, t1=1.0, hold=1.0, seek=0.0)], None,
+                      "stretch", (360, 640))
+    assert _frame_count(rough) == 24
