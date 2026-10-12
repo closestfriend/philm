@@ -384,6 +384,8 @@ def pick_clip(clips, used, level, tslope, last_atmo, rnd, jitter=0.5, section_la
         pen = 0.0
         if rarity_w and usage:
             n = usage.get(c.vid, 0)
+            if c.proxy.stem != c.vid:        # older ledger rows carry only the filename; keep counting them
+                n += usage.get(c.proxy.stem, 0)
             if n:
                 pen += rarity_w * c.salience * math.sqrt(n)
         if content_w and used_content:

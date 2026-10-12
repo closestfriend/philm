@@ -57,6 +57,21 @@ def test_rarity_penalizes_only_the_clip_that_was_used(tmp_path, monkeypatch):
     assert clip.vid == "uidA"
 
 
+def test_rarity_still_counts_legacy_rows_that_only_have_a_filename(tmp_path, monkeypatch):
+    # the real ledger has 1,783 rows that predate uids and carry only the filename. They must still
+    # count against the clip with that filename, or --rarity forgets that part of the history.
+    old = AS.Clip(vid="uidOld", proxy=Path("/proxies/shoot/MVI_9945.mp4"), times=[0.0, 1.0, 2.0, 3.0],
+                  intens=[5, 5, 5, 5], dom_vector="neutral", dom_atmo="calm")
+    fresh = _clip("uidFresh", "folder1")
+    _ledger(tmp_path, monkeypatch, [{"label": "OLD", "clip": "MVI_9945", "backfill": True}] * 4)
+    usage = AS.load_usage_counts()
+    # identical fit and `old` is listed first, so with its history ignored it would be picked.
+    cost, clip, *_ = AS.pick_clip([old, fresh], set(), 5.0, 0, "", random.Random(0), jitter=0.0,
+                                  usage=usage, rarity_w=0.4)
+    assert clip.vid == "uidFresh"
+    assert cost == 0.25                     # `old` would cost 0.25 + 0.4 * sqrt(4) = 1.05
+
+
 def _run_main(monkeypatch, argv, clips, seq):
     """Run the real main() with the catalogue and composers faked; return the usage Counter
     snapshot each compose call saw, so the in-run accumulation is observable."""
