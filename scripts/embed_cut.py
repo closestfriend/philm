@@ -51,6 +51,9 @@ Examples (run with --script, not plain uv run; the model loads only when text/ax
   uv run --script scripts/embed_cut.py axis --track T.mp3 --axis dwelling -- --variations 2 --diversity 0.8
   uv run --script scripts/embed_cut.py silent --seed-clip IMG_6002 --cut 0.5 --duration 60
   add --dry to any of them for the cut sheet only.
+
+  Every cut writes two records next to the rough: NAME_cut.md to read, and NAME_cut.json, the same
+  cut as unrounded data naming each proxy's original, for rebuilding it at full resolution.
 """
 from __future__ import annotations
 
@@ -87,10 +90,12 @@ class Index:
         self.wdur = np.array([b - a for a, b in self.wtimes], dtype=float)
         self.n_clips = len(self.rows)
         self.root = E.DEFAULT_ROOT
-        # capture dates per clip, written by the exiftool harvest (dates.json); None if absent
+        # capture date and the original's path per clip, written by the exiftool harvest
+        # (dates.json); None if absent
         dj = out / "dates.json"
         dates = json.load(open(dj)) if dj.exists() else {}
         self.date = [dates.get(r["key"], {}).get("date") for r in self.rows]
+        self.orig = [dates.get(r["key"], {}).get("orig") for r in self.rows]
 
     def date_mask(self, start: str | None, end: str | None) -> np.ndarray | None:
         """Window mask for clips captured in [start, end] (YYYY-MM-DD or YYYY). Undated clips drop out."""
@@ -221,7 +226,7 @@ def cast(idx: Index, picks: list[dict], segs: list[tuple[float, float]], rnd: ra
         hold = t1 - t0
         seek = a + rnd.uniform(0, max(0.0, (b - a) - hold)) if (b - a) > hold else a
         seq.append({**p, "t0": t0, "t1": t1, "hold": hold, "seek": seek, "rel": idx.rel(w),
-                    "win": (a, b), "date": idx.date[idx.owner[w]]})
+                    "win": (a, b), "date": idx.date[idx.owner[w]], "orig": idx.orig[idx.owner[w]]})
     return seq
 
 
@@ -248,6 +253,12 @@ def ffdur(p: Path) -> float:
         return 0.0
 
 
+def frames(s: dict) -> int:
+    """Length of one cut in frames: its two boundaries rounded onto the FPS grid, so cuts stay on
+    the beat instead of drifting by a rounding error each."""
+    return max(1, int(round(s["t1"] * FPS)) - int(round(s["t0"] * FPS)))
+
+
 def render(name: str, idx: Index, seq: list[dict], track: Path | None, fit: str, canvas: tuple[int, int]) -> Path:
     segdir = SCRATCH / name
     segdir.mkdir(parents=True, exist_ok=True)
@@ -255,7 +266,7 @@ def render(name: str, idx: Index, seq: list[dict], track: Path | None, fit: str,
     listfile = segdir / "list.txt"
     with open(listfile, "w") as lf:
         for i, s in enumerate(seq):
-            nf = max(1, int(round(s["t1"] * FPS)) - int(round(s["t0"] * FPS)))
+            nf = frames(s)
             seg = segdir / f"seg_{i:04d}.mp4"
             subprocess.run(["ffmpeg", "-nostdin", "-y", "-loglevel", "error", "-ss", f"{s['seek']:.3f}",
                             "-i", str(idx.path(s["w"])), "-frames:v", str(nf), "-vf", vf, "-r", str(FPS),
@@ -303,6 +314,23 @@ def sheet(name: str, mode: str, seq: list[dict], track: Path | None, bpm: float 
                      f"{s.get('date') or ''} | `{s['rel']}` | {a:.0f}-{b:.0f}s @ {s['seek']:.1f}s |")
     p = OUT_DIR / f"{name}_cut.md"
     p.write_text("\n".join(lines) + "\n")
+    return p
+
+
+def sidecar(name: str, mode: str, seq: list[dict], track: Path | None, bpm: float | None, notes: list[str],
+            fit: str, canvas: tuple[int, int], proxy_root: Path) -> Path:
+    """The cut as data, unrounded (the sheet is for reading). Everything a rebuild from the
+    originals needs: per cut, the proxy (`rel`), its original (`orig`), the in-point and the
+    frame count the rough was rendered with."""
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    cuts = [{"n": i, "t0": s["t0"], "t1": s["t1"], "frames": frames(s), "seek": s["seek"],
+             "rel": s["rel"], "orig": s.get("orig"), "window": list(s["win"]), "step": s.get("step"),
+             "sim": s.get("sim"), "date": s.get("date")} for i, s in enumerate(seq, 1)]
+    doc = {"name": name, "mode": mode, "recipe": sys.argv[1:], "fps": FPS, "fit": fit, "canvas": list(canvas),
+           "track": str(track) if track else None, "bpm": bpm, "proxy_root": str(proxy_root),
+           "notes": notes, "cuts": cuts}
+    p = OUT_DIR / f"{name}_cut.json"
+    p.write_text(json.dumps(doc, indent=1) + "\n")
     return p
 
 
@@ -433,6 +461,7 @@ def finish(a, mode, idx, seq, track, bpm, notes):
     notes.append(f"fit `{a.fit}` on {a.canvas[0]}x{a.canvas[1]}")
     sp = sheet(name, mode, seq, track, bpm, notes)
     print(f"sheet  -> {sp}")
+    print(f"data   -> {sidecar(name, mode, seq, track, bpm, notes, a.fit, tuple(a.canvas), idx.root)}")
     if a.dry:
         return
     t = time.time()
