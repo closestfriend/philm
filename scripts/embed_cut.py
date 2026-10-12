@@ -415,13 +415,37 @@ def run_prompts(a):
     finish(a, "prompts", idx, seq, track, bpm, notes)
 
 
+POOL_FLAGS = ("--pool-min-intensity", "--pool-tone", "--pool-best-for", "--pool-min-energy",
+              "--pool-tone-or-best-for", "--pool-root")
+
+
+def pool_flags_given(extra) -> set[str]:
+    """Which affect_score pool flags the extra args name (argparse also accepts =value and unique prefixes)."""
+    given = set()
+    for tok in extra:
+        name = tok.split("=", 1)[0]
+        hits = [f for f in POOL_FLAGS if f == name] or [f for f in POOL_FLAGS if f.startswith(name)]
+        if name.startswith("--pool") and len(hits) == 1:
+            given.add(hits[0])
+    return given
+
+
 def run_axis(a):
     """PROXY: synthetic catalogue (intensity := axis rank 1..10) fed to the real affect_score engine."""
     import affect_score as AS
+    # the synthetic catalogue leaves sizzle.dominant_tone "" and best_for [] — a tone / best_for filter
+    # matches nothing there, so it would empty the pool; the OR switch alone has no effect
+    given = pool_flags_given(a.extra)
+    for f, field in (("--pool-tone", "tone"), ("--pool-best-for", "best_for")):
+        if f in given:
+            sys.exit(f"axis mode: {f} would leave the pool empty (the synthetic catalogue has no {field} "
+                     f"to match); drop it")
+    if "--pool-tone-or-best-for" in given:
+        print("axis mode: --pool-tone-or-best-for is ignored (no --pool-tone / --pool-best-for to combine)",
+              file=sys.stderr)
     idx = Index(Path(a.index))
-    z = axis_scores(idx, a.axis)
-    if a.invert:
-        z = -z
+    z_true = axis_scores(idx, a.axis)                       # labels describe this, never the inverted score
+    z = -z_true if a.invert else z_true
     ranks = z.argsort().argsort() / max(1, len(z) - 1)      # 0..1 quantile across windows
     lvl = np.clip(np.floor(1 + 9 * ranks).astype(int), 1, 10)
     cat = Path(a.index) / "axis_catalog" / (a.axis + ("_inv" if a.invert else ""))
@@ -435,7 +459,7 @@ def run_axis(a):
             t0, t1 = idx.wtimes[w]
             for t in (t0, max(t0, t1 - 1.0)):          # two samples per window so best_window has a span
                 tcs.append({"time": f"{int(t // 60)}:{int(t % 60):02d}", "intensity": int(lvl[w]),
-                            "atmosphere": f"{a.axis} {'high' if z[w] > 0.5 else 'low' if z[w] < -0.5 else 'mid'}",
+                            "atmosphere": f"{a.axis} {'high' if z_true[w] > 0.5 else 'low' if z_true[w] < -0.5 else 'mid'}",
                             "vector": "static"})
         (cat / f"{row['key']}.json").write_text(json.dumps({
             "video": Path(row["rel"]).name, "path": str(idx.root / row["rel"]), "uid": row["key"],
@@ -449,6 +473,7 @@ def run_axis(a):
     AS.SCRATCH = SCRATCH / "affect_score"
     AS.SEG_VF = vf_for(a.fit, tuple(a.canvas))
     label = f"{a.axis.upper()}{'_INV' if a.invert else ''}"
+    AS.RECIPE = ["embed_cut.py", *sys.argv[1:]]             # the sheet's Recipe line; argv is rewritten next
     sys.argv = ["affect_score.py", "--audio", str(Path(a.track).expanduser()), "--label", label] \
         + (["--dry"] if a.dry else []) + list(a.extra)
     print(f"PROXY: synthetic catalogue {cat} ({len(idx.rows)} clips) → affect_score {sys.argv[1:]}", file=sys.stderr)

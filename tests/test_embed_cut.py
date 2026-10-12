@@ -120,3 +120,102 @@ def test_render_holds_a_clip_that_ends_just_short_of_its_cut(tmp_path, monkeypat
     rough = ec.render("T_v01", idx, [_cut(w=2, t0=0.0, t1=1.0, hold=1.0, seek=0.0)], None,
                       "stretch", (360, 640))
     assert _frame_count(rough) == 24
+
+
+# ----------------------------------------------------------------------------- axis mode
+import affect_score as AS  # noqa: E402
+
+
+def _axis(tmp_path, monkeypatch, z, invert=False, extra=(), argv=("axis",)):
+    """Run run_axis() on the tiny index with fixed per-window scores and a stubbed engine.
+    Windows are: clip 0 -> w0, w1; clip 1 -> w2. Returns (index, namespace, what the engine saw)."""
+    idx = _index(tmp_path)
+    seen = {}
+
+    def fake_main():
+        seen["argv"] = list(sys.argv)
+        seen["recipe"] = AS.RECIPE
+        return 0
+
+    real_index = ec.Index
+    monkeypatch.setattr(ec, "Index", lambda out: real_index(out, dim=DIM))
+    monkeypatch.setattr(ec, "axis_scores", lambda i, name: np.array(z, dtype=float))
+    monkeypatch.setattr(ec, "OUT_DIR", tmp_path / "cuts")
+    monkeypatch.setattr(ec, "SCRATCH", tmp_path / "scratch")
+    monkeypatch.setattr(sys, "argv", ["embed_cut.py", *argv])
+    for g in ("CATALOG", "OUT", "USAGE_MANIFEST", "SCRATCH", "SEG_VF"):
+        monkeypatch.setattr(AS, g, getattr(AS, g))      # so teardown restores what run_axis rewrites
+    monkeypatch.setattr(AS, "RECIPE", None, raising=False)
+    monkeypatch.setattr(AS, "main", fake_main)
+    a = argparse.Namespace(index=str(tmp_path / "index"), axis="dwelling", invert=invert,
+                           track="t.mp3", dry=True, fit="stretch", canvas=[360, 640], extra=list(extra))
+    ec.run_axis(a)
+    return idx, a, seen
+
+
+def _rows(idx, a):
+    cat = Path(a.index) / "axis_catalog" / (a.axis + ("_inv" if a.invert else ""))
+    out = []
+    for r in idx.rows:
+        tcs = json.loads((cat / f"{r['key']}.json").read_text())["analyses"]["affect"]["timecodes"]
+        out.append([(t["atmosphere"], t["intensity"]) for t in tcs])
+    return out
+
+
+def test_axis_labels_and_ranks_follow_the_score(tmp_path, monkeypatch):
+    # z = [1, -1, 0] -> quantile ranks [1, 0, 0.5] -> intensity floor(1+9r) = [10, 1, 5]
+    idx, a, _ = _axis(tmp_path, monkeypatch, [1.0, -1.0, 0.0])
+    assert _rows(idx, a) == [[("dwelling high", 10)] * 2 + [("dwelling low", 1)] * 2,
+                             [("dwelling mid", 5)] * 2]
+
+
+def test_inverted_axis_keeps_the_true_label_but_flips_the_rank(tmp_path, monkeypatch):
+    # the airport window (z = -1) is still "dwelling low"; only its intensity becomes 10
+    idx, a, _ = _axis(tmp_path, monkeypatch, [1.0, -1.0, 0.0], invert=True)
+    assert _rows(idx, a) == [[("dwelling high", 1)] * 2 + [("dwelling low", 10)] * 2,
+                             [("dwelling mid", 5)] * 2]
+
+
+def test_axis_hands_the_engine_the_real_recipe(tmp_path, monkeypatch):
+    argv = ("axis", "--track", "t.mp3", "--axis", "dwelling", "--invert", "--", "--variations", "2")
+    _, _, seen = _axis(tmp_path, monkeypatch, [1.0, -1.0, 0.0], invert=True, argv=argv,
+                       extra=["--variations", "2"])
+    assert seen["recipe"] == ["embed_cut.py", *argv]
+    assert seen["argv"][0] == "affect_score.py"          # argv itself is still rewritten for the engine
+
+
+@pytest.mark.parametrize("extra", [["--pool-tone", "dramatic"], ["--pool-tone=dramatic"],
+                                   ["--pool-best-for", "hook"], ["--pool-best", "hook"]])
+def test_axis_refuses_pool_flags_that_empty_the_pool(tmp_path, monkeypatch, extra):
+    flag = "--pool-tone" if "tone" in extra[0] else "--pool-best-for"
+    with pytest.raises(SystemExit) as e:
+        _axis(tmp_path, monkeypatch, [1.0, -1.0, 0.0], extra=extra)
+    assert flag in str(e.value) and "empty" in str(e.value)
+
+
+def test_axis_refuses_before_scoring_anything(tmp_path, monkeypatch):
+    def boom(*_):
+        raise AssertionError("scored before refusing")
+    monkeypatch.setattr(ec, "axis_scores", boom)
+    _index(tmp_path)
+    monkeypatch.setattr(ec, "Index", lambda out: pytest.fail("loaded the index before refusing"))
+    a = argparse.Namespace(index=str(tmp_path / "index"), axis="dwelling", invert=False,
+                           track="t.mp3", dry=True, fit="stretch", canvas=[360, 640],
+                           extra=["--pool-tone", "dramatic"])
+    with pytest.raises(SystemExit):
+        ec.run_axis(a)
+
+
+def test_axis_warns_about_a_flag_that_does_nothing_and_carries_on(tmp_path, monkeypatch, capsys):
+    _, _, seen = _axis(tmp_path, monkeypatch, [1.0, -1.0, 0.0],
+                       extra=["--pool-tone-or-best-for", "--variations", "2"])
+    err = capsys.readouterr().err
+    assert "--pool-tone-or-best-for" in err and "ignored" in err
+    assert seen["argv"][-3:] == ["--pool-tone-or-best-for", "--variations", "2"]   # still passed on
+
+
+def test_axis_is_quiet_about_pool_flags_that_work(tmp_path, monkeypatch, capsys):
+    # intensity, energy and root all read fields the synthetic catalogue does fill
+    _axis(tmp_path, monkeypatch, [1.0, -1.0, 0.0],
+          extra=["--pool-min-intensity", "5", "--pool-min-energy", "5", "--pool-root", "/x"])
+    assert "ignored" not in capsys.readouterr().err
