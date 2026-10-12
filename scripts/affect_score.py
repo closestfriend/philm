@@ -28,6 +28,7 @@ import json
 import math
 import os
 import random
+import re
 import subprocess
 import sys
 from collections import Counter
@@ -50,6 +51,10 @@ SCRATCH = (_VAULT / "_render_scratch" / "affect_score") if os.path.ismount(_VAUL
 # within FIT_TOL cost-units of the best candidate. ~0.6 is the tradeoff knee — strong corpus spread
 # while sparse-region peaks keep their charge. Overridable per-run via --fit-tol. 0 -> pure best-fit.
 FIT_TOL = 0.6
+
+# Recipe override for the cut sheet's "**Recipe:**" line. A driver that rewrites sys.argv and calls
+# main() (embed_cut.py) sets this to the command the user really ran; None -> record sys.argv[1:].
+RECIPE: list[str] | None = None
 
 # Per-segment normalize filter. A module constant so other composers (embed_cut.py) can swap it
 # (e.g. stretch-to-fill for portrait phone footage) without forking the render path.
@@ -779,10 +784,25 @@ def append_usage(label: str, seq: list):
                 "tone": c.tone, "atmo": c.dom_atmo}) + "\n")
 
 
+def unique_name(label: str) -> str:
+    """Never overwrite a render. Returns NAME (label upper-cased) if none of its three outputs exist
+    in OUT, else NAME_r2, NAME_r3, ... (first free). The suffix stays lowercase: render() keeps it.
+    NB: 'V01' in a name is seed 1, not version 1; 'r2' is the second render of that name."""
+    base = label.upper()
+    name, n = base, 1
+    while any((OUT / f"{name}_{kind}").exists() for kind in ("cut.md", "rough.mp4", "picture.mp4")):
+        n += 1
+        name = f"{base}_r{n}"
+    if n > 1:
+        print(f"  {base} already rendered -> writing as {name}")
+    return name
+
+
 def render(score: str, seq: list, dry: bool, audio: Path | None = None,
-           sections: list | None = None):
+           sections: list | None = None, settings: dict | None = None):
     OUT.mkdir(parents=True, exist_ok=True)
-    name = score.upper()
+    stem, rerun = re.fullmatch(r"(.*?)(_r\d+)?", score).groups()    # keep unique_name's lowercase _rN
+    name = stem.upper() + (rerun or "")
     tgt = [s["target"] for s in seq]
     ach = [s["achieved"] for s in seq]
     total = sum(s["hold"] for s in seq)
@@ -794,20 +814,27 @@ def render(score: str, seq: list, dry: bool, audio: Path | None = None,
              f"piece's affect intensity tracks the target; `vector` matched to the curve's local slope. "
              f"The editing GRAMMAR (cut-rate, target bias, vector preference) shifts per detected song section.",
              "",
-             "**Recipe:** `" + " ".join(a if " " not in a else repr(a) for a in sys.argv[1:]) + "`",
-             ""]
+             "**Recipe:** `" + " ".join(a if " " not in a else repr(a)
+                                        for a in (sys.argv[1:] if RECIPE is None else RECIPE)) + "`"]
+    if settings:                       # effective values after flags + defaults were resolved
+        lines.append("**Settings:** `" + " ".join(f"{k}={v}" for k, v in settings.items()) + "`")
+    lines.append("")
 
     if sections:
-        # per-section cut-rate summary
-        per = {}
+        # per-section cut-rate summary: a cut belongs to the section its START falls in (same rule
+        # as section_at). Start = exact t0 when the composer recorded it, else the cumulative holds.
+        per = [[] for _ in sections]
+        clock = 0.0
         for s in seq:
-            lab = s.get("section", "?")
-            per.setdefault(lab, []).append(s["hold"])
+            t0 = s.get("t0", clock)
+            clock += s["hold"]
+            k = next((i for i, sec in enumerate(sections) if sec.start <= t0 < sec.end), len(sections) - 1)
+            per[k].append(s["hold"])
         lines += ["## Detected section map", "",
                   "| start | end | label | dur | cuts | mean hold | cuts/min |",
                   "|------:|----:|-------|----:|-----:|----------:|---------:|"]
-        for sec in sections:
-            holds = per.get(sec.label, [])
+        for k, sec in enumerate(sections):
+            holds = per[k]
             ncut = len(holds)
             mh = (sum(holds) / ncut) if ncut else 0.0
             spd = sec.end - sec.start
@@ -933,6 +960,9 @@ def main() -> int:
     rarity_w = 0.4 if args.rarity else 0.0
     content_w = 0.6 if args.content_aware else 0.0
     topk = max(1, args.topk) if args.select == "topk" else 1
+    # effective values (flags + hard-coded defaults), recorded on every cut sheet as "**Settings:**"
+    settings = {"fit_tol": FIT_TOL, "rarity_w": rarity_w, "content_w": content_w, "topk": topk,
+                "diversity": args.diversity}
     usage = load_usage_counts() if args.rarity else None
     if args.rarity:
         print(f"rarity bias ON: {len(usage)} clips have prior-render history to spread away from")
@@ -953,12 +983,15 @@ def main() -> int:
         for i in range(n):
             seed = (args.seed if args.seed is not None else 1) + i
             label = f"{base}_V{seed:02d}" if (n > 1 or args.seed is not None) else base
+            label = unique_name(label)                  # never overwrite an earlier render
             print(f"--- {label} (seed {seed}) ---")
             seq, sections = compose_audio(apath, clips, seed=seed, jitter=args.diversity,
                                           transient=args.transient, usage=usage,
                                           rarity_w=rarity_w, content_w=content_w, topk=topk,
                                           target_map=args.target_map)
-            render(label, seq, args.dry, audio=apath, sections=sections)
+            render(label, seq, args.dry, audio=apath, sections=sections,
+                   settings={**settings, "seed": seed, "target_map": args.target_map,
+                             "transient": args.transient})
             if usage is not None:                       # accumulate within this run (rarity)
                 usage.update(s["clip"].proxy.stem for s in seq)
             if not args.dry:                            # persist real renders only
@@ -968,8 +1001,8 @@ def main() -> int:
     for sc in scores:
         seq = compose(sc, clips, jitter=args.diversity, usage=usage,
                       rarity_w=rarity_w, content_w=content_w, topk=topk)
-        name = f"{sc}_{args.label.upper()}" if args.label else sc
-        render(name, seq, args.dry)
+        name = unique_name(f"{sc}_{args.label.upper()}" if args.label else sc)
+        render(name, seq, args.dry, settings=settings)
         if usage is not None:
             usage.update(s["clip"].proxy.stem for s in seq)
         if not args.dry:
