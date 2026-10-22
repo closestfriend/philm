@@ -30,8 +30,8 @@ pull from a pool. Every mode below is one rule for the next cut, applied on a be
                score) while the images are irreconcilable (far in the full embedding).
     prompts    a shot list in words; each section of the track casts from clips nearest its prompt,
                ordered by the step pattern so the section still flows (or shocks).
-    axis       drives the EXISTING affect_score.py engine with an embedding axis score (dwelling,
-               front_stage, poor_image, intensity) in place of Gemini intensity. See PROXY note.
+    axis       drives the EXISTING affect_score.py engine with an embedding axis score (any axis in
+               affect_anchors.json) in place of Gemini intensity. See PROXY note.
     silent     a walk/encounter at a fixed cut rate with no track, for watching the archive
                reorganise itself.
 
@@ -46,9 +46,9 @@ pull from a pool. Every mode below is one rule for the next cut, applied on a be
 
 Examples (run with --script, not plain uv run; the model loads only when text/axis is needed):
   uv run --script scripts/embed_cut.py walk --track T.mp3 --seed-clip IMG_6002 --toward "an empty road at dawn"
-  uv run --script scripts/embed_cut.py encounter --track T.mp3 --pattern nnF --plane dwelling
+  uv run --script scripts/embed_cut.py encounter --track T.mp3 --pattern nnF --plane intensity
   uv run --script scripts/embed_cut.py prompts --track T.mp3 -p "alone in a hotel" -p "friends in a car at night"
-  uv run --script scripts/embed_cut.py axis --track T.mp3 --axis dwelling -- --variations 2 --diversity 0.8
+  uv run --script scripts/embed_cut.py axis --track T.mp3 --axis intensity -- --variations 2 --diversity 0.8
   uv run --script scripts/embed_cut.py silent --seed-clip IMG_6002 --cut 0.5 --duration 60
   add --dry to any of them for the cut sheet only.
 

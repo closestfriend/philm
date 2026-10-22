@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "status": "PROVISIONAL. v2 drafted 2026-10-08 from Hunter's own theory library (Are.na 'informative-pdfs'), replacing v1's placeholder-driven axes (togetherness, cinematic, Boym). Unvalidated until checked against his hand labels. Edit freely; anchors are embedded at scoring time, so no re-embedding is needed.",
+  "status": "PROVISIONAL. v2 drafted 2026-10-08 from Hunter's own theory library (Are.na 'informative-pdfs'), replacing v1's placeholder-driven axes (togetherness, cinematic, Boym). Unvalidated until checked against his hand labels. Edit freely; anchors are embedded at scoring time, so no re-embedding is needed. dwelling retired 2026-10-21 by Hunter (see not_used_and_why). Each axis's `label` is the wording the label sheet shows.",
   "method": "Each axis has two poles written as descriptions of what the PICTURE shows (the model saw silent frames at 1 fps, 360p). Score = mean cosine(clip, high anchors) - mean cosine(clip, low anchors), z-scored across the archive. Scores rank clips against each other; they are not calibrated units.",
   "stance": "Sedgwick, 'Paranoid Reading and Reparative Reading' (in the library): label reparatively. Ask what the clip offers or sustains, not what it exposes. This governs how Hunter rates, not how the model scores.",
   "axes": {
     "intensity": {
       "theory": "Massumi; the register the Affect Theory Reader's introduction (Seigworth & Gregg, 'An Inventory of Shimmers') calls intensity passing between bodies, before it is named as an emotion.",
+      "label": {"name": "Intensity", "ask": "How hard it hits before you can name the feeling (Massumi)", "scale": [1, 10]},
       "already_in_philm": "AffectMoment.intensity (1-10), --affect mode.",
       "weakness": "1 fps under-reads motion and there is no audio, so loudness is invisible.",
       "high": [
@@ -23,6 +24,7 @@
     },
     "front_stage": {
       "theory": "Goffman, The Presentation of Self in Everyday Life (in the library): front region, where a performance is given for an audience, versus back region, where the performer drops the act. Phone video constantly toggles between the two.",
+      "label": {"name": "Front stage", "ask": "Performing for the lens (10) or caught unaware (0) (Goffman)", "scale": [0, 10]},
       "replaces": "v1 'togetherness'. Whether people are performing for the lens is visible; whether they are friends is not.",
       "weakness": "A mirror selfie and a staged group pose both read as front stage; the axis does not say what the performance is for.",
       "high": [
@@ -38,24 +40,8 @@
         "someone asleep or slumped, unguarded, not performing"
       ]
     },
-    "dwelling": {
-      "theory": "Csikszentmihalyi & Rochberg-Halton, The Meaning of Things: Domestic Symbols and the Self (in the library): the home and its cherished objects as carriers of the self. The low pole is the non-place Hunter named as his own subject on 2026-09-23 ('my Fisher-ian non-space'): transit, retail, screens, interchangeable interiors.",
-      "replaces": "v1 had nothing here. This is the axis a personal phone archive most obviously carries.",
-      "weakness": "A friend's home and a hotel room can look alike at 360p. The axis reads furnishing and personal objects, not ownership.",
-      "high": [
-        "a lived-in bedroom with personal belongings, clothes on the floor, a messy desk, a familiar bed",
-        "a kitchen or living room with someone cooking or lounging, objects that clearly belong to them",
-        "a pet on a sofa, a cluttered shelf of personal things, a window of a home",
-        "a cosy interior with a lamp on, someone at ease in their own space"
-      ],
-      "low": [
-        "an airport terminal, a parking garage or a hotel corridor, anonymous and interchangeable",
-        "a freeway at night from inside a car, signs and lights passing",
-        "a mall, a chain store interior or a gas station under flat fluorescent light",
-        "a blank waiting room or lobby with nobody who belongs there"
-      ]
-    },
     "poor_image": {
+      "label": {"name": "Poor image", "ask": "Degraded, copied, re-filmed (10) or crisp and rich (0) (Steyerl)", "scale": [0, 10]},
       "theory": "Steyerl, 'In Defense of the Poor Image' (The Wretched of the Screen, in the library): the low-resolution, compressed, copied-and-recopied image as its own class, whose degradation records circulation and intimacy rather than failure. The phone proxy is a poor image by construction.",
       "replaces": "v1 'cinematic' (pure taste). Steyerl inverts that axis: the rich, high-definition image is the low pole.",
       "weakness": "IMPORTANT: every clip was transcoded to the same 360p/0.4 Mbps proxy, which flattens much of this axis before the model sees it. What survives is motion blur, low-light noise, screen-recordings, re-filmed screens and blown-out exposure. Treat as a weak axis until the labels say otherwise.",
@@ -85,6 +71,7 @@
     }
   },
   "not_used_and_why": {
+    "dwelling (Csikszentmihalyi & Rochberg-Halton)": "RETIRED 2026-10-21 by Hunter: 'the dwelling atmosphere was a huge mistake.' Added unasked in the 2026-10-08 v2 rebuild and never his choice; four roughs used it before he knew what it measured (BEING_GOOD_ENCOUNTER_v01, COLD_DECEMBER_ENCOUNTER_v01, both MIRROR axis cuts). Its anchors were last present in commit c8aef08.",
     "happy_objects (Ahmed, Affect Theory Reader)": "promising (bodies oriented toward a shared object) but overlaps front_stage and dwelling; revisit after labels.",
     "bleak_joys (Fuller & Goriunova)": "a composite (joy inside a bleak setting); could be derived later as high intensity x low dwelling rather than scored directly.",
     "The Dialectics of Friendship (Porter & Tomaselli 1989, in the library)": "a sociology of friendship, not an aesthetics; no visual anchor follows from it. Noted because 'friendship' was not only a placeholder: the text is in the library if Hunter wants that axis back."

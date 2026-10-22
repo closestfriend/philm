@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Build a local HTML labeling sheet: Hunter rates ~60 iPhone clips on four axes drawn from his own theory library (see affect_anchors.json),
-and those labels become the ground truth that the embedding anchors are validated against.
+"""Build a local HTML labeling sheet: Hunter rates ~60 iPhone clips on the axes in affect_anchors.json
+(one slider per axis, worded by its `label`), and those labels become the ground truth that the
+embedding anchors are validated against.
 
 Nothing is uploaded. The sheet is a plain local file that plays the silent 360p proxies, the same
 silent picture the embedding model saw. Ratings are kept in the browser (localStorage) as you go
@@ -25,6 +26,7 @@ PROXIES = MEDIA / "_proxies" / "_found_footage_wer_iphone"
 EMB = MEDIA / "_embeddings" / "_found_footage_wer_iphone"
 CATALOG = MEDIA / "_cloud_catalog"
 ORIG_PREFIX = str(MEDIA / "_found_footage_wer_iphone") + "/"
+ANCHORS = Path(__file__).resolve().parent / "affect_anchors.json"
 TOTAL, SEED = 60, 11
 MIN_DUR, MAX_DUR = 3.0, 75.0   # short enough to judge in one watch, long enough to mean something
 
@@ -66,7 +68,9 @@ def main():
               "catalogued": r in catalogued, "src": (PROXIES / r).as_uri()} for r in chosen]
     (EMB / "label_set.json").write_text(json.dumps(
         [{k: c[k] for k in ("key", "rel", "dur", "catalogued")} for c in clips], indent=1))
-    html = TEMPLATE.replace("__CLIPS__", json.dumps(clips))
+    axes = [[k, v["label"]["name"], v["label"]["ask"], *v["label"]["scale"]]
+            for k, v in json.loads(ANCHORS.read_text())["axes"].items()]
+    html = TEMPLATE.replace("__CLIPS__", json.dumps(clips)).replace("__AXES__", json.dumps(axes))
     (EMB / "label_sheet.html").write_text(html)
     print(f"{len(clips)} clips ({sum(c['catalogued'] for c in clips)} catalogued, "
           f"{len({os.path.dirname(c['rel']) for c in clips})} folders)")
@@ -104,11 +108,7 @@ textarea{width:100%;height:90px;font:12px ui-monospace,monospace;margin-top:8px;
 <textarea id="ta" readonly></textarea><main id="main"></main>
 <script>
 const CLIPS = __CLIPS__;
-const AXES = [
- ["intensity","Intensity","How hard it hits before you can name the feeling (Massumi)",1,10],
- ["front_stage","Front stage","Performing for the lens (10) or caught unaware (0) (Goffman)",0,10],
- ["dwelling","Dwelling","Home and its things (10) or non-place: transit, retail, screens (0)",0,10],
- ["poor_image","Poor image","Degraded, copied, re-filmed (10) or crisp and rich (0) (Steyerl)",0,10]];
+const AXES = __AXES__;   // [key, name, ask, min, max] from affect_anchors.json
 const KEY="affect-labels-v2";let S={};try{S=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const isDone=c=>{const s=S[c.key]||{};return s.skip||AXES.some(a=>s[a[0]]!==undefined)};

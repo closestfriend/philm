@@ -11,9 +11,10 @@ with the Export button.
   python3 scripts/make_review_sheet.py      # writes embed_cuts/review_sheet.html
   open "<printed path>"
 
-Re-run after new renders: every *_cut.json in embed_cuts/ becomes a film on the sheet (axis/ is
-skipped; it only holds dwelling pieces). Clip keys are sha1(rel)[:12], the rule make_label_sheet.py
-and reliability/ use, so review records join with the affect labels.
+Re-run after new renders: every *_cut.json in embed_cuts/ becomes a film on the sheet, except films
+cut on a --plane that is no longer an axis in affect_anchors.json, so a retired axis drops out of the
+homework on its own. axis/ is skipped; it only holds dwelling pieces. Clip keys are sha1(rel)[:12],
+the rule make_label_sheet.py and reliability/ use, so review records join with the affect labels.
 """
 import glob
 import hashlib
@@ -25,21 +26,24 @@ from datetime import date
 from pathlib import Path
 
 OUT_DIR = Path.home() / "Projects" / "Ecosystems" / "Karman" / "karman-video-art" / "embed_cuts"
-LABEL_SHEET = Path("/Volumes/2025_exSSD_2tb/Photography + Video/_embeddings/_found_footage_wer_iphone/label_sheet.html")
-RETIRED_AXES = {"dwelling"}   # 2026-10-21, Hunter: "the dwelling atmosphere was a huge mistake"
+ANCHORS = Path(__file__).resolve().parent / "affect_anchors.json"
 RUT_MIN = 5                   # this many cuts in a row from one folder is worth a look
 
 
 def main():
-    films = [film(p) for p in sorted(glob.glob(str(OUT_DIR / "*_cut.json")))]
+    live = set(json.loads(ANCHORS.read_text())["axes"])
+    films, left_out = [], []
+    for p in sorted(glob.glob(str(OUT_DIR / "*_cut.json"))):
+        f = film(p)
+        (left_out if f["plane"] and f["plane"] not in live else films).append(f)
     tracks = {}
     for f in films:
         if f["track"]:
             tracks.setdefault(f["track"], []).append(f["name"])
     groups = [{"id": t, "track": t, "films": names} for t, names in tracks.items() if len(names) > 1]
-    data = {"films": films, "groups": groups, "retired": sorted(RETIRED_AXES),
-            "index": sorted({f.pop("proxy_root") for f in films}),
-            "label_sheet": LABEL_SHEET.as_uri(), "built": date.today().isoformat()}
+    data = {"films": films, "groups": groups,
+            "left_out": [{"film": f["name"], "plane": f["plane"]} for f in left_out],
+            "index": sorted({f.pop("proxy_root") for f in films}), "built": date.today().isoformat()}
     html = TEMPLATE.replace("__DATA__", json.dumps(data, separators=(",", ":")).replace("</", "<\\/"))
     out = OUT_DIR / "review_sheet.html"
     out.write_text(html)
@@ -47,6 +51,8 @@ def main():
     missing = [f["name"] for f in films if not f["src_ok"]]
     print(f"{len(films)} films, {len(groups)} shared-track group(s), {jumps} far jumps"
           + (f"; rough missing for {', '.join(missing)} (re-run its recipe)" if missing else ""))
+    if left_out:
+        print("left out, plane is no longer an axis: " + ", ".join(f"{f['name']} ({f['plane']})" for f in left_out))
     print(f"open: {out}")
 
 
@@ -58,7 +64,7 @@ def film(path):
     track = Path(d["track"]).name if d.get("track") else None
     src = f"{d['name']}_rough.mp4"
     return {"name": d["name"], "mode": d["mode"], "track": track, "plane": plane,
-            "retired": plane in RETIRED_AXES, "recipe": shlex.join(r), "proxy_root": d.get("proxy_root"),
+            "recipe": shlex.join(r), "proxy_root": d.get("proxy_root"),
             "src": src, "src_ok": (OUT_DIR / src).exists(),
             # one row per cut: [t0, t1, rel, key, step, sim, date]
             "cuts": [[round(c["t0"], 2), round(c["t1"], 2), c["rel"], hashlib.sha1(c["rel"].encode()).hexdigest()[:12],
@@ -132,7 +138,7 @@ select{font:inherit;font-size:14px;padding:6px;border-radius:6px;border:1px soli
 .player{display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr);gap:18px;margin-top:8px}
 .readout{font:12.5px/1.55 ui-monospace,Menlo,monospace;color:var(--mut);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;word-break:break-all;margin:0 0 10px;min-height:4.8em}
 .readout b{color:var(--fg)}kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--bg)}
-.badge{font-size:12px;font-weight:600;color:var(--warn);border:1px solid var(--warn);border-radius:10px;padding:0 7px;white-space:nowrap}
+.task.paused{opacity:.8}.task.paused h2 .st{color:var(--warn)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{font-size:13px;padding:3px 9px}
 .log{font:12px ui-monospace,monospace;color:var(--mut);max-height:130px;overflow:auto;margin:6px 0 0;padding:0;list-style:none}
 .log li{display:flex;gap:8px;align-items:center}.log button{padding:0 6px;font-size:12px}
@@ -164,15 +170,14 @@ code{font:12.5px ui-monospace,Menlo,monospace}textarea{width:100%;height:90px;fo
 <div class="row chips"><button data-tag="good">Good cut (G)</button><button data-tag="bad">Bad cut (B)</button><button data-tag="stuck">Stuck (S)</button><button data-flag="never">Never use (X)</button><button data-flag="hero">Hero (H)</button></div>
 <div id="ruts"></div><ul class="log" id="wlog"></ul><div id="checks"></div></div></div></section>
 
-<section class="task" id="t-labels"><h2><span class="n">4</span>Finish the affect label sheet (60 clips)<span class="st"></span></h2>
-<p class="why">The anchor axes (intensity, front_stage, poor_image) are still marked provisional: nobody has checked them against your eyes. RAV3RZ and COLD DECEMBER ENCOUNTER v02 were cut on those planes, and intensity drives affect_score. About a minute per clip; ten a sitting is fine. <b>Leave the Dwelling slider untouched</b> (untouched counts as unlabeled). No export of this sheet exists on disk yet; if you started it, your progress is still saved in that browser.</p>
-<div class="row"><a class="btn" id="lsheet" target="_blank">Open the label sheet</a><label><input type="checkbox" id="ldone"> Done and exported</label></div></section>
+<section class="task paused" id="t-labels"><h2><span class="n">4</span>Affect label sheet<span class="st">paused</span></h2>
+<p class="why">On hold until you choose which qualities you want to steer by. The label sheet checks the anchor axes against your eyes, but front_stage and poor_image were drafted by an earlier session rather than picked by you, and dwelling is retired. Labeling now would validate axes you haven't chosen. Once the axes are yours, re-run <code>scripts/make_label_sheet.py</code>: its sliders come straight from <code>affect_anchors.json</code>.</p></section>
 
 <section class="task" id="t-out"><h2><span class="n">5</span>Export and hand off<span class="st"></span></h2>
 <p class="why">Hit <b>Export JSONL</b> at the end of a sitting. Save the file into <code>karman-video-art/embed_cuts/reviews/</code> and commit it: unlike the roughs, your judgments can't be regenerated. Then tell Claude it's there.</p>
 <h3>What your answers feed</h3><ul class="feeds">
 <li><b>Never-use clips</b>: a blocklist the index skips. Pays off on the next render, no training needed.</li>
-<li><b>Rankings and keepers</b>: which modes and knobs stay. COLD DECEMBER ENCOUNTER v01 and v02 differ in three knobs at once (plane, pattern, prompt), so that pair says which film wins, not which knob.</li>
+<li><b>Rankings and keepers</b>: which modes and knobs stay. The COLD DECEMBER cuts differ in mode and in several knobs at once, so a ranking says which film wins, not which knob.</li>
 <li><b>Jump verdicts</b>: whether the far jump works, split by plane (poor_image, intensity, none).</li>
 <li><b>Stuck tags and cut tags</b>: tune momentum and top-k, or add a same-folder penalty to the walk.</li>
 <li><b>Prompt and ending scores</b>: whether the text steering (<code>prompts</code>, <code>--toward</code>) actually steers.</li></ul>
@@ -188,10 +193,9 @@ const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 const mmss=t=>Math.floor((t||0)/60)+":"+String(Math.floor((t||0)%60)).padStart(2,"0");
 const clip=c=>c?{rel:c[2],key:c[3]}:null;   // cut row: [t0, t1, rel, key, step, sim, date]
 const at=(f,t)=>{const c=f.cuts;let lo=0,hi=c.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(c[m][0]<=t)lo=m;else hi=m-1}return lo};
-const badge=f=>f.retired?' <span class="badge">'+esc(f.plane)+' · retired</span>':"";
-const label=f=>f.name+" · "+f.mode+(f.plane?" · plane "+f.plane+(f.retired?" (retired)":""):"");
+const label=f=>f.name+" · "+f.mode+(f.plane?" · plane "+f.plane:"");
 const playable=D.films.filter(f=>f.src_ok);
-$("intro").innerHTML=`Dogfooding the roughs in this folder. Each task is one short sitting, and everything saves in this browser as you go, so you can stop mid-task and come back. The two MIRROR films aren't here: they only test the dwelling axis, which is retired. Films cut on <code>--plane dwelling</code> carry a <span class="badge">dwelling · retired</span> badge. Built ${esc(D.built)} from ${D.films.length} cut sheets; re-run <code>scripts/make_review_sheet.py</code> after new renders.`;
+$("intro").innerHTML=`Dogfooding the roughs in this folder. Each task is one short sitting, and everything saves in this browser as you go, so you can stop mid-task and come back. Left out on purpose: the MIRROR axis pieces${D.left_out.length?", and "+D.left_out.map(x=>esc(x.film)).join(", ")+", cut on a retired axis ("+[...new Set(D.left_out.map(x=>esc(x.plane)))].join(", ")+")":""}. Built ${esc(D.built)} from ${D.films.length} cut sheets; re-run <code>scripts/make_review_sheet.py</code> after new renders.`;
 
 // 1 — blind ranking, one block per shared track
 function renderGroups(){const box=$("groups");box.innerHTML="";
@@ -201,7 +205,7 @@ function renderGroups(){const box=$("groups");box.innerHTML="";
    for(let i=A.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[A[i],A[j]]=[A[j],A[i]]}S.assign[g.id]=A;S.rank[g.id]=null;save()}
   const R=S.rank[g.id]=S.rank[g.id]||{order:[],locked:false,note:""},el=document.createElement("div");
   el.innerHTML=`<h3>${esc(g.track)}</h3><div class="grid">${A.map((n,i)=>`<figure><video preload="metadata" playsinline ${i?"muted":""} src="${esc(F[n].src)}"></video>
-   <figcaption>${LET[i]}${R.locked?`<small>${esc(n)}${badge(F[n])}</small>`:""}</figcaption></figure>`).join("")}</div>
+   <figcaption>${LET[i]}${R.locked?`<small>${esc(n)}</small>`:""}</figcaption></figure>`).join("")}</div>
    <div class="row"><button data-a="play">Play</button><input type="range" min="0" max="1000" value="0" data-a="seek"><span class="tm">0:00</span></div>
    <div class="row"><span class="lbl">Best → worst</span><span class="chips">${A.map((n,i)=>`<button data-l="${i}">${LET[i]}</button>`).join("")}</span>
    <b class="ord"></b><button data-a="undo">Undo</button><button data-a="lock" class="primary"></button></div>
@@ -244,7 +248,7 @@ const wv=$("wv");let wf=F[S.wfilm]&&playable.includes(F[S.wfilm])?F[S.wfilm]:pla
 const wcur=()=>at(wf,wv.currentTime);
 function wload(){wv.src=wf.src;S.wfilm=wf.name;save();wread();wruts();wlog();wchecks()}
 function wread(){const i=wcur(),c=wf.cuts[i],fl=S.flags[c[3]];
- $("wread").innerHTML=`<b>cut ${i+1} / ${wf.cuts.length}</b> · ${mmss(c[0])} · ${c[4]==="F"?"<b>F far jump</b>":"n nearest"} · sim ${c[5].toFixed(2)}${c[6]?" · shot "+esc(c[6]):""}${badge(wf)}<br>${esc(c[2])}${fl?" · <b>"+fl.flag+"</b>":""}`}
+ $("wread").innerHTML=`<b>cut ${i+1} / ${wf.cuts.length}</b> · ${mmss(c[0])} · ${c[4]==="F"?"<b>F far jump</b>":"n nearest"} · sim ${c[5].toFixed(2)}${c[6]?" · shot "+esc(c[6]):""}<br>${esc(c[2])}${fl?" · <b>"+fl.flag+"</b>":""}`}
 function wtag(tag){const i=wcur();S.tags.push({film:wf.name,n:i+1,t:+wv.currentTime.toFixed(2),tag});save();wlog();progress()}
 function wflag(flag){const i=wcur(),c=wf.cuts[i];if(S.flags[c[3]]&&S.flags[c[3]].flag===flag)delete S.flags[c[3]];else S.flags[c[3]]={flag,rel:c[2],film:wf.name,n:i+1};save();wread();wlog();progress()}
 function wruts(){$("ruts").innerHTML=wf.ruts.length?`<div class="row"><span class="lbl">Possible ruts</span><span class="chips">${wf.ruts.map(r=>`<button data-t="${r.t}">${mmss(r.t)} · cuts ${r.from}–${r.to} · ${esc(r.folder)}</button>`).join("")}</span></div>`:""}
@@ -278,9 +282,6 @@ document.addEventListener("keydown",e=>{if(e.metaKey||e.ctrlKey||e.altKey||/INPU
  else if(active==="watch"&&wf){if(k===" "){if(e.target===wv)return;wv.paused?wv.play():wv.pause()}else if(k==="g")wtag("good");else if(k==="b")wtag("bad");else if(k==="s")wtag("stuck");else if(k==="x")wflag("never");else if(k==="h")wflag("hero");else return}
  else return;e.preventDefault()});
 
-// 4 — label sheet
-$("lsheet").href=D.label_sheet;$("ldone").checked=!!S.labels_done;$("ldone").onchange=e=>{S.labels_done=e.target.checked;save();progress()};
-
 // progress + export
 function progress(){const set=(id,txt,done)=>{$(id).querySelector(".st").textContent=txt;$(id).classList.toggle("done",!!done)};
  const gl=D.groups.filter(g=>(S.rank[g.id]||{}).locked).length,jt=jFilms.reduce((s,f)=>s+jumps(f).length,0),jr=jFilms.reduce((s,f)=>s+Object.keys(S.jumps[f.name]||{}).length,0);
@@ -289,11 +290,10 @@ function progress(){const set=(id,txt,done)=>{$(id).querySelector(".st").textCon
  set("t-jump",jr+" / "+jt+" rated",jt&&jr===jt);
  const pl=(n,w)=>n+" "+w+(n===1?"":"s");
  set("t-watch",wc+" / "+playable.length+" films checked · "+pl(tags,"tag")+" · "+pl(flags,"clip flag"),playable.length&&wc===playable.length);
- set("t-labels",S.labels_done?"done":"not yet",S.labels_done);
- const parts=[[gl,D.groups.length],[jr,jt],[wc,playable.length],[S.labels_done?1:0,1]].filter(p=>p[1]);
+ const parts=[[gl,D.groups.length],[jr,jt],[wc,playable.length]].filter(p=>p[1]);
  const frac=parts.reduce((s,p)=>s+p[0]/p[1],0)/parts.length;$("fill").style.width=(100*frac)+"%";$("count").textContent=Math.round(100*frac)+"% through"}
-function records(){const out=[{kind:"meta",sheet:"embed_cut review v1",exported:new Date().toISOString(),built:D.built,index:D.index,retired_axes:D.retired}];
- D.films.forEach(f=>out.push({kind:"film",film:f.name,mode:f.mode,plane:f.plane,retired:f.retired,recipe:f.recipe}));
+function records(){const out=[{kind:"meta",sheet:"embed_cut review v1",exported:new Date().toISOString(),built:D.built,index:D.index,left_out:D.left_out}];
+ D.films.forEach(f=>out.push({kind:"film",film:f.name,mode:f.mode,plane:f.plane,recipe:f.recipe}));
  D.groups.forEach(g=>{const R=S.rank[g.id];if(!R||!R.locked)return;const names=R.order.map(l=>S.assign[g.id][l]);
   out.push({kind:"ranking",group:g.track,order:names,note:R.note||undefined});
   for(let i=0;i<names.length;i++)for(let j=i+1;j<names.length;j++)out.push({kind:"pair",group:g.track,chosen:names[i],rejected:names[j],margin:j-i})});
