@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Two ways to search Philm</title>
+  <style>
+    :root { color-scheme: dark; --bg:#111310; --panel:#1b1d19; --line:#3b4037; --text:#f1efe7; --muted:#b2b7ac; --corpus:#a7c8d0; --discover:#e5c798; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { max-width:960px; padding:48px 24px 80px; margin:auto; }
+    .eyebrow { color:var(--discover); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.16em; }
+    h1 { font-size:clamp(38px,6vw,64px); line-height:1.05; letter-spacing:-.05em; margin:12px 0 18px; }
+    h2 { font-size:24px; letter-spacing:-.025em; margin:0 0 14px; }
+    p { margin:0 0 16px; }
+    .intro { color:var(--muted); font-size:19px; max-width:700px; }
+    .paths { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:34px 0; }
+    .path { background:var(--panel); border:1px solid var(--line); border-top:3px solid var(--corpus); padding:24px; border-radius:4px; }
+    .path.discover { border-top-color:var(--discover); }
+    .path .tag { font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--corpus); font-weight:700; }
+    .path.discover .tag { color:var(--discover); }
+    .path h2 { margin-top:8px; }
+    .flow { margin:22px 0 0; padding:16px; background:#121510; border:1px solid var(--line); border-radius:3px; font-size:14px; line-height:1.8; }
+    .flow strong { color:var(--text); }
+    section { border-top:1px solid var(--line); padding-top:28px; margin-top:34px; }
+    table { width:100%; border-collapse:collapse; margin-top:16px; }
+    th,td { padding:13px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { color:var(--muted); font-size:13px; font-weight:600; }
+    td:first-child { width:27%; color:var(--muted); }
+    .example { background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:22px; margin:18px 0; }
+    .query { color:var(--discover); font-size:18px; font-weight:650; margin-bottom:14px; }
+    .example-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .example-grid div { border-left:2px solid var(--corpus); padding-left:13px; }
+    .example-grid div+div { border-left-color:var(--discover); }
+    .example-grid b { display:block; margin-bottom:5px; }
+    .note { color:var(--muted); font-size:14px; }
+    .callout { background:#29251d; border-left:3px solid var(--discover); padding:16px 18px; margin-top:22px; }
+    a { color:var(--discover); text-underline-offset:3px; }
+    code { font: .9em ui-monospace,SFMono-Regular,Menlo,monospace; color:#eee3cb; }
+    @media(max-width:680px) { main { padding:32px 18px 60px; } .paths,.example-grid { grid-template-columns:1fr; } .path { padding:20px; } table { font-size:14px; } th,td { padding:10px 7px; } }
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Philm / field guide</div>
+  <h1>Two ways to find footage</h1>
+  <p class="note"><strong>Valid as of: 2026-10-27</strong></p>
+  <p class="intro">The main page and Discover are separate searches. They look at different information, so a query can return different clips on each page.</p>
+
+  <div class="paths">
+    <article class="path">
+      <div class="tag">Main page · Corpus</div>
+      <h2>Search the written record</h2>
+      <p>Finds words in Philm's video database: filenames, paths, and descriptions. It is useful when you know a name or when someone has already described the scene.</p>
+      <div class="flow"><strong>You type words</strong> → Philm matches stored text → <strong>video records</strong></div>
+    </article>
+    <article class="path discover">
+      <div class="tag">Discover</div>
+      <h2>Search the footage itself</h2>
+      <p>Turns your description into an EmbeddingGemma vector and compares it with saved vectors made from video proxies. It can find visual similarities without a written label.</p>
+      <div class="flow"><strong>You describe a scene</strong> → Philm compares vectors → <strong>ranked video windows</strong></div>
+    </article>
+  </div>
+
+  <section>
+    <h2>What changes in practice?</h2>
+    <table>
+      <thead><tr><th></th><th>Corpus</th><th>Discover</th></tr></thead>
+      <tbody>
+        <tr><td>Good query</td><td><code>IMG_4079</code> or a known description term</td><td><code>person crossing a dark room</code></td></tr>
+        <tr><td>What comes back</td><td>Whole video records</td><td>Matching time windows within clips</td></tr>
+        <tr><td>How it ranks</td><td>Text match in the database</td><td>Vector similarity, highest first</td></tr>
+        <tr><td>Current source</td><td><code>~/.vanalyze/archive.db</code></td><td>The merged proxy index (<code>_embeddings/_all</code>): 5,625 clips and 10,564 windows</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>One query, two outcomes</h2>
+    <div class="example">
+      <div class="query">“rain on a windshield at night”</div>
+      <div class="example-grid">
+        <div><b>Corpus</b>Finds videos whose stored path, filename, or description contains matching words. An unlabeled rainy clip may be missed.</div>
+        <div><b>Discover</b>Ranks indexed windows whose visual content resembles the description, even if their filenames are meaningless.</div>
+      </div>
+    </div>
+    <p class="note">Discover's similarity number tells you relative closeness within this index. It is not a probability that the description is true. Open the result and judge the footage yourself.</p>
+  </section>
+
+  <section>
+    <h2>Where to start</h2>
+    <p>Use <a href="http://127.0.0.1:8000/">Corpus</a> for known clips and recorded metadata. Use <a href="http://127.0.0.1:8000/discover">Discover</a> when you are looking for an image, gesture, setting, or visual texture. Run <code>uv run vanalyze ui</code> in the Philm repository first.</p>
+    <div class="callout"><strong>Current boundary:</strong> Discover searches every clip that has a proxy (5,625 of 5,627). The merged index has no capture dates yet, so every result reads "date unknown" and links to its proxy rather than the original. Its video vectors were made from 360p proxies; retrieval quality against originals still needs a direct comparison.</div>
+  </section>
+</main>
+</body>
+</html>

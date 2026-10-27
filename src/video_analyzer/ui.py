@@ -2,6 +2,8 @@
 
 import shutil
 import os
+import subprocess
+from functools import lru_cache
 from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
@@ -14,6 +16,7 @@ from .archive import Archive, DEFAULT_ARCHIVE_PATH
 from .analyzer import configure_genai, upload_video, analyze_video
 from .modes import ALL_MODES, get_mode
 from .thumbnails import extract_thumbnail
+from .discover import EmbeddingIndex, DEFAULT_INDEX, DEFAULT_PROXIES, DEFAULT_SOURCES, encode_query
 
 app = FastAPI(title="Philm UI")
 
@@ -23,6 +26,71 @@ TEMPLATES_DIR = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 MODES = list(ALL_MODES.keys())
+
+
+@lru_cache(maxsize=1)
+def get_discover_index() -> EmbeddingIndex:
+    return EmbeddingIndex(DEFAULT_INDEX, DEFAULT_PROXIES, DEFAULT_SOURCES)
+
+
+def timecode(seconds: float) -> str:
+    total = int(seconds)
+    return f"{total // 3600:02d}:{(total // 60) % 60:02d}:{total % 60:02d}"
+
+
+@app.get("/discover", response_class=HTMLResponse)
+async def discover(request: Request, q: str = ""):
+    hits, error, clip_count, window_count = [], None, 0, 0
+    try:
+        index = get_discover_index()
+        clip_count = len(index.proxies)
+        window_count = len(index.moments)
+        if q.strip():
+            hits = index.search(encode_query(q.strip()), limit=32)
+    except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as exc:
+        error = str(exc)
+    return templates.TemplateResponse("discover.html", {
+        "request": request, "q": q, "hits": hits, "error": error,
+        "clip_count": clip_count, "window_count": window_count,
+        "timecode": timecode,
+    })
+
+
+@app.get("/discover/media/{key}")
+async def discover_media(key: str):
+    try:
+        proxy = get_discover_index().proxy_for(key)
+    except (OSError, ValueError):
+        raise HTTPException(status_code=404)
+    if proxy is None or not proxy.is_file():
+        raise HTTPException(status_code=404)
+    return FileResponse(proxy, media_type="video/mp4")
+
+
+@app.get("/discover/thumb/{key}/{window_index}.jpg")
+async def discover_thumbnail(key: str, window_index: int):
+    try:
+        moment = get_discover_index().moment_for(key, window_index)
+    except (OSError, ValueError):
+        raise HTTPException(status_code=404)
+    if moment is None or not moment.proxy_path.is_file():
+        raise HTTPException(status_code=404)
+    cache = Path.home() / ".vanalyze" / "discover_thumbnails"
+    cache.mkdir(parents=True, exist_ok=True)
+    thumb = cache / f"{key}-{window_index}.jpg"
+    if not thumb.is_file():
+        temp = cache / f"{key}-{window_index}.tmp.jpg"
+        result = subprocess.run([
+            "ffmpeg", "-nostdin", "-y", "-loglevel", "error",
+            "-ss", f"{(moment.start_sec + moment.end_sec) / 2:.3f}",
+            "-i", str(moment.proxy_path), "-frames:v", "1",
+            "-vf", "scale=640:-2", str(temp),
+        ], capture_output=True, timeout=30)
+        if result.returncode or not temp.is_file():
+            temp.unlink(missing_ok=True)
+            raise HTTPException(status_code=404)
+        temp.replace(thumb)
+    return FileResponse(thumb, media_type="image/jpeg")
 
 
 def get_archive() -> Archive:
