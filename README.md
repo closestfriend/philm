@@ -27,7 +27,7 @@ Philm uploads video to Gemini 2.5 Flash and returns structured philosophical ana
 | `--baudrillard` | Baudrillard | Which order of simulacra? Does the model precede the real? |
 | `--virilio` | Virilio | What speed regime governs? Where is the accident? |
 | `--foucault` | Foucault | What power operates? What subject is produced? |
-| `--epistemic` | — | What truth claims are made? What counts as evidence? |
+| `--epistemic` | - | What truth claims are made? What counts as evidence? |
 | `--zizek` | Žižek/Lacan | Where is the parallax gap? What ideology operates? |
 | `--barthes` | Barthes | What wounds (punctum)? What myths naturalize? |
 | `--benjamin` | Benjamin | What is the aura status? Where is the dialectical image? |
@@ -210,7 +210,7 @@ vanalyze ui
 Launches a local web interface at `http://localhost:8000` for browsing and analyzing your corpus.
 
 - Card grid with description-first navigation
-- Framework coverage per clip — click a hollow pill to trigger analysis
+- Framework coverage per clip - click a hollow pill to trigger analysis
 - Drag-and-drop video intake, or point at a folder
 - Timecode-synced analysis overlay on the video player
 

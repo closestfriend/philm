@@ -97,8 +97,8 @@ def extract_clip(video_path: Path, start: float, duration: float, output_path: P
 
 
 def main():
-    results_dir = Path("/Users/hnsk/Downloads/MD_ScreenRecordings_v0.0.5a/vanalysis_results")
-    videos_dir = Path("/Users/hnsk/Downloads/MD_ScreenRecordings_v0.0.5a")
+    results_dir = Path(os.environ.get("PHILM_RESULTS_DIR", "./vanalysis_results"))
+    videos_dir = Path(os.environ.get("PHILM_VIDEOS_DIR", "./videos"))
     output_dir = Path("/Users/hnsk/Downloads/MD_ScreenRecordings_v0.0.5a/sizzle_reel")
     clips_dir = output_dir / "clips"
 
