@@ -63,15 +63,26 @@ WINDOW = 32.0          # seconds per window = 32 frames at 1 fps, the processor'
 MIN_TAIL = 8.0         # a trailing window shorter than this is merged into the previous one
 
 
-def load_model(dtype: str = "bfloat16", device: str | None = None):
+def load_model(dtype: str = "bfloat16", device: str | None = None, text_only: bool = False):
     import torch
     from sentence_transformers import SentenceTransformer
 
     device = device or ("mps" if torch.backends.mps.is_available() else "cpu")
     # The model card warns against float16; bfloat16 or float32 only.
     td = {"bfloat16": torch.bfloat16, "float32": torch.float32}[dtype]
-    return SentenceTransformer(MODEL_ID, device=device, config_kwargs={"audio_config": None},
+    config = {"audio_config": None, **({"vision_config": None} if text_only else {})}
+    return SentenceTransformer(MODEL_ID, device=device, config_kwargs=config,
                                model_kwargs={"torch_dtype": td})
+
+
+def cmd_query_vector(a):
+    """Emit only a SearchQuery vector, for the lightweight local browser."""
+    model = load_model(a.dtype, text_only=True)
+    vector = np.asarray(model.encode(a.query, prompt_name="SearchQuery", normalize_embeddings=True),
+                        dtype=np.float32)
+    if vector.ndim != 1 or not np.isfinite(vector).all():
+        raise RuntimeError("invalid query embedding")
+    print(json.dumps(vector.tolist()))
 
 
 def probe_duration(path: Path) -> float:
@@ -274,6 +285,10 @@ def main():
     s.add_argument("--dim", type=int, default=768, choices=[128, 256, 512, 768], help="Matryoshka truncation")
     s.add_argument("--sheet", default=None, help="write a contact sheet JPG of the hits")
     s.set_defaults(fn=cmd_search)
+    q = sub.add_parser("query-vector", help="write a text search vector as JSON to stdout")
+    q.add_argument("query")
+    q.add_argument("--dtype", choices=["bfloat16", "float32"], default="bfloat16")
+    q.set_defaults(fn=cmd_query_vector)
     a = ap.parse_args()
     if a.cmd == "search" and not (a.query or a.like):
         ap.error("search needs a text query or --like")
