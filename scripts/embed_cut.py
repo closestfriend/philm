@@ -51,6 +51,8 @@ Examples (run with --script, not plain uv run; the model loads only when text/ax
   uv run --script scripts/embed_cut.py axis --track T.mp3 --axis dwelling -- --variations 2 --diversity 0.8
   uv run --script scripts/embed_cut.py silent --seed-clip IMG_6002 --cut 0.5 --duration 60
   add --dry to any of them for the cut sheet only.
+  add --beats GRID.json (from scripts/beat_grid.py, run in .venv-mir) to cut on an Essentia tempo with a
+  transient-anchored phase instead of librosa's beat_track, which half-times rav3rz.
 
   Every cut writes two records next to the rough: NAME_cut.md to read, and NAME_cut.json, the same
   cut as unrounded data naming each proxy's original, for rebuilding it at full resolution.
@@ -149,9 +151,16 @@ def axis_scores(idx: Index, axis: str) -> np.ndarray:
 
 
 # ----------------------------------------------------------------------------- timeline
-def beat_timeline(track: Path, density: float) -> tuple[list[tuple[float, float]], float, float]:
-    """Cut boundaries on the beat grid. Returns ([(t0, t1), ...], track_dur, bpm)."""
-    beats, bpm = detect_beats(track)
+def beat_timeline(track: Path, density: float, beats_file: str | None = None) -> tuple[list[tuple[float, float]], float, float]:
+    """Cut boundaries on the beat grid. Returns ([(t0, t1), ...], track_dur, bpm).
+    beats_file: a grid from scripts/beat_grid.py, used instead of librosa's detect_beats."""
+    if beats_file:
+        grid = json.loads(Path(beats_file).expanduser().read_text())
+        beats, bpm = grid["beats"], float(grid["bpm"])
+        if not grid.get("pulse", True) or not beats:
+            sys.exit(f"{beats_file}: no usable pulse in this track; use `silent --cut` or drop --beats")
+    else:
+        beats, bpm = detect_beats(track)
     dur = ffprobe_duration(track)
     cuts = [c for c in apply_cut_density(beats, density) if c < dur]
     if not cuts or cuts[0] > 0.5:
@@ -352,7 +361,7 @@ def run_chain_mode(a, mode: str, pattern: str):
         segs, dur, bpm, track = fixed_timeline(a.cut, a.duration), a.duration, None, None
     else:
         track = Path(a.track).expanduser()
-        segs, dur, bpm = beat_timeline(track, a.density)
+        segs, dur, bpm = beat_timeline(track, a.density, a.beats)
     start, note = start_vector(idx, a, rnd)
     notes = [note, f"pattern `{pattern}` (n = nearest unused, F = far jump from the least-similar {FAR_BAND:.0%})",
              f"momentum {a.momentum}, top-k {a.topk}"]
@@ -377,7 +386,7 @@ def run_prompts(a):
     idx = Index(Path(a.index))
     rnd = random.Random(a.seed)
     track = Path(a.track).expanduser()
-    segs, dur, bpm = beat_timeline(track, a.density)
+    segs, dur, bpm = beat_timeline(track, a.density, a.beats)
     n = len(segs)
     bounds = [round(n * k / len(a.prompt)) for k in range(len(a.prompt) + 1)]
     seq, notes = [], [f"{len(a.prompt)} prompt sections, pattern `{a.pattern}` inside each"]
@@ -478,6 +487,7 @@ def main():
         p.add_argument("--index", default=str(E.DEFAULT_OUT), help="embedding index folder")
         if track:
             p.add_argument("--track", required=True)
+            p.add_argument("--beats", default=None, metavar="GRID.json", help="beat grid from scripts/beat_grid.py (replaces librosa beat_track)")
             p.add_argument("--density", type=float, default=0.5, help="cuts per beat: 1=every beat, 0.5=every 2nd, 2=half-beats")
         p.add_argument("--seed", type=int, default=1)
         p.add_argument("--label", default=None)
