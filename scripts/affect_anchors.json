@@ -71,6 +71,22 @@
         "a professional-looking clip with shallow focus and no noise",
         "a clean bright daylight scene with nothing blurred"
       ]
+    },
+    "danger": {
+      "theory": "Hunter's own axis (2026-10-27): dangerous <-> safe. Named and approved by him, 'just send it'. Danger is not visible; this scores how much a clip LOOKS like danger imagery.",
+      "weakness": "Overlaps intensity (fast/chaotic reads dangerous) and day/night (a calm dark car ride reads dangerous). Abstract words embed poorly, so poles are written as pictures.",
+      "high": [
+        "a car speeding at night, headlights and streaks of light, the road barely visible",
+        "fire or flashing lights in the dark, a crowd pressed together and shoving",
+        "standing near a cliff edge or a high rooftop, the ground far below, the camera unsteady",
+        "a lurching handheld shot running through a dark place, something about to happen"
+      ],
+      "low": [
+        "a bed with a sleeping person or a pet curled up in warm daylight",
+        "a calm sunlit kitchen or living room, someone relaxed, nothing moving fast",
+        "still water or a quiet garden in soft daylight, a steady held shot",
+        "friends sitting close and laughing on a sofa, lamp light, nothing threatening"
+      ]
     }
   },
   "label_only": {
