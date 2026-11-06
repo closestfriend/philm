@@ -1,6 +1,6 @@
 # Philm
 
-Philosophical video analysis. A CLI tool that reads video through critical theory.
+A tool that reads video through theory. Mechanic schemas allow for expanding types of interpretations beyond those here.
 
 ## Thesis
 
