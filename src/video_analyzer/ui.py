@@ -39,18 +39,18 @@ def timecode(seconds: float) -> str:
 
 
 @app.get("/discover", response_class=HTMLResponse)
-async def discover(request: Request, q: str = ""):
+async def discover(request: Request, q: str = "", n: int = 32):
     hits, error, clip_count, window_count = [], None, 0, 0
     try:
         index = get_discover_index()
         clip_count = len(index.proxies)
         window_count = len(index.moments)
         if q.strip():
-            hits = index.search(encode_query(q.strip()), limit=32)
+            hits = index.search(encode_query(q.strip()), limit=max(8, min(n, 96)))
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as exc:
         error = str(exc)
     return templates.TemplateResponse("discover.html", {
-        "request": request, "q": q, "hits": hits, "error": error,
+        "request": request, "q": q, "n": n, "hits": hits, "error": error,
         "clip_count": clip_count, "window_count": window_count,
         "timecode": timecode,
     })

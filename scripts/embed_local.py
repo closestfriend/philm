@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.11"
+# requires-python = "==3.11.*"
 # dependencies = [
 #   "sentence-transformers>=6.1",
 #   "transformers",
@@ -58,6 +58,7 @@ import numpy as np
 MEDIA = Path("/Volumes/2025_exSSD_2tb/Photography + Video")
 DEFAULT_ROOT = MEDIA / "_proxies" / "_found_footage_wer_iphone"
 DEFAULT_OUT = MEDIA / "_embeddings" / "_found_footage_wer_iphone"
+DEFAULT_EXCLUDES = ["Bob Loukas"]  # reference rips in the tree, not Hunter's footage; --all-hits to include
 MODEL_ID = "google/embeddinggemma-2"
 WINDOW = 32.0          # seconds per window = 32 frames at 1 fps, the processor's max_frames cap
 MIN_TAIL = 8.0         # a trailing window shorter than this is merged into the previous one
@@ -193,15 +194,48 @@ def cmd_embed(a):
 
 # ---------------------------------------------------------------- search
 def load_index(out: Path, dim: int):
-    man = read_manifest(out)
-    mats, owner, wtimes, rows = [], [], [], list(man.values())
+    rows = list(read_manifest(out).values())
+    # Cache is stamped by manifest bytes + dim, so any embed run that appends
+    # rows invalidates it and the next search rebuilds. Safe to delete anytime.
+    stamp = hashlib.sha1((out / "manifest.jsonl").read_bytes() + f"d{dim}".encode()).hexdigest()[:16]
+    cache = out / "matrix_cache.npz"
+    if cache.exists():
+        try:
+            z = np.load(cache, allow_pickle=False)
+            if str(z["stamp"]) == stamp:
+                return rows, z["mat"], z["owner"], z["wtimes"].tolist()  # plain floats: callers json.dump these
+            z.close()
+        except (OSError, ValueError, EOFError, KeyError):
+            pass  # corrupt or unreadable cache; fall through and rebuild
+    mats, owner, wtimes = [], [], []
     for ci, row in enumerate(rows):
         v = np.load(out / "clips" / f"{row['key']}.npy").astype(np.float32)[:, :dim]
         v /= np.linalg.norm(v, axis=1, keepdims=True)
         mats.append(v)
         owner += [ci] * len(v)
         wtimes += row["windows"]
-    return rows, np.concatenate(mats), np.array(owner), wtimes
+    mat = np.concatenate(mats)
+    try:  # best effort: a read-only volume must not break search
+        tmp = cache.with_name("matrix_cache.tmp.npz")
+        with open(tmp, "wb") as f:
+            np.savez(f, stamp=stamp, keys=np.array([r["key"] for r in rows]), mat=mat,
+                     owner=np.array(owner, dtype=np.int32), wtimes=np.array(wtimes, dtype=np.float32))
+        tmp.replace(cache)
+        print(f"cached matrix -> {cache} ({mat.shape[0]} windows x {mat.shape[1]})")
+    except OSError:
+        tmp.unlink(missing_ok=True)
+    return rows, mat, np.array(owner, dtype=np.int32), wtimes
+
+
+def filter_excluded(excludes, rows, mat, owner, wtimes):
+    """Drop clips whose rel contains any --exclude substring, before ranking."""
+    keep = np.array([not any(x.lower() in r["rel"].lower() for x in excludes) for r in rows])
+    if keep.all():
+        return rows, mat, owner, wtimes
+    wkeep = keep[owner]                      # mask over windows, aligned with mat/wtimes
+    remap = np.cumsum(keep) - 1              # old clip index -> new
+    rows2 = [r for r, k in zip(rows, keep) if k]
+    return rows2, mat[wkeep], remap[owner[wkeep]], [w for w, k in zip(wtimes, wkeep) if k]
 
 
 def rank_clips(q: np.ndarray, mat: np.ndarray, owner: np.ndarray, n_clips: int):
@@ -239,6 +273,7 @@ def make_sheet(hits, root: Path, dst: Path):
 def cmd_search(a):
     out, root = Path(a.out), Path(a.root)
     rows, mat, owner, wtimes = load_index(out, a.dim)
+    rows, mat, owner, wtimes = filter_excluded([] if a.all_hits else a.exclude, rows, mat, owner, wtimes)
     print(f"{len(rows)} clips / {len(mat)} windows in index")
     if a.like:
         hit = [i for i, r in enumerate(rows) if a.like in r["rel"]]
@@ -283,6 +318,9 @@ def main():
     s.add_argument("--like", default=None, help="find clips similar to this embedded clip (path substring)")
     s.add_argument("--top", type=int, default=10)
     s.add_argument("--dim", type=int, default=768, choices=[128, 256, 512, 768], help="Matryoshka truncation")
+    s.add_argument("--exclude", action="append", default=DEFAULT_EXCLUDES,
+                   help="drop clips whose path contains this substring, case-insensitive (repeatable)")
+    s.add_argument("--all-hits", action="store_true", help="include default-excluded clips (Bob Loukas reference rips)")
     s.add_argument("--sheet", default=None, help="write a contact sheet JPG of the hits")
     s.set_defaults(fn=cmd_search)
     q = sub.add_parser("query-vector", help="write a text search vector as JSON to stdout")

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
@@ -16,6 +17,13 @@ DEFAULT_INDEX = MEDIA_ROOT / "_embeddings" / "_all"
 DEFAULT_PROXIES = MEDIA_ROOT / "_proxies"
 DEFAULT_SOURCES = MEDIA_ROOT
 QUERY_SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "embed_local.py"
+# Reference rips inside _proxies that are not Hunter's footage; never surface them.
+EMBED_EXCLUDES = ("bob loukas",)
+
+
+def _cache_stamp(manifest: Path, dim: int = 768) -> str:
+    """Must match embed_local.load_index: sha1(manifest bytes + dim tag)."""
+    return hashlib.sha1(manifest.read_bytes() + f"d{dim}".encode()).hexdigest()[:16]
 
 
 def encode_query(query: str) -> np.ndarray:
@@ -70,10 +78,28 @@ class EmbeddingIndex:
         moments: list[Moment] = []
         vectors: list[np.ndarray] = []
         manifest = self.index_dir / "manifest.jsonl"
+        cached_keys, cached_mat = [], None
+        cache_file = self.index_dir / "matrix_cache.npz"
+        if cache_file.exists():
+            try:
+                z = np.load(cache_file, allow_pickle=False)
+                if str(z["stamp"]) == _cache_stamp(manifest):
+                    cached_keys, cached_mat = z["keys"].tolist(), z["mat"]
+                z.close()
+            except (OSError, ValueError, EOFError, KeyError):
+                pass  # corrupt or unreadable cache; fall back to per-clip npys
+        rows: dict[str, dict] = {}  # last row wins, same dedupe as embed_local.read_manifest
         for line in manifest.read_text().splitlines():
-            if not line.strip():
+            if line.strip():
+                d = json.loads(line)
+                rows[d["key"]] = d
+        clip_i, win_i = 0, 0  # cursors into the cached matrix, over ALL manifest rows
+        for row in rows.values():
+            n_windows = len(row["windows"])
+            clip_i += 1
+            if any(x in row["rel"].lower() for x in EMBED_EXCLUDES):
+                win_i += n_windows  # excluded rows still occupy cache slots
                 continue
-            row = json.loads(line)
             key, rel = row["key"], row["rel"]
             proxy = _inside(self.proxy_root, rel)
             self.proxies[key] = proxy
@@ -81,8 +107,11 @@ class EmbeddingIndex:
             original_rel = metadata.get("orig")
             # Some originals are symlinks to an archival drive. Preserve their catalog path.
             original = _inside(self.source_root, original_rel, follow_symlinks=False) if original_rel else None
-            clip_vectors = np.load(self.index_dir / "clips" / f"{key}.npy").astype(np.float32)
-            if clip_vectors.ndim != 2 or clip_vectors.shape[0] != len(row["windows"]):
+            if cached_mat is not None and cached_keys[clip_i - 1] == key:
+                clip_vectors = cached_mat[win_i:win_i + n_windows]
+            else:
+                clip_vectors = np.load(self.index_dir / "clips" / f"{key}.npy").astype(np.float32)
+            if clip_vectors.ndim != 2 or clip_vectors.shape[0] != n_windows:
                 raise ValueError(f"vector/window count mismatch: {rel}")
             for wi, ((start, end), vector) in enumerate(zip(row["windows"], clip_vectors)):
                 norm = np.linalg.norm(vector)
@@ -95,6 +124,7 @@ class EmbeddingIndex:
                     proxy_path=proxy, original_path=original,
                     capture_date=metadata.get("date"), window_index=wi,
                 ))
+            win_i += n_windows
         self.moments = moments
         self.vectors = np.stack(vectors) if vectors else np.empty((0, 768), dtype=np.float32)
 

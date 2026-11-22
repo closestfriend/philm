@@ -12,6 +12,7 @@
   .discover-form button { background: #d1c4a6; color: #171612; border: 1px solid #d1c4a6; padding: 0 25px; font-weight: bold; }
   .discover-form button:hover { background: #e4d8b9; }
   .discover-form :focus-visible, .moment:focus-visible, .discover button:focus-visible { outline: 2px solid #d1c4a6; outline-offset: 3px; }
+  .discover-form select { background: #141412; color: inherit; border: 1px solid #48453c; padding: 0 10px; font-size: 13px; }
   .discover-note { color: #777; font-size: 11px; line-height: 1.6; margin-top: 12px; }
   .discover-error { color: #e5b2a5; border: 1px solid #8b4b3c; background: #291914; padding: 16px; margin-top: 24px; overflow-wrap: anywhere; }
   .discover-status { margin: 30px 0 15px; color: #aaa; font-size: 12px; }
@@ -43,6 +44,11 @@
   </header>
   <form class="discover-form" action="/discover" method="get" id="discover-form">
     <input type="search" name="q" value="{{ q }}" placeholder="A figure crossing a dark room…" aria-label="Describe footage to find" autofocus>
+    <select name="n" aria-label="Number of results">
+      {% for opt in (12, 32, 64, 96) %}
+      <option value="{{ opt }}" {% if opt == n %}selected{% endif %}>{{ opt }}</option>
+      {% endfor %}
+    </select>
     <button type="submit" id="search-button">Search</button>
   </form>
   <p class="discover-note">Search by scene, gesture, texture or mood. Matches are approximate video windows; open one to inspect the exact footage.</p>
