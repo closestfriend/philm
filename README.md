@@ -1,12 +1,12 @@
 # Philm
 
-Philosophical video analysis. A CLI tool that reads video through critical theory.
+A tool that reads video through theory. Mechanic schemas allow for expanding types of interpretations beyond those here.
 
 ## Thesis
 
 Every recording technology contains its own ideology. Philm makes that ideology legible.
 
-The tool pairs **hard structural constraints** (Pydantic schemas) with **rich interpretive prompts** (theoretical frameworks) to produce structured readings of video content. The orthogonality is the point: the same schema can be filled by Baudrillard or Virilio, the same footage can be read through Mulvey or Benjamin. The apparatus doesn't privilege one framework over another—it treats theory as a parameter.
+The tool pairs **hard structural constraints** (Pydantic schemas) with **theoretical frameworks** (interpretive queries) to produce structured readings of video content. The orthogonality is the point: the same schema can be filled by Baudrillard or Virilio, the same footage can be read through Mulvey or Benjamin. The apparatus doesn't privilege one framework over another—it treats theory as a parameter.
 
 ```
 vanalyze main video.mp4 --virilio --baudrillard --hauntology
