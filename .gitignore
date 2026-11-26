@@ -68,3 +68,6 @@ documentary/output/
 carti_cuts/
 input/
 *.asd
+
+.agents/
+.claude/
